@@ -42,7 +42,7 @@ telex.h contains core functionality, everything that is needed for basic applica
     * [ void eval(const std::string&amp; eval) ](#void-evalconst-stdstring-eval)
     * [ void debug(const std::string&amp; msg) ](#void-debugconst-stdstring-msg)
     * [ void alert(const std::string&amp; msg) ](#void-alertconst-stdstring-msg)
-    * [ void open(const std::string&amp; url, const std::string&amp; name = &quot;&quot;) ](#void-openconst-stdstring-url-const-stdstring-name)
+    * [ void open(const std::string&amp; url, const std::string&amp; name = &quot;&quot;) ](#void-openconst-stdstring-url-const-stdstring-name=)
     * [ TimerId startTimer(const std::chrono::milliseconds&amp; ms, bool singleShot, const std::function&lt;void (TimerId id)&gt;&amp; timerFunc) ](#timerid-starttimerconst-stdchronomilliseconds-ms-bool-singleshot-const-stdfunctionvoid-timerid-id-timerfunc)
     * [ TimerId startTimer(const std::chrono::milliseconds&amp; ms, bool singleShot, const std::function&lt;void ()&gt;&amp; timerFunc) ](#timerid-starttimerconst-stdchronomilliseconds-ms-bool-singleshot-const-stdfunctionvoid-timerfunc)
     * [ bool stopTimer(TimerId) ](#bool-stoptimertimerid)
@@ -256,7 +256,7 @@ Echoes a message
 
 Shown a browser&#39;s alert dialogue
 <a id="#void-openconst-stdstring-url-const-stdstring-name"></a>
-##### void open(const std::string&amp; url, const std::string&amp; name) 
+##### void open(const std::string&amp; url, const std::string&amp; name = &quot;&quot;) 
 ###### *Param:* url 
 ###### *Param:* name 
 

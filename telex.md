@@ -11,54 +11,55 @@ telex.h contains core functionality, everything that is needed for basic applica
 * [ namespace Telex ](#telex)
   * [  void setDebug() ](#-void-setdebug-)
   * [ class Element ](#element)
-    * [ Element(Ui& ui, const std::string& id) ](#element-ui-ui-const-std-string-id-)
-    * [ Element(Ui& ui, const std::string& id, const std::string& htmlElement, const Element& parent) ](#element-ui-ui-const-std-string-id-const-std-string-htmlelement-const-element-parent-)
-    * [ const Ui& ui() const ](#const-ui-ui-const)
-    * [ Ui& ui() ](#ui-ui-)
+    * [ Element(Ui&amp; ui, const std::string&amp; id) ](#element-ui-amp-ui-const-std-string-amp-id-)
+    * [ Element(Ui&amp; ui, const std::string&amp; id, const std::string&amp; htmlElement, const Element&amp; parent) ](#element-ui-amp-ui-const-std-string-amp-id-const-std-string-amp-htmlelement-const-element-amp-parent-)
+    * [ const Ui&amp; ui() const ](#const-ui-amp-ui-const)
+    * [ Ui&amp; ui() ](#ui-amp-ui-)
     * [ std::string id() const ](#std-string-id-const)
-    * [ Element& subscribe(const std::string& name, std::function<void(const Event& ev)> handler, const std::vector<std::string>& properties = {}, const std::chrono::milliseconds& = 0ms) ](#element-subscribe-const-std-string-name-std-functionvoid-const-event-ev-handler-const-std-vectorstd-string-properties-const-std-chrono-milliseconds-0ms-)
-    * [ Element& setHTML(const std::string& htmlText) ](#element-sethtml-const-std-string-htmltext-)
-    * [ Element& setAttribute(const std::string& attr, const std::string& values) ](#element-setattribute-const-std-string-attr-const-std-string-values-)
-    * [ std::optional<Attributes> attributes() const ](#std-optionalattributes-attributes-const)
-    * [ std::optional<Elements> children() const ](#std-optionalelements-children-const)
-    * [ std::optional<Values> values() const ](#std-optionalvalues-values-const)
-    * [ std::optional<std::string> html() const ](#std-optionalstd-string-html-const)
+    * [ Element&amp; subscribe(const std::string&amp; name, std::function&amp;lt;void(const Event&amp; ev)&gt; handler, const std::vector&amp;lt;std::string&gt;&amp; properties = {}, const std::chrono::milliseconds&amp; = 0ms) ](#element-amp-subscribe-const-std-string-amp-name-std-function-amp-lt-void-const-event-amp-ev-gt-handler-const-std-vector-amp-lt-std-string-gt-amp-properties-const-std-chrono-milliseconds-amp-0ms-)
+    * [ Element&amp; setHTML(const std::string&amp; htmlText) ](#element-amp-sethtml-const-std-string-amp-htmltext-)
+    * [ Element&amp; setAttribute(const std::string&amp; attr, const std::string&amp; values) ](#element-amp-setattribute-const-std-string-amp-attr-const-std-string-amp-values-)
+    * [ std::optional&amp;lt;Attributes&gt; attributes() const ](#std-optional-amp-lt-attributes-gt-attributes-const)
+    * [ std::optional&amp;lt;Elements&gt; children() const ](#std-optional-amp-lt-elements-gt-children-const)
+    * [ std::optional&amp;lt;Values&gt; values() const ](#std-optional-amp-lt-values-gt-values-const)
+    * [ std::optional&amp;lt;std::string&gt; html() const ](#std-optional-amp-lt-std-string-gt-html-const)
     * [ void remove() ](#void-remove-)
-    * [ std::optional<std::string> type() const ](#std-optionalstd-string-type-const)
-    * [ std::optional<Rect> rect() const ](#std-optionalrect-rect-const)
+    * [ std::optional&amp;lt;std::string&gt; type() const ](#std-optional-amp-lt-std-string-gt-type-const)
+    * [ std::optional&amp;lt;Rect&gt; rect() const ](#std-optional-amp-lt-rect-gt-rect-const)
   * [ class Ui ](#ui)
-    * [ explicit Ui(const std::string& indexHtml, const std::string& browser, const std::string& extraParams = "", unsigned short port = UseDefaultPort, const std::string& root = UseDefaultRoot) ](#explicit-ui-const-std-string-indexhtml-const-std-string-browser-const-std-string-extraparams-unsigned-short-port-usedefaultport-const-std-string-root-usedefaultroot-)
-    * [ explicit Ui(const std::string& indexHtml, unsigned short port = UseDefaultPort, const std::string& root = UseDefaultRoot) ](#explicit-ui-const-std-string-indexhtml-unsigned-short-port-usedefaultport-const-std-string-root-usedefaultroot-)
-    * [ explicit Ui(const Filemap& filemap, const std::string& indexHtml, const std::string& browser, const std::string& extraParams = "", unsigned short port = UseDefaultPort, const std::string& root = UseDefaultRoot) ](#explicit-ui-const-filemap-filemap-const-std-string-indexhtml-const-std-string-browser-const-std-string-extraparams-unsigned-short-port-usedefaultport-const-std-string-root-usedefaultroot-)
-    * [ explicit Ui(const Filemap& filemap, const std::string& indexHtml, unsigned short port = UseDefaultPort, const std::string& root = UseDefaultRoot) ](#explicit-ui-const-filemap-filemap-const-std-string-indexhtml-unsigned-short-port-usedefaultport-const-std-string-root-usedefaultroot-)
+    * [ explicit Ui(const std::string&amp; indexHtml, const std::string&amp; browser, const std::string&amp; extraParams = &quot;&quot;, unsigned short port = UseDefaultPort, const std::string&amp; root = UseDefaultRoot) ](#explicit-ui-const-std-string-amp-indexhtml-const-std-string-amp-browser-const-std-string-amp-extraparams-quot-quot-unsigned-short-port-usedefaultport-const-std-string-amp-root-usedefaultroot-)
+    * [ explicit Ui(const std::string&amp; indexHtml, unsigned short port = UseDefaultPort, const std::string&amp; root = UseDefaultRoot) ](#explicit-ui-const-std-string-amp-indexhtml-unsigned-short-port-usedefaultport-const-std-string-amp-root-usedefaultroot-)
+    * [ explicit Ui(const Filemap&amp; filemap, const std::string&amp; indexHtml, const std::string&amp; browser, const std::string&amp; extraParams = &quot;&quot;, unsigned short port = UseDefaultPort, const std::string&amp; root = UseDefaultRoot) ](#explicit-ui-const-filemap-amp-filemap-const-std-string-amp-indexhtml-const-std-string-amp-browser-const-std-string-amp-extraparams-quot-quot-unsigned-short-port-usedefaultport-const-std-string-amp-root-usedefaultroot-)
+    * [ explicit Ui(const Filemap&amp; filemap, const std::string&amp; indexHtml, unsigned short port = UseDefaultPort, const std::string&amp; root = UseDefaultRoot) ](#explicit-ui-const-filemap-amp-filemap-const-std-string-amp-indexhtml-unsigned-short-port-usedefaultport-const-std-string-amp-root-usedefaultroot-)
     * [ void exit() ](#void-exit-)
     * [ void close() ](#void-close-)
-    * [ Ui& onUiExit(std::function<void ()> onExitFunction = nullptr) ](#ui-onuiexit-std-functionvoid-onexitfunction-nullptr-)
-    * [ Ui& onReload(std::function<void ()> onReleadFunction = nullptr) ](#ui-onreload-std-functionvoid-onreleadfunction-nullptr-)
-    * [ Ui& onOpen(std::function<void ()> onOpenFunction = nullptr) ](#ui-onopen-std-functionvoid-onopenfunction-nullptr-)
-    * [ Ui& onError(std::function<void (const std::string& element, const std::string& info)> onErrorFunction = nullptr) ](#ui-onerror-std-functionvoid-const-std-string-element-const-std-string-info-onerrorfunction-nullptr-)
+    * [ Ui&amp; onUiExit(std::function&amp;lt;void ()&gt; onExitFunction = nullptr) ](#ui-amp-onuiexit-std-function-amp-lt-void-gt-onexitfunction-nullptr-)
+    * [ Ui&amp; onReload(std::function&amp;lt;void ()&gt; onReleadFunction = nullptr) ](#ui-amp-onreload-std-function-amp-lt-void-gt-onreleadfunction-nullptr-)
+    * [ Ui&amp; onOpen(std::function&amp;lt;void ()&gt; onOpenFunction = nullptr) ](#ui-amp-onopen-std-function-amp-lt-void-gt-onopenfunction-nullptr-)
+    * [ Ui&amp; onError(std::function&amp;lt;void (const std::string&amp; element, const std::string&amp; info)&gt; onErrorFunction = nullptr) ](#ui-amp-onerror-std-function-amp-lt-void-const-std-string-amp-element-const-std-string-amp-info-gt-onerrorfunction-nullptr-)
     * [ void run() ](#void-run-)
     * [ void setLogging(bool logging) ](#void-setlogging-bool-logging-)
-    * [ void eval(const std::string& eval) ](#void-eval-const-std-string-eval-)
-    * [ void debug(const std::string& msg) ](#void-debug-const-std-string-msg-)
-    * [ void alert(const std::string& msg) ](#void-alert-const-std-string-msg-)
-    * [ void open(const std::string& url, const std::string& name = "") ](#void-open-const-std-string-url-const-std-string-name-)
-    * [ TimerId startTimer(const std::chrono::milliseconds& ms, bool singleShot, const std::function<void (TimerId id)>& timerFunc) ](#timerid-starttimer-const-std-chrono-milliseconds-ms-bool-singleshot-const-std-functionvoid-timerid-id-timerfunc-)
-    * [ TimerId startTimer(const std::chrono::milliseconds& ms, bool singleShot, const std::function<void ()>& timerFunc) ](#timerid-starttimer-const-std-chrono-milliseconds-ms-bool-singleshot-const-std-functionvoid-timerfunc-)
+    * [ void eval(const std::string&amp; eval) ](#void-eval-const-std-string-amp-eval-)
+    * [ void debug(const std::string&amp; msg) ](#void-debug-const-std-string-amp-msg-)
+    * [ void alert(const std::string&amp; msg) ](#void-alert-const-std-string-amp-msg-)
+    * [ void open(const std::string&amp; url, const std::string&amp; name = &quot;&quot;) ](#void-open-const-std-string-amp-url-const-std-string-amp-name-quot-quot-)
+    * [ TimerId startTimer(const std::chrono::milliseconds&amp; ms, bool singleShot, const std::function&amp;lt;void (TimerId id)&gt;&amp; timerFunc) ](#timerid-starttimer-const-std-chrono-milliseconds-amp-ms-bool-singleshot-const-std-function-amp-lt-void-timerid-id-gt-amp-timerfunc-)
+    * [ TimerId startTimer(const std::chrono::milliseconds&amp; ms, bool singleShot, const std::function&amp;lt;void ()&gt;&amp; timerFunc) ](#timerid-starttimer-const-std-chrono-milliseconds-amp-ms-bool-singleshot-const-std-function-amp-lt-void-gt-amp-timerfunc-)
     * [ bool stopTimer(TimerId) ](#bool-stoptimer-timerid-)
     * [ Element root() const ](#element-root-const)
-    * [ std::string addressOf(const std::string& filepath) const ](#std-string-addressof-const-std-string-filepath-const)
-    * [ std::optional<Element::Elements> byClass(const std::string& className) const ](#std-optionalelement-elements-byclass-const-std-string-classname-const)
-    * [ std::optional<Element::Elements> byName(const std::string& className) const ](#std-optionalelement-elements-byname-const-std-string-classname-const)
-    * [ std::optional<std::pair<std::chrono::microseconds, std::chrono::microseconds>> ping() const ](#std-optionalstd-pairstd-chrono-microseconds-std-chrono-microseconds-ping-const)
-    * [ std::optional<std::any> extension(const std::string& callId, const std::unordered_map<std::string, std::any>& parameters) ](#std-optionalstd-any-extension-const-std-string-callid-const-std-unordered_mapstd-string-std-any-parameters-)
-    * [ std::optional<std::vector<uint8_t>> resource(const std::string& url) const ](#std-optionalstd-vectoruint8_t-resource-const-std-string-url-const)
-    * [ bool addFile(const std::string& url, const std::string& file) ](#bool-addfile-const-std-string-url-const-std-string-file-)
+    * [ std::string addressOf(const std::string&amp; filepath) const ](#std-string-addressof-const-std-string-amp-filepath-const)
+    * [ std::optional&amp;lt;Element::Elements&gt; byClass(const std::string&amp; className) const ](#std-optional-amp-lt-element-elements-gt-byclass-const-std-string-amp-classname-const)
+    * [ std::optional&amp;lt;Element::Elements&gt; byName(const std::string&amp; className) const ](#std-optional-amp-lt-element-elements-gt-byname-const-std-string-amp-classname-const)
+    * [ std::optional&amp;lt;std::pair&amp;lt;std::chrono::microseconds, std::chrono::microseconds&gt;&gt; ping() const ](#std-optional-amp-lt-std-pair-amp-lt-std-chrono-microseconds-std-chrono-microseconds-gt-gt-ping-const)
+    * [ std::optional&amp;lt;std::any&gt; extension(const std::string&amp; callId, const std::unordered_map&amp;lt;std::string, std::any&gt;&amp; parameters) ](#std-optional-amp-lt-std-any-gt-extension-const-std-string-amp-callid-const-std-unordered_map-amp-lt-std-string-std-any-gt-amp-parameters-)
+    * [ std::optional&amp;lt;std::vector&amp;lt;uint8_t&gt;&gt; resource(const std::string&amp; url) const ](#std-optional-amp-lt-std-vector-amp-lt-uint8_t-gt-gt-resource-const-std-string-amp-url-const)
+    * [ bool addFile(const std::string&amp; url, const std::string&amp; file) ](#bool-addfile-const-std-string-amp-url-const-std-string-amp-file-)
     * [ void beginBatch() ](#void-beginbatch-)
     * [ void endBatch() ](#void-endbatch-)
 
 
 ---
+<a name=""></a>
 #####
 Telex contains three header files
 * `telex.h`
@@ -68,85 +69,128 @@ Telex contains three header files
 ---
 
 ---
+<a name="Telex"></a>
 ### Telex
 
 Common namespace for Telex implementation.
+<a name="#-void-setdebug-"></a>
 #####  void setDebug()
 Enable debug outputs
 
 ---
 
 ---
+<a name="Element"></a>
 #### Telex::Element
 
 Element represents any UI element
-##### Element(Ui& ui, const std::string& id)
+<a name="#element-ui-amp-ui-const-std-string-amp-id-"></a>
+##### Element(Ui&amp; ui, const std::string&amp; id)
+<a name=""></a>
 ###### *Param:* ui
+<a name=""></a>
 ###### *Param:* id
 
 Creates instance that refers to existing element.
-##### Element(Ui& ui, const std::string& id, const std::string& htmlElement, const Element& parent)
+<a name="#element-ui-amp-ui-const-std-string-amp-id-const-std-string-amp-htmlelement-const-element-amp-parent-"></a>
+##### Element(Ui&amp; ui, const std::string&amp; id, const std::string&amp; htmlElement, const Element&amp; parent)
+<a name=""></a>
 ###### *Param:* ui
+<a name=""></a>
 ###### *Param:* id
+<a name=""></a>
 ###### *Param:* htmlElement
+<a name=""></a>
 ###### *Param:* parent
 
 Creates a new elements as given HTML type and parent.
-##### const Ui& ui() const
+<a name="#const-ui-amp-ui-const"></a>
+##### const Ui&amp; ui() const
+<a name=""></a>
 ###### *Return:* Ui
 
 Return current Ui.
-##### Ui& ui()
+<a name="#ui-amp-ui-"></a>
+##### Ui&amp; ui()
+<a name=""></a>
 ###### *Return:* Ui
 
 Return current Ui.
+<a name="#std-string-id-const"></a>
 ##### std::string id() const
+<a name=""></a>
 ###### *Return:* string
 
 HTML identifer of this element
-##### Element& subscribe(const std::string& name, std::function<void(const Event& ev)> handler, const std::vector<std::string>& properties = {}, const std::chrono::milliseconds& = 0ms)
+<a name="#element-amp-subscribe-const-std-string-amp-name-std-function-amp-lt-void-const-event-amp-ev-gt-handler-const-std-vector-amp-lt-std-string-gt-amp-properties-const-std-chrono-milliseconds-amp-0ms-"></a>
+##### Element&amp; subscribe(const std::string&amp; name, std::function&amp;lt;void(const Event&amp; ev)&gt; handler, const std::vector&amp;lt;std::string&gt;&amp; properties = {}, const std::chrono::milliseconds&amp; = 0ms)
+<a name=""></a>
 ###### *Param:* name
+<a name=""></a>
 ###### *Param:* handler
+<a name=""></a>
 ###### *Param:* throttle
+<a name=""></a>
 ###### *Return:* Element
 
 Set a function to listen ui event.
-##### Element& setHTML(const std::string& htmlText)
+<a name="#element-amp-sethtml-const-std-string-amp-htmltext-"></a>
+##### Element&amp; setHTML(const std::string&amp; htmlText)
+<a name=""></a>
 ###### *Param:* name
+<a name=""></a>
 ###### *Param:* handler
+<a name=""></a>
 ###### *Return:* Element
 
 Set HTML content for element.
-##### Element& setAttribute(const std::string& attr, const std::string& values)
+<a name="#element-amp-setattribute-const-std-string-amp-attr-const-std-string-amp-values-"></a>
+##### Element&amp; setAttribute(const std::string&amp; attr, const std::string&amp; values)
+<a name=""></a>
 ###### *Param:* attr
+<a name=""></a>
 ###### *Param:* values
+<a name=""></a>
 ###### *Return:* Element
 
 Set a given attribute a given name
-##### std::optional<Attributes> attributes() const
+<a name="#std-optional-amp-lt-attributes-gt-attributes-const"></a>
+##### std::optional&amp;lt;Attributes&gt; attributes() const
+<a name=""></a>
 ###### *Return:* optional Attributes
 
 Return Attributes.
-##### std::optional<Elements> children() const
+<a name="#std-optional-amp-lt-elements-gt-children-const"></a>
+##### std::optional&amp;lt;Elements&gt; children() const
+<a name=""></a>
 ###### *Return:* optional Elements
 
 Return child elements (only direct children).
-##### std::optional<Values> values() const
+<a name="#std-optional-amp-lt-values-gt-values-const"></a>
+##### std::optional&amp;lt;Values&gt; values() const
+<a name=""></a>
 ###### *Return:* optional Values
 
 Return values. (e.g. input values).
-##### std::optional<std::string> html() const
+<a name="#std-optional-amp-lt-std-string-gt-html-const"></a>
+##### std::optional&amp;lt;std::string&gt; html() const
+<a name=""></a>
 ###### *Return:* optional string
 
 Return html content of this element.
+<a name="#void-remove-"></a>
 ##### void remove()
 
 Remove this element from Ui.
-##### std::optional<std::string> type() const
+<a name="#std-optional-amp-lt-std-string-gt-type-const"></a>
+##### std::optional&amp;lt;std::string&gt; type() const
+<a name=""></a>
 ###### *Return:* optiona string.
 
 Return type as HTML tag in lower case, empty is not found.
-##### std::optional<Rect> rect() const
+<a name="#std-optional-amp-lt-rect-gt-rect-const"></a>
+##### std::optional&amp;lt;Rect&gt; rect() const
+<a name=""></a>
 ###### *Return:* optional Rect
 
 Return bounding rect of element
@@ -154,131 +198,209 @@ Return bounding rect of element
 ---
 
 ---
+<a name="Ui"></a>
 #### Telex::Ui
-##### explicit Ui(const std::string& indexHtml, const std::string& browser, const std::string& extraParams = "", unsigned short port = UseDefaultPort, const std::string& root = UseDefaultRoot)
+<a name="#explicit-ui-const-std-string-amp-indexhtml-const-std-string-amp-browser-const-std-string-amp-extraparams-quot-quot-unsigned-short-port-usedefaultport-const-std-string-amp-root-usedefaultroot-"></a>
+##### explicit Ui(const std::string&amp; indexHtml, const std::string&amp; browser, const std::string&amp; extraParams = &quot;&quot;, unsigned short port = UseDefaultPort, const std::string&amp; root = UseDefaultRoot)
+<a name=""></a>
 ###### *Param:* indexHtml
+<a name=""></a>
 ###### *Param:* browser
+<a name=""></a>
 ###### *Param:* extraParams
+<a name=""></a>
 ###### *Param:* port, has default
+<a name=""></a>
 ###### *Param:* root, has default
 
 Constructor
-##### explicit Ui(const std::string& indexHtml, unsigned short port = UseDefaultPort, const std::string& root = UseDefaultRoot)
+<a name="#explicit-ui-const-std-string-amp-indexhtml-unsigned-short-port-usedefaultport-const-std-string-amp-root-usedefaultroot-"></a>
+##### explicit Ui(const std::string&amp; indexHtml, unsigned short port = UseDefaultPort, const std::string&amp; root = UseDefaultRoot)
+<a name=""></a>
 ###### *Param:* indexHtml
+<a name=""></a>
 ###### *Param:* port, has default
+<a name=""></a>
 ###### *Param:* root, has default
 
 Constructor
-##### explicit Ui(const Filemap& filemap, const std::string& indexHtml, const std::string& browser, const std::string& extraParams = "", unsigned short port = UseDefaultPort, const std::string& root = UseDefaultRoot)
+<a name="#explicit-ui-const-filemap-amp-filemap-const-std-string-amp-indexhtml-const-std-string-amp-browser-const-std-string-amp-extraparams-quot-quot-unsigned-short-port-usedefaultport-const-std-string-amp-root-usedefaultroot-"></a>
+##### explicit Ui(const Filemap&amp; filemap, const std::string&amp; indexHtml, const std::string&amp; browser, const std::string&amp; extraParams = &quot;&quot;, unsigned short port = UseDefaultPort, const std::string&amp; root = UseDefaultRoot)
+<a name=""></a>
 ###### *Param:* filemap
+<a name=""></a>
 ###### *Param:* indexHtml
+<a name=""></a>
 ###### *Param:* browser
+<a name=""></a>
 ###### *Param:* extraParams, has defaul
+<a name=""></a>
 ###### *Param:* port, has default
+<a name=""></a>
 ###### *Param:* root, has default
 
 Constructor
-##### explicit Ui(const Filemap& filemap, const std::string& indexHtml, unsigned short port = UseDefaultPort, const std::string& root = UseDefaultRoot)
+<a name="#explicit-ui-const-filemap-amp-filemap-const-std-string-amp-indexhtml-unsigned-short-port-usedefaultport-const-std-string-amp-root-usedefaultroot-"></a>
+##### explicit Ui(const Filemap&amp; filemap, const std::string&amp; indexHtml, unsigned short port = UseDefaultPort, const std::string&amp; root = UseDefaultRoot)
+<a name=""></a>
 ###### *Param:* filemap
+<a name=""></a>
 ###### *Param:* indexHtml
+<a name=""></a>
 ###### *Param:* port, has default
+<a name=""></a>
 ###### *Param:* root, has default
 
 Constructor
+<a name="#void-exit-"></a>
 ##### void exit()
 
 Exits the eventloop and make application to close.
+<a name="#void-close-"></a>
 ##### void close()
 
 Asks Client window to close (which then signals application to close)
-##### Ui& onUiExit(std::function<void ()> onExitFunction = nullptr)
+<a name="#ui-amp-onuiexit-std-function-amp-lt-void-gt-onexitfunction-nullptr-"></a>
+##### Ui&amp; onUiExit(std::function&amp;lt;void ()&gt; onExitFunction = nullptr)
+<a name=""></a>
 ###### *Param:* onExitFunction
+<a name=""></a>
 ###### *Return:* Ui
 
 Callback just before exit.
-##### Ui& onReload(std::function<void ()> onReleadFunction = nullptr)
+<a name="#ui-amp-onreload-std-function-amp-lt-void-gt-onreleadfunction-nullptr-"></a>
+##### Ui&amp; onReload(std::function&amp;lt;void ()&gt; onReleadFunction = nullptr)
+<a name=""></a>
 ###### *Param:* onReleadFunction
+<a name=""></a>
 ###### *Return:* Ui
 
 Callback when browser window reload occurs.
-##### Ui& onOpen(std::function<void ()> onOpenFunction = nullptr)
+<a name="#ui-amp-onopen-std-function-amp-lt-void-gt-onopenfunction-nullptr-"></a>
+##### Ui&amp; onOpen(std::function&amp;lt;void ()&gt; onOpenFunction = nullptr)
+<a name=""></a>
 ###### *Param:* onOpenFunction
+<a name=""></a>
 ###### *Return:* Ui
 
 Callback when browser UI is running.
-##### Ui& onError(std::function<void (const std::string& element, const std::string& info)> onErrorFunction = nullptr)
+<a name="#ui-amp-onerror-std-function-amp-lt-void-const-std-string-amp-element-const-std-string-amp-info-gt-onerrorfunction-nullptr-"></a>
+##### Ui&amp; onError(std::function&amp;lt;void (const std::string&amp; element, const std::string&amp; info)&gt; onErrorFunction = nullptr)
+<a name=""></a>
 ###### *Param:* onErrorFunction
+<a name=""></a>
 ###### *Return:* Ui
 
 Browser reports an issue
+<a name="#void-run-"></a>
 ##### void run()
 
 Starts eventloop
+<a name="#void-setlogging-bool-logging-"></a>
 ##### void setLogging(bool logging)
+<a name=""></a>
 ###### *Param:* logging
 
 Enforces Browser being verbose when serving Telex.
-##### void eval(const std::string& eval)
+<a name="#void-eval-const-std-string-amp-eval-"></a>
+##### void eval(const std::string&amp; eval)
+<a name=""></a>
 ###### *Param:* eval
 
 Execute code on browser (calls JS eval)
-##### void debug(const std::string& msg)
+<a name="#void-debug-const-std-string-amp-msg-"></a>
+##### void debug(const std::string&amp; msg)
+<a name=""></a>
 ###### *Param:* msg
 
 Echoes a message
-##### void alert(const std::string& msg)
+<a name="#void-alert-const-std-string-amp-msg-"></a>
+##### void alert(const std::string&amp; msg)
+<a name=""></a>
 ###### *Param:* msg
 
 Shown a browser&amp;#39;s alert dialogue
-##### void open(const std::string& url, const std::string& name = "")
+<a name="#void-open-const-std-string-amp-url-const-std-string-amp-name-quot-quot-"></a>
+##### void open(const std::string&amp; url, const std::string&amp; name = &quot;&quot;)
+<a name=""></a>
 ###### *Param:* url
+<a name=""></a>
 ###### *Param:* name
 
 Opens an extrenal URL on browser tab
-##### TimerId startTimer(const std::chrono::milliseconds& ms, bool singleShot, const std::function<void (TimerId id)>& timerFunc)
+<a name="#timerid-starttimer-const-std-chrono-milliseconds-amp-ms-bool-singleshot-const-std-function-amp-lt-void-timerid-id-gt-amp-timerfunc-"></a>
+##### TimerId startTimer(const std::chrono::milliseconds&amp; ms, bool singleShot, const std::function&amp;lt;void (TimerId id)&gt;&amp; timerFunc)
+<a name=""></a>
 ###### *Param:* ms
+<a name=""></a>
 ###### *Param:* singleShot
+<a name=""></a>
 ###### *Param:* timerFunc
+<a name=""></a>
 ###### *Return:* TimerId
 
 Starts a timer that is called after given amount of milliseconds.
-##### TimerId startTimer(const std::chrono::milliseconds& ms, bool singleShot, const std::function<void ()>& timerFunc)
+<a name="#timerid-starttimer-const-std-chrono-milliseconds-amp-ms-bool-singleshot-const-std-function-amp-lt-void-gt-amp-timerfunc-"></a>
+##### TimerId startTimer(const std::chrono::milliseconds&amp; ms, bool singleShot, const std::function&amp;lt;void ()&gt;&amp; timerFunc)
+<a name=""></a>
 ###### *Param:* ms
+<a name=""></a>
 ###### *Param:* singleShot
+<a name=""></a>
 ###### *Param:* timerFunc
+<a name=""></a>
 ###### *Return:* TimerId
 
 Starts a timer that is called after given amount of milliseconds.
+<a name="#bool-stoptimer-timerid-"></a>
 ##### bool stopTimer(TimerId)
+<a name=""></a>
 ###### *Return:* Boolean
 
 Stop the timer.
+<a name="#element-root-const"></a>
 ##### Element root() const
+<a name=""></a>
 ###### *Return:* Element
 
 Pseudo element that represents root of the element structure
-##### std::string addressOf(const std::string& filepath) const
+<a name="#std-string-addressof-const-std-string-amp-filepath-const"></a>
+##### std::string addressOf(const std::string&amp; filepath) const
+<a name=""></a>
 ###### *Param:* filepath
+<a name=""></a>
 ###### *Return:* string
 
 Translates given path to address that Telex can read when provided as a link.
-##### std::optional<Element::Elements> byClass(const std::string& className) const
+<a name="#std-optional-amp-lt-element-elements-gt-byclass-const-std-string-amp-classname-const"></a>
+##### std::optional&amp;lt;Element::Elements&gt; byClass(const std::string&amp; className) const
+<a name=""></a>
 ###### *Param:* className
+<a name=""></a>
 ###### *Return:* optional list of Elements
 
 Returns all elements match to given class
-##### std::optional<Element::Elements> byName(const std::string& className) const
+<a name="#std-optional-amp-lt-element-elements-gt-byname-const-std-string-amp-classname-const"></a>
+##### std::optional&amp;lt;Element::Elements&gt; byName(const std::string&amp; className) const
+<a name=""></a>
 ###### *Param:* className
+<a name=""></a>
 ###### *Return:* optional list of Elements.
 
 Returns all elements match to given name
-##### std::optional<std::pair<std::chrono::microseconds, std::chrono::microseconds>> ping() const
+<a name="#std-optional-amp-lt-std-pair-amp-lt-std-chrono-microseconds-std-chrono-microseconds-gt-gt-ping-const"></a>
+##### std::optional&amp;lt;std::pair&amp;lt;std::chrono::microseconds, std::chrono::microseconds&gt;&gt; ping() const
+<a name=""></a>
 ###### *Return:* optional pair of times.
 
 Just a ping.
-##### std::optional<std::any> extension(const std::string& callId, const std::unordered_map<std::string, std::any>& parameters)
+<a name="#std-optional-amp-lt-std-any-gt-extension-const-std-string-amp-callid-const-std-unordered_map-amp-lt-std-string-std-any-gt-amp-parameters-"></a>
+##### std::optional&amp;lt;std::any&gt; extension(const std::string&amp; callId, const std::unordered_map&amp;lt;std::string, std::any&gt;&amp; parameters)
+<a name=""></a>
 ###### *Param:* callId
+<a name=""></a>
 ###### *Param:* parameters
+<a name=""></a>
 ###### *Return:* optional any
 
 Low level access to extension services that browser may implement. The return parameter and return value are JSON kind
@@ -297,20 +419,29 @@ const auto anyvec = std::any_cast<std::vector<std::any>(*out);
 std::vector<std::string> vec;
 std::transform(anyvec.begin(), anyvec.end, std::back_inserter(vec), [](const auto& a){return std::any_cast<std::string>(a)});
 ```
-##### std::optional<std::vector<uint8_t>> resource(const std::string& url) const
+<a name="#std-optional-amp-lt-std-vector-amp-lt-uint8_t-gt-gt-resource-const-std-string-amp-url-const"></a>
+##### std::optional&amp;lt;std::vector&amp;lt;uint8_t&gt;&gt; resource(const std::string&amp; url) const
+<a name=""></a>
 ###### *Param:* url
+<a name=""></a>
 ###### *Return:* optional byte vector
 
 Get data stored as a resource
-##### bool addFile(const std::string& url, const std::string& file)
+<a name="#bool-addfile-const-std-string-amp-url-const-std-string-amp-file-"></a>
+##### bool addFile(const std::string&amp; url, const std::string&amp; file)
+<a name=""></a>
 ###### *Param:* url
+<a name=""></a>
 ###### *Param:* file
+<a name=""></a>
 ###### *Return:* boolean
 
 Adds a file as a resources
+<a name="#void-beginbatch-"></a>
 ##### void beginBatch()
 
 Starts buffering non-DataPtr message locally
+<a name="#void-endbatch-"></a>
 ##### void endBatch()
 
 Sends locally buffered message to UI

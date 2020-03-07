@@ -16,7 +16,7 @@ telex.h contains core functionality, everything that is needed for basic applica
     * [ const Ui&amp; ui() const ](#const-ui-ui-const)
     * [ Ui&amp; ui() ](#ui-ui)
     * [ std::string id() const ](#stdstring-id-const)
-    * [ Element&amp; subscribe(const std::string&amp; name, std::function&lt;void(const Event&amp; ev)&gt; handler, const std::vector&lt;std::string&gt;&amp; properties = {}, const std::chrono::milliseconds&amp; = 0ms) ](#element-subscribeconst-stdstring-name-stdfunctionvoidconst-event-ev-handler-const-stdvectorstdstring-properties-const-stdchronomilliseconds-ms)
+    * [ Element&amp; subscribe(const std::string&amp; name, std::function&lt;void(const Event&amp; ev)&gt; handler, const std::vector&lt;std::string&gt;&amp; properties = {}, const std::chrono::milliseconds&amp; = 0ms) ](#element-subscribeconst-stdstring-name-stdfunctionvoidconst-event-ev-handler-const-stdvectorstdstring-properties-const-stdchronomilliseconds-0ms)
     * [ Element&amp; setHTML(const std::string&amp; htmlText) ](#element-sethtmlconst-stdstring-htmltext)
     * [ Element&amp; setAttribute(const std::string&amp; attr, const std::string&amp; values) ](#element-setattributeconst-stdstring-attr-const-stdstring-values)
     * [ std::optional&lt;Attributes&gt; attributes() const ](#stdoptionalattributes-attributes-const)
@@ -35,7 +35,7 @@ telex.h contains core functionality, everything that is needed for basic applica
     * [ void close() ](#void-close)
     * [ Ui&amp; onUiExit(std::function&lt;void ()&gt; onExitFunction = nullptr) ](#ui-onuiexitstdfunctionvoid-onexitfunction-nullptr)
     * [ Ui&amp; onReload(std::function&lt;void ()&gt; onReleadFunction = nullptr) ](#ui-onreloadstdfunctionvoid-onreleadfunction-nullptr)
-    * [ Ui&amp; onOpen(std::function&lt;void ()&gt; onOpenFunction = nullptr) ](#ui-onopen-std-function-void-onopenfunction-nullptr)
+    * [ Ui&amp; onOpen(std::function&lt;void ()&gt; onOpenFunction = nullptr) ](#ui-onopenstdfunctionvoid-onopenfunction-nullptr)
     * [ Ui&amp; onError(std::function&lt;void (const std::string&amp; element, const std::string&amp; info)&gt; onErrorFunction = nullptr) ](#ui-onerrorstdfunctionvoid-const-stdstring-element-const-stdstring-info-onerrorfunction-nullptr)
     * [ void run() ](#void-run)
     * [ void setLogging(bool logging) ](#void-setloggingbool-logging)
@@ -256,7 +256,7 @@ Echoes a message
 
 Shown a browser&#39;s alert dialogue
 <a name="#void-openconst-stdstring-url-const-stdstring-name"></a>
-##### void open(const std::string&amp; url, const std::string&amp; name) 
+##### void open(const std::string&amp; url, const std::string&amp; name = &quot;&quot;) 
 ###### *Param:* url 
 ###### *Param:* name 
 

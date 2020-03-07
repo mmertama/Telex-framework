@@ -11,7 +11,7 @@ telex.h contains core functionality, everything that is needed for basic applica
 * [ namespace Telex ](#telex)
   * [  void setDebug() ](#void-setdebug)
   * [ class Element ](#element)
-    * [ Element(Ui&amp; ui, const std::string&amp; id) ](#elementuiamp-ui-const-stdstringamp-id)
+    * [ Element(Ui&amp; ui, const std::string&amp; id) ](#elementui-ui-const-stdstring-id)
     * [ Element(Ui&amp; ui, const std::string&amp; id, const std::string&amp; htmlElement, const Element&amp; parent) ](#elementuiamp-ui-const-stdstringamp-id-const-stdstringamp-htmlelement-const-elementamp-parent)
     * [ const Ui&amp; ui() const ](#const-uiamp-ui-const)
     * [ Ui&amp; ui() ](#uiamp-ui)

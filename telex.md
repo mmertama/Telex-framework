@@ -16,7 +16,7 @@ telex.h contains core functionality, everything that is needed for basic applica
     * [ const Ui&amp; ui() const ](#const-ui-ui-const)
     * [ Ui&amp; ui() ](#ui-ui)
     * [ std::string id() const ](#stdstring-id-const)
-    * [ Element&amp; subscribe(const std::string&amp; name, std::function&lt;void(const Event&amp; ev)&gt; handler, const std::vector&lt;std::string&gt;&amp; properties = {}, const std::chrono::milliseconds&amp; = 0ms) ](#element-subscribeconst-stdstring-name-stdfunctionvoidconst-event-ev-handler-const-stdvectorstdstring-properties-const-stdchronomilliseconds-0ms)
+    * [ Element&amp; subscribe(const std::string&amp; name, std::function&lt;void(const Event&amp; ev)&gt; handler, const std::vector&lt;std::string&gt;&amp; properties = {}, const std::chrono::milliseconds&amp; = 0ms) ](#element-subscribeconst-stdstring-name-stdfunctionvoidconst-event-ev-handler-const-stdvectorstdstring-properties-const-stdchronomilliseconds-ms)
     * [ Element&amp; setHTML(const std::string&amp; htmlText) ](#element-sethtmlconst-stdstring-htmltext)
     * [ Element&amp; setAttribute(const std::string&amp; attr, const std::string&amp; values) ](#element-setattributeconst-stdstring-attr-const-stdstring-values)
     * [ std::optional&lt;Attributes&gt; attributes() const ](#stdoptionalattributes-attributes-const)

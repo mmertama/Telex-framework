@@ -1,17 +1,21 @@
 
 ---
 ##### String Utils 
-##### inline std::string qq(const std::string& s) 
+<a id="inline-stdstring-qqconst-stdstring-s"></a>
+##### inline std::string qq(const std::string&amp; s) 
 ###### *Param:* s 
 ###### *Return:*  
-##### inline std::string chop(const std::string& s) 
+<a id="inline-stdstring-chopconst-stdstring-s"></a>
+##### inline std::string chop(const std::string&amp; s) 
 ###### *Param:* s 
 ###### *Return:*  
-##### inline std::string chop(const std::string& s, const std::string& chopped) 
+<a id="inline-stdstring-chopconst-stdstring-s-const-stdstring-chopped"></a>
+##### inline std::string chop(const std::string&amp; s, const std::string&amp; chopped) 
 ###### *Param:* s 
 ###### *Param:* chopped 
 ###### *Return:*  
-##### T to(const std::string& source) 
+<a id="t-toconst-stdstring-source"></a>
+##### T to(const std::string&amp; source) 
 ###### *Param:* source 
 ###### *Return:*  
 
@@ -19,39 +23,47 @@
 
 ---
 ##### Container Utils 
-##### bool contains(const T& container, const std::string& s) 
+<a id="bool-containsconst-t-container-const-stdstring-s"></a>
+##### bool contains(const T&amp; container, const std::string&amp; s) 
 ###### *Param:* container 
 ###### *Param:* s 
 ###### *Return:*  
-##### std::optional<T> at(const C& container, const std::string& s, unsigned index = 0) 
+<a id="stdoptionalt-atconst-c-container-const-stdstring-s-unsigned-index-0"></a>
+##### std::optional&lt;T&gt; at(const C&amp; container, const std::string&amp; s, unsigned index = 0) 
 ###### *Param:* container 
 ###### *Param:* s 
 ###### *Param:* index 
 ###### *Return:*  
-##### T atOr(const C& container, const std::string& s, const T& defaultValue, unsigned index = 0) 
+<a id="t-atorconst-c-container-const-stdstring-s-const-t-defaultvalue-unsigned-index-0"></a>
+##### T atOr(const C&amp; container, const std::string&amp; s, const T&amp; defaultValue, unsigned index = 0) 
 ###### *Param:* container 
 ###### *Param:* s 
 ###### *Param:* defaultValue 
 ###### *Param:* index 
 ###### *Return:*  
-##### Container split(const std::string& str, const char splitChar = ' ') 
+<a id="container-splitconst-stdstring-str-const-char-splitchar-39-39"></a>
+##### Container split(const std::string&amp; str, const char splitChar = &#39; &#39;) 
 ###### *Param:* str 
 ###### *Param:* splitChar 
 ###### *Return:*  
-##### std::string join(const IT& begin, const IT& end, const std::string joinChar = "" ) 
+<a id="stdstring-joinconst-it-begin-const-it-end-const-stdstring-joinchar"></a>
+##### std::string join(const IT&amp; begin, const IT&amp; end, const std::string joinChar = &quot;&quot; ) 
 ###### *Param:* begin 
 ###### *Param:* end 
 ###### *Param:* joinChar 
 ###### *Return:*  
-##### std::string join(const T& t, const std::string joinChar = "" ) 
+<a id="stdstring-joinconst-t-t-const-stdstring-joinchar"></a>
+##### std::string join(const T&amp; t, const std::string joinChar = &quot;&quot; ) 
 ###### *Param:* t 
 ###### *Param:* joinChar 
 ###### *Return:*  
-##### T merge(const T& b1, const T& b2) 
+<a id="t-mergeconst-t-b1-const-t-b2"></a>
+##### T merge(const T&amp; b1, const T&amp; b2) 
 ###### *Param:* b1 
 ###### *Param:* b2 
 ###### *Return:*  
-##### T toLow(const T& str) 
+<a id="t-tolowconst-t-str"></a>
+##### T toLow(const T&amp; str) 
 ###### *Param:* str 
 ###### *Return:*  
 
@@ -64,51 +76,66 @@
 
 ---
 ##### File Utils 
-#####  std::string getLink(const std::string& fname) 
+<a id="stdstring-getlinkconst-stdstring-fname"></a>
+#####  std::string getLink(const std::string&amp; fname) 
 ###### *Param:* fname 
 ###### *Return:*  
-#####  bool isDir(const std::string& fname) 
+<a id="bool-isdirconst-stdstring-fname"></a>
+#####  bool isDir(const std::string&amp; fname) 
 ###### *Param:* fname 
 ###### *Return:*  
+<a id="stdstring-workingdir"></a>
 #####  std::string workingDir() 
 ###### *Return:*  
-#####  std::string absPath(const std::string& rpath) 
+<a id="stdstring-abspathconst-stdstring-rpath"></a>
+#####  std::string absPath(const std::string&amp; rpath) 
 ###### *Param:* rpath 
 ###### *Return:*  
-#####  std::string pathPop(const std::string& filename) 
+<a id="stdstring-pathpopconst-stdstring-filename"></a>
+#####  std::string pathPop(const std::string&amp; filename) 
 ###### *Param:* filename 
 ###### *Return:*  
-#####  std::vector<std::tuple<std::string, bool, std::string>> directory(const std::string& dirname) 
+<a id="stdvectorstdtuplestdstring-bool-stdstring-directoryconst-stdstring-dirname"></a>
+#####  std::vector&lt;std::tuple&lt;std::string, bool, std::string&gt;&gt; directory(const std::string&amp; dirname) 
 ###### *Param:* dirname 
 ###### *Return:*  
+<a id="stdstring-tempname"></a>
 #####  std::string tempName() 
 ###### *Return:*  
-#####  std::string systemEnv(const std::string& env) 
+<a id="stdstring-systemenvconst-stdstring-env"></a>
+#####  std::string systemEnv(const std::string&amp; env) 
 ###### *Param:* env 
 ###### *Return:*  
-#####  SSIZE_T fileSize(const std::string& filename) 
+<a id="ssize_t-filesizeconst-stdstring-filename"></a>
+#####  SSIZE_T fileSize(const std::string&amp; filename) 
 ###### *Param:* filename 
 ###### *Return:*  
-#####  bool rename(const std::string& of, const std::string& nf) 
+<a id="bool-renameconst-stdstring-of-const-stdstring-nf"></a>
+#####  bool rename(const std::string&amp; of, const std::string&amp; nf) 
 ###### *Param:* of 
 ###### *Param:* nf 
 ###### *Return:*  
-#####  void removeFile(const std::string& filename) 
+<a id="void-removefileconst-stdstring-filename"></a>
+#####  void removeFile(const std::string&amp; filename) 
 ###### *Param:* filename 
-#####  bool fileExists(const std::string& filename) 
+<a id="bool-fileexistsconst-stdstring-filename"></a>
+#####  bool fileExists(const std::string&amp; filename) 
 ###### *Param:* filename 
 ###### *Return:*  
-##### std::string writeToTemp(const T& data) 
+<a id="stdstring-writetotempconst-t-data"></a>
+##### std::string writeToTemp(const T&amp; data) 
 ###### *Param:* data 
 ###### *Return:*  
-##### std::vector<T> slurp(const std::string& file, const size_t max = std::numeric_limits<size_t>::max()) 
+<a id="stdvectort-slurpconst-stdstring-file-const-size_t-max-stdnumeric_limitssize_tmax"></a>
+##### std::vector&lt;T&gt; slurp(const std::string&amp; file, const size_t max = std::numeric_limits&lt;size_t&gt;::max()) 
 ###### *Param:* file 
 ###### *Param:* max 
 ###### *Return:*  
-#####  std::string slurp(const std::string& file, const size_t max = std::numeric_limits<size_t>::max()) 
+<a id="stdstring-slurpconst-stdstring-file-const-size_t-max-stdnumeric_limitssize_tmax"></a>
+#####  std::string slurp(const std::string&amp; file, const size_t max = std::numeric_limits&lt;size_t&gt;::max()) 
 ###### *Param:* file 
 ###### *Param:* max 
 ###### *Return:*  
 
 ---
-###### Generated by MarkdownMaker, (c) Markus Mertama 2018 
+###### Generated by MarkdownMaker, (c) Markus Mertama 2020 

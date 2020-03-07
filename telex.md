@@ -35,7 +35,7 @@ telex.h contains core functionality, everything that is needed for basic applica
     * [ void close() ](#void-close)
     * [ Ui&amp; onUiExit(std::function&lt;void ()&gt; onExitFunction = nullptr) ](#ui-onuiexitstdfunctionvoid-onexitfunction-nullptr)
     * [ Ui&amp; onReload(std::function&lt;void ()&gt; onReleadFunction = nullptr) ](#ui-onreloadstdfunctionvoid-onreleadfunction-nullptr)
-    * [ Ui&amp; onOpen(std::function&lt;void ()&gt; onOpenFunction = nullptr) ](#ui-onopenstdfunctionvoid-onopenfunction-nullptr)
+    * [ Ui&amp; onOpen(std::function&lt;void ()&gt; onOpenFunction = nullptr) ](#ui-onopen-std-function-void-onopenfunction-nullptr)
     * [ Ui&amp; onError(std::function&lt;void (const std::string&amp; element, const std::string&amp; info)&gt; onErrorFunction = nullptr) ](#ui-onerrorstdfunctionvoid-const-stdstring-element-const-stdstring-info-onerrorfunction-nullptr)
     * [ void run() ](#void-run)
     * [ void setLogging(bool logging) ](#void-setloggingbool-logging)

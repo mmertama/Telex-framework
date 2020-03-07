@@ -255,7 +255,7 @@ Echoes a message
 ###### *Param:* msg 
 
 Shown a browser&#39;s alert dialogue
-<a name="#void-openconst-stdstring-url-const-stdstring-name-"></a>
+<a name="#void-openconst-stdstring-url-const-stdstring-name"></a>
 ##### void open(const std::string&amp; url, const std::string&amp; name = &quot;&quot;) 
 ###### *Param:* url 
 ###### *Param:* name 

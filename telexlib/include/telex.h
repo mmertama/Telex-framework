@@ -29,15 +29,6 @@
   *
   */
 
-/**
- * @scope
-  * Telex contains three header files
-  * * `telex.h`
-  * * `telex_utils.h`
-  * * `telex_graphics.h`
-  * @scopeend
-  */
-
 using namespace std::chrono_literals;
 
 #ifdef WINDOWS_EXPORT
@@ -94,7 +85,6 @@ namespace Telex {
         friend class Element;
         friend class Ui;
     };
-
 
 
     /**

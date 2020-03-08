@@ -17,13 +17,38 @@
 /**
   * ![wqe](https://avatars1.githubusercontent.com/u/7837709?s=400&v=4)
   *
-  * Telex
+  * telex.h
   * =====
-  * GUI Framework
+  * Telex GUI Framework
   * -------------
   *
   * telex.h contains core functionality, everything that is needed for basic application using Telex framework.
   *
+  * There are two classes: The Ui creates a Ui framework, and Element represents visual on screen. Basically flow is
+  * create Ui -> intialize elements -> start event loop. There are several type of constructor - Ui::Filemap are using
+  * compile time encoded files. File are added using `addResource` CMake function:
+  * ```
+  * addResource(
+  * PROJECT <PROJECT_NAME>
+  * TARGET <GENERATED_HEADER>
+  * SOURCES <LIST-OF-ENCODED_FILES>)
+  * ```
+  * a simple main goes as follows:
+  *
+  * ```
+  * int main() {
+  *     Telex::Ui ui({{"/index.html", Tickhtml}}, "index.html");
+  *     Telex::Element header(ui, "header");
+  *      ui.startTimer(10000ms, true, [header]() mutable {
+  *         header.setHTML("time force");
+  *     });
+  *      ui.run();
+  * }
+  *  ```
+  * Please note that UI is not created until event loop is running,
+  * that means any Ui query is not possible before event loop is running.
+  * To resolve issue there is onOpen callback that is called immediately
+  * after event loop has been started.
   *
   * @toc
   *
@@ -39,7 +64,6 @@ using namespace std::chrono_literals;
 
 /**
  * @namespace Telex
- *
  * Common namespace for Telex implementation.
  */
 namespace Telex {
@@ -89,7 +113,6 @@ namespace Telex {
 
     /**
      * @class Element
-     *
      * Element represents any UI element
      */
     class TELEX_EX Element {

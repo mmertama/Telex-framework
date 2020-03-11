@@ -111,7 +111,7 @@ public:
         return pixel & static_cast<dataT>(0xFF);
     }
     /**
-     * @function r
+     * @function g
      * @param pixel
      * @return dataT
      *
@@ -121,7 +121,7 @@ public:
         return (pixel & static_cast<dataT>(0xFF00)) >> 8;
     }
     /**
-     * @function r
+     * @function b
      * @param pixel
      * @return dataT
      *
@@ -131,7 +131,7 @@ public:
         return (pixel & static_cast<dataT>(0xFF0000)) >> 16;
     }
     /**
-     * @function r
+     * @function alpha
      * @param pixel
      * @return dataT
      *
@@ -155,6 +155,9 @@ private:
         height(h) {}
     friend class CanvasElement;
 };
+/**
+ * @scopeend
+ */
 
 using CanvasPtr = std::shared_ptr<Canvas>;
 
@@ -183,7 +186,7 @@ public:
      */
     CanvasElement(CanvasElement&& other) : Element(std::move(other)) {m_tile = std::move(other.m_tile);}
     /**
-     * @brief CanvasElement
+     * @function CanvasElement
      * @param ui
      * @param id
      *
@@ -248,7 +251,9 @@ public:
 private:
     CanvasPtr m_tile;
 };
-
+/**
+ * @scopeend
+ */
 /**
  * @class Graphics
  * The Graphics class, a simple compositor to clone and merge Canvases. Besides a simple bitmap manipulation the a rect drawing
@@ -268,7 +273,7 @@ public:
     Graphics(const Telex::CanvasElement& element, int width, int height) : m_element(element), m_canvas(m_element.makeCanvas(width, height)) {
     }
     /**
-     * @brief Graphics
+     * @function Graphics
      * @param element
      *
      * Creates a Graphics without a Canvas, call `create` to construct an actual Canvas.
@@ -383,7 +388,11 @@ private:
     Telex::CanvasElement m_element;
     Telex::CanvasPtr m_canvas;
 };
-
+/**
+ * @scopeend
+ */
 }
-
+/**
+ * @scopeend
+ */
 #endif // TELEX_GRAPHICS_H

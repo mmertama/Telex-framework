@@ -155,6 +155,25 @@ std::optional<T> toOr(const std::string& source) {
     return !ss.fail() ? std::make_optional(v) : std::nullopt;
 }
 
+template <class T>
+/**
+ * @function toLow
+ * @param str
+ * @return
+ */
+ T toLow(const T& str) {
+    T n;
+    std::transform(str.begin(), str.end(), std::back_inserter(n),
+                                    [](auto c){return std::tolower(c);});
+    return n;
+}
+
+
+/**
+ * @scopeend
+ * @scope Container Utils
+ */
+
 template<typename T>
 /**
  * @function contains
@@ -327,19 +346,6 @@ T merge(const T& b1, const T& b2, Arg ...args) {
     return merge(bytes, args...);
 }
 
-template <class T>
-/**
- * @function toLow
- * @param str
- * @return
- */
- T toLow(const T& str) {
-    T n;
-    std::transform(str.begin(), str.end(), std::back_inserter(n),
-                                    [](auto c){return std::tolower(c);});
-    return n;
-}
-
  /**
  * @scopeend
  * @scope Misc Utils
@@ -358,10 +364,28 @@ private:
     friend std::shared_ptr<TelexUtils::expiror> TelexUtils::waitExpire(std::chrono::seconds s, const std::function<void ()>& onExpire);
 };
 
+/**
+ * @function hexify
+ * @param src
+ * @param pat
+ * @return
+ */
 UTILS_EX  std::string hexify(const std::string& src, const std::string pat);
+/**
+ * @function unhexify
+ * @param src
+ * @return
+ */
 UTILS_EX  std::string unhexify(const std::string& src);
 
+/**
+ * @brief The OS enum
+ */
 enum class OS {OTHER, MAC, WIN, LINUX};
+/**
+ * @function currentOS
+ * @return
+ */
 UTILS_EX OS currentOS();
 
 #ifdef UNIX_OS //fix if needed
@@ -434,6 +458,14 @@ inline void log_t(LogLevel level, const std::nullptr_t&, Args... args) {
     log_t(level, args...);
 }
 
+/**
+ * @function doFatal
+ * @param txt
+ * @param f
+ * @param file
+ * @param line
+ * @return
+ */
 inline bool doFatal(const std::string& txt, std::function<void()> f, const char* file, int line) {
     if(f) f();
     log(LogLevel::Fatal, txt, "at", file, "line:", line);
@@ -501,7 +533,17 @@ UTILS_EX std::string hostName();
  * @return
  */
 UTILS_EX std::string systemEnv(const std::string& env);
+/**
+ * @function isHiddenEntry
+ * @param filename
+ * @return
+ */
 UTILS_EX bool isHiddenEntry(const std::string& filename);
+/**
+ * @function isExecutable
+ * @param filename
+ * @return
+ */
 UTILS_EX bool isExecutable(const std::string& filename);
 /**
  * @function fileSize

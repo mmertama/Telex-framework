@@ -22,7 +22,7 @@ void TimerMgr::start() {
                 const auto actualWait = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
                 TelexUtils::log(TelexUtils::LogLevel::Debug, "timer awake id:", data.id , currentSleep.count(), actualWait.count(), m_queue.size());
                 m_queue.reduce(actualWait);
-                continue; // we has slept
+                continue; // we have slept
             }
             TelexUtils::log(TelexUtils::LogLevel::Debug, "timer pop id:", data.id, m_queue.size());
             m_queue.pop();

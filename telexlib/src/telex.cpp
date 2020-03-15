@@ -213,11 +213,11 @@ Ui::~Ui() {
 void Ui::pendingClose() {
     TelexUtils::log(TelexUtils::LogLevel::Debug, "Pending close, Status change --> Pending");
     m_status = State::PENDING;
-    m_timers->flush();
+    m_timers->flush(); //all timers are run here
     startTimer(1000ms, true, [this]() { //delay as a get may come due page chage
     if(m_status == State::PENDING) {
         TelexUtils::log(TelexUtils::LogLevel::Debug, "Pending close, Status change --> Exit");
-        m_status = State::EXIT;
+        m_status = State::CLOSE;
         m_sema->signal();
     } else {
          TelexUtils::log(TelexUtils::LogLevel::Debug, "Pending cancelled", toStr(m_status));
@@ -425,6 +425,9 @@ void Ui::eventLoop() {
             TelexUtils::log(TelexUtils::LogLevel::Debug, "Eventloop is Close", m_server && m_server->isRunning());
             if(m_onUiExit) {
                 m_onUiExit();
+            }
+            if(!m_server->isConnected()) {
+                m_server->close(true);
             }
             continue;
         }

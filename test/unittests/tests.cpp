@@ -99,16 +99,16 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
        ok = true;
        ui.close();
     });
-    ui.startTimer(2000ms, true, [&ui]()  {
+    ui.startTimer(2s, true, [&ui]()  {
        ui.exit();
     });
     ui.run();
     return ok;
 }},
-{R"(Ui& onUiExit(std::function<void ()> onExitFunction = nullptr))",
+{R"(Ui& onExit(std::function<void ()> onExitFunction = nullptr))",
         [](const std::string& browser) {
     CONSTRUCT_UI
-    ui.startTimer(1000ms, true, [&ui]() {
+    ui.startTimer(10s, true, [&ui]() {
        ui.close();
     });
     bool ok = false;
@@ -525,7 +525,7 @@ int main(int args, char* argv[]) {
         }
         if(TelexUtils::contains(opts, "headless")) {
             browser = defaultChrome() + " " + headlessParams();
-        //    nonRun.emplace(5, "Not work when headless");
+            nonRun.emplace(6, "Not work on headless");
         }
         const auto lp = opts.find("tests");
         if(lp != opts.end()) {

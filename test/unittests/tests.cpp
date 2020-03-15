@@ -112,7 +112,7 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
        ui.close();
     });
     bool ok = false;
-    ui.onUiExit([&ok, &ui](){
+    ui.onExit([&ok, &ui](){
         ok = true;
         ui.exit();
     });
@@ -300,7 +300,9 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
 {R"(std::vector<uint8_t> resource(const std::string& url))",
         [](const std::string& browser){
     CONSTRUCT_UI
-    const auto r = ui.resource(Unittestshtml);
+    const auto r = ui.resource("/test.html");
+    if(!r)
+        return false;
     const std::string html = TelexUtils::join(*r);
     const auto p1 = html.find("html");
     const auto p2 = html.find("html");

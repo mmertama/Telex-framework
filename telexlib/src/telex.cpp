@@ -216,8 +216,8 @@ void Ui::pendingClose() {
     m_timers->flush();
     startTimer(1000ms, true, [this]() { //delay as a get may come due page chage
     if(m_status == State::PENDING) {
-        TelexUtils::log(TelexUtils::LogLevel::Debug, "Pending close, Status change --> Close");
-        m_status = State::CLOSE;
+        TelexUtils::log(TelexUtils::LogLevel::Debug, "Pending close, Status change --> Exit");
+        m_status = State::EXIT;
         m_sema->signal();
     } else {
          TelexUtils::log(TelexUtils::LogLevel::Debug, "Pending cancelled", toStr(m_status));
@@ -373,7 +373,7 @@ bool Ui::stopTimer(TimerId id) {
 }
 
 
-Ui& Ui::onUiExit(std::function<void ()> onUiExitFunction) {
+Ui& Ui::onExit(std::function<void ()> onUiExitFunction) {
     m_onUiExit = std::move(onUiExitFunction);
     return *this;
 }
@@ -422,7 +422,7 @@ void Ui::eventLoop() {
         }
 
         if(m_status == State::CLOSE) {
-            TelexUtils::log(TelexUtils::LogLevel::Debug, "Eventloop is Close");
+            TelexUtils::log(TelexUtils::LogLevel::Debug, "Eventloop is Close", m_server && m_server->isRunning());
             if(m_onUiExit) {
                 m_onUiExit();
             }

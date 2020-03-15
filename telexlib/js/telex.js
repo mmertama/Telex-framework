@@ -17,7 +17,6 @@ function errlog(source, text) {
     socket.send(JSON.stringify({'type': 'error', 'element': String(source), 'error': text}));
 }
 
-
 function createElement(parent, tag, id) {
     if(document.getElementById(id) == null) {
         const el = document.createElement(tag);
@@ -117,9 +116,9 @@ function id(el) {
 }
 
 function serveQuery(element, query_id, query) {
-    const el = document.getElementById(element);
+    const el = element.length > 0 ? document.getElementById(element) : document.body;
     if(!el) {
-        errlog(element, "not found");
+        errlog(element, 'not found:', element, '" for query"');
         socket.send(JSON.stringify({'type': 'query', 'query_id': query_id, 'query_value':'query_error', 'query_error':'query_error'}));
         return;
     }
@@ -312,9 +311,9 @@ function handleJson(msg) {
             return;
         }
     
-        const el = document.getElementById(msg.element);
+        const el = msg.element.length > 0 ?  document.getElementById(msg.element) : document.body;
         if(!el) {
-            errlog(msg.element, "not found");
+            errlog(msg.element, 'not found:"', msg.element, '"');
             return;
         }
         switch(msg.type) {

@@ -1,5 +1,5 @@
-#ifndef _TIMER_H_
-#define _TIMER_H_
+#ifndef _TELEXTIMER_H_
+#define _TELEXTIMER_H_
 
 #include <chrono>
 #include <queue>

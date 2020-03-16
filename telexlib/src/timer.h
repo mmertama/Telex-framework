@@ -68,6 +68,11 @@ public:
         m_blessed.emplace(id);
     }
 
+    bool blessed(int id) const {
+        std::lock_guard<std::mutex> guard(m_mutex);
+        return m_blessed.find(id) != m_blessed.end();
+    }
+
     bool takeBless(int id) {
         std::lock_guard<std::mutex> guard(m_mutex);
         auto it = m_blessed.find(id);
@@ -93,7 +98,7 @@ public:
         }
     }
 
-    void setNow() {
+    void setNow(bool keepBless = true) {
         std::lock_guard<std::mutex> guard(m_mutex);
         std::vector<DataEntry> store;
         store.reserve(m_queue.size());
@@ -103,6 +108,8 @@ public:
         }
 
         for(auto& c : store) {
+            if(!keepBless)
+                takeBless(c.id);
             c.currentTime = std::chrono::milliseconds{0};
             m_queue.push(c);
         }
@@ -154,6 +161,8 @@ public:
     int append(const TimeQueue::TimeType& ms, const TimeQueue::Function& func);
     bool remove(int id);
     bool bless(int id);
+    bool blessed(int id) const;
+    bool takeBless(int id);
     ~TimerMgr() {
         if(!m_queue.empty()) {
             m_queue.clear();
@@ -161,14 +170,7 @@ public:
             m_timerThread.wait();
         }
     }
-    void flush() {
-        if(!m_queue.empty()) {
-            m_queue.setNow();
-            m_exit = true;
-            m_cv.notify_all();
-            m_timerThread.wait();
-        }
-    }
+    void flush(bool doRun);
 private:
     void start();
 private:

@@ -65,3 +65,22 @@ bool TimerMgr::bless(int id) {
     m_queue.bless(id);
     return true;
 }
+
+bool TimerMgr::blessed(int id) const {
+    if(m_queue.empty())
+        return false;
+    return m_queue.blessed(id);
+}
+
+bool TimerMgr::takeBless(int id) {
+    return m_queue.takeBless(id);
+}
+
+void TimerMgr::flush(bool doRun) {
+    if(!m_queue.empty()) {
+        m_queue.setNow(doRun); //There was a feature that on flush (on exit) all timers are run.
+        m_exit = true;
+        m_cv.notify_all();
+        m_timerThread.wait();
+    }
+}

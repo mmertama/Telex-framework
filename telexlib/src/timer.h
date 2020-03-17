@@ -75,7 +75,7 @@ public:
 
     bool takeBless(int id) {
         std::lock_guard<std::mutex> guard(m_mutex);
-        auto it = m_blessed.find(id);
+        const auto it = m_blessed.find(id);
         if(it != m_blessed.end()) {
             m_blessed.erase(it);
             return true;
@@ -106,10 +106,13 @@ public:
             store.push_back(std::move(m_queue.top()));
             m_queue.pop();
         }
-
         for(auto& c : store) {
-            if(!keepBless)
-                takeBless(c.id);
+            if(!keepBless) {
+                const auto it = m_blessed.find(c.id);
+                if(it != m_blessed.end()) {
+                    m_blessed.erase(it);
+                }
+            }
             c.currentTime = std::chrono::milliseconds{0};
             m_queue.push(c);
         }

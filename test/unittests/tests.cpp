@@ -363,22 +363,7 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.startTimer(2s, true, [&el]()  {
               el.setAttribute("style", "color:green");
            });
-        ui.startTimer(10s, true, [&ui]()  {
-              ui.exit();
-           });
-        ui.run();
-        return ok;
-}},
-{R"(Element& subscribe(const std::string& name, std::function<void()> handler))",
-        [](const std::string& browser) {
-        CONSTRUCT_UI
-        bool ok = false;
-        Telex::Element el(ui, "test-1");
-        el.subscribe("onload", [&ok, &ui](const Telex::Element::Event&) {
-            ok = true;
-            ui.exit();
-        });
-        ui.startTimer(3000ms, true, [&ui]()  {
+        ui.startTimer(3s, true, [&ui]()  {
               ui.exit();
            });
         ui.run();
@@ -528,6 +513,7 @@ int main(int args, char* argv[]) {
         }
         if(TelexUtils::contains(opts, "headless")) {
             browser = defaultChrome() + " " + headlessParams();
+            nonRun.emplace(5, "Not work on headless");
             nonRun.emplace(6, "Not work on headless");
             nonRun.emplace(9, "Not work on headless");
             nonRun.emplace(10, "Not work on headless");
@@ -535,6 +521,14 @@ int main(int args, char* argv[]) {
             nonRun.emplace(21, "Not work on headless");
             nonRun.emplace(22, "Not work on headless");
             nonRun.emplace(23, "Not work on headless");
+            nonRun.emplace(29, "Not work on headless");
+            nonRun.emplace(30, "Not work on headless");
+            nonRun.emplace(31, "Not work on headless");
+            nonRun.emplace(32, "Not work on headless");
+            nonRun.emplace(33, "Not work on headless");
+            nonRun.emplace(35, "Not work on headless");
+            nonRun.emplace(34, "Not work on headless");
+            nonRun.emplace(36, "Not work on headless");
         }
         const auto lp = opts.find("tests");
         if(lp != opts.end()) {

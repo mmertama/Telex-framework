@@ -78,6 +78,7 @@ bool TimerMgr::takeBless(int id) {
 
 void TimerMgr::flush(bool doRun) {
     if(!m_queue.empty()) {
+        TelexUtils::log(TelexUtils::LogLevel::Debug, "flush");
         m_queue.setNow(doRun); //There was a feature that on flush (on exit) all timers are run.
         m_exit = true;
         m_cv.notify_all();

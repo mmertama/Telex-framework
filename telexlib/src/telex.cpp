@@ -214,6 +214,7 @@ void Ui::pendingClose() {
     TelexUtils::log(TelexUtils::LogLevel::Debug, "Pending close, Status change --> Pending");
     m_status = State::PENDING;
     m_timers->flush(false); //all timers are run here
+    TelexUtils::log(TelexUtils::LogLevel::Debug, "Start 1s wait for pending");
     startTimer(1000ms, true, [this]() { //delay as a get may come due page chage
     if(m_status == State::PENDING) {
         TelexUtils::log(TelexUtils::LogLevel::Debug, "Pending close, Status change --> Exit");

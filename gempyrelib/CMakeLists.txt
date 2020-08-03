@@ -296,7 +296,7 @@ elseif(ANDROID)
 
     add_custom_target(ranlib1
         DEPENDS libuv
-        COMMENT "Running ranlib1 explicitly due some Android Toolchain bug"
+        COMMENT "Running ranlib1 explicitly due some Android Toolchain bug on ${UV_LIB}"
         BYPRODUCTS ${UV_LIB}
         COMMAND echo "run ranlib" && ${RANLIB} ${UV_LIB}
         )
@@ -314,7 +314,7 @@ elseif(ANDROID)
 
     add_custom_command(TARGET ${PROJECT_NAME}
                    POST_BUILD
-                   COMMENT "Running ranlib explicitly due some Android Toolchain bug"
+                   COMMENT "Running ranlib explicitly due some Android Toolchain bugon {CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
                    COMMAND echo "run ranlib again" && ${RANLIB} "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
                    )
 

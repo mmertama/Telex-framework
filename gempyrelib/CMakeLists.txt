@@ -103,7 +103,8 @@ externalproject_add(libsockets
     TEST_COMMAND ""
     )
 
-set(SOCKETS_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(SOCKETS_LIB_NAME uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
+#set(SOCKETS_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 if(WIN32 OR ANDROID)
     message("...")
@@ -291,13 +292,12 @@ elseif(ANDROID)
         COMMAND $ENV{RANLIB} ${UV_LIB}
         )
 
-    add_custom_target(ranlib2
-        DEPENDS libsockets
-        COMMENT Running ranlib2 explicitly due some Android Toolchain bug
-        BYPRODUCTS ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
-        COMMAND $ENV{RANLIB} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
-        )
-
+ #   add_custom_target(ranlib2
+ #       DEPENDS libsockets
+ #       COMMENT Running ranlib2 explicitly due some Android Toolchain bug
+ #       BYPRODUCTS ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+ #       COMMAND $ENV{RANLIB} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+ #       )
 
     add_dependencies(${PROJECT_NAME} ranlib1)
     add_dependencies(${PROJECT_NAME} ranlib2)

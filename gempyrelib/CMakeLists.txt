@@ -286,7 +286,7 @@ elseif(ANDROID)
     message("uvdir ${UV_LIB}")
 
     if(NOT $ENV{RANLIB})
-        message(FATAL_ERROR "RANLIB is not set")
+        message(FATAL_ERROR "RANLIB is not set ${RANLIB}")
     endif()
 
     add_custom_target(ranlib1

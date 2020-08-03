@@ -21,10 +21,9 @@ endif()
 
 if (WIN32 OR ANDROID)
         message("Need Libuv...")
-        set(UV_NAME "libuv")
-        set(UV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/${UV_NAME}")
-		
-		set(UV_LIB_DIR "${UV_DIR}/src/libuv-build")
+
+        set(UV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/libuv")
+        set(UV_LIB_DIR "${UV_DIR}/src/libuv-build")
 		
         if(CMAKE_BUILD_TYPE STREQUAL "Debug") #these actally pretty same, change if debug is needed.
              set(UV_LIB "${UV_LIB_DIR}/Debug/uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -32,10 +31,7 @@ if (WIN32 OR ANDROID)
              set(UV_LIB "${UV_LIB_DIR}/Release/uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
         endif()
 
-       
-
-        externalproject_add(
-			${UV_NAME}
+        externalproject_add(libuv
             PREFIX ${UV_DIR}
             GIT_REPOSITORY https://github.com/libuv/libuv.git
             GIT_TAG v1.34.0
@@ -49,12 +45,10 @@ if (WIN32 OR ANDROID)
             )
 			
         set(UV_SOURCES "${UV_DIR}/src/libuv")
-		
-		set(INCLUDES
-			"${UV_SOURCES}/include"
-		)
-		 
-	
+        set(INCLUDES "${UV_SOURCES}/include")
+
+        add_custom_target()
+
 endif()
 
 
@@ -269,15 +263,18 @@ if(WIN32)
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${UV_LIB}
-		PRIVATE ${WIN_LIB}
+        PRIVATE ${WIN_LIB}
         )
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
+    add_custom_target(foo ALL DEPENDS {UV_LIB})
+    add_dependencies(foo uvlib)
+    add_dependencies(${PROJECT_NAME} foo)
     #set(ANDROID_LIB  psapi.lib userenv.lib iphlpapi.lib)
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${UV_LIB}
-		#	PRIVATE ${ANDROID_LIB}
+        PRIVATE ${ANDROID_LIB}
         -lstdc++
         )
 else()

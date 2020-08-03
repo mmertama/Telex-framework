@@ -52,11 +52,20 @@ if (WIN32 OR ANDROID)
             GIT_PROGRESS true
             CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
             UPDATE_DISCONNECTED false
-            INSTALL_COMMAND true # ${CMAKE_COMMAND} --build . --target install
+            INSTALL_COMMAND  ${CMAKE_COMMAND} --build . --target install
             UPDATE_COMMAND ""
             PATCH_COMMAND ""
             TEST_COMMAND ""
             )
+
+        externalproject_Get_Property(libuv BINARY_DIR)
+
+        add_custom_target(uv_files
+            DEPENDS libuv ${BINARY_DIR}
+            COMMAND cmake -E copy "${BINARY_DIR}/*.*" "${UV_LIB_DIR}/"
+            )
+
+        add_dependencies(${PROJECT_NAME} uv_files)
 			
         set(UV_SOURCES "${UV_DIR}/src/libuv")
         set(INCLUDES "${UV_SOURCES}/include")

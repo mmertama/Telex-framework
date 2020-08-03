@@ -26,11 +26,16 @@ if (WIN32 OR ANDROID)
         set(UV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/libuv")
         set(UV_LIB_DIR "${UV_DIR}/src/libuv-build")
 		
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug") #these actally pretty same, change if debug is needed.
-             set(UV_LIB "${UV_LIB_DIR}/Debug/uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
-        else()
-             set(UV_LIB "${UV_LIB_DIR}/Release/uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
-        endif()
+        if (MSCV)
+            if(CMAKE_BUILD_TYPE STREQUAL "Debug") #these actally pretty same, change if debug is needed.
+                 set(UV_LIB "${UV_LIB_DIR}/Debug/uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
+            else()
+                 set(UV_LIB "${UV_LIB_DIR}/Release/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
+            endif()
+         else()
+             set(UV_LIB "${UV_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}"
+         endif()
+
 
     #    FetchContent_Declare(
     #        libuv

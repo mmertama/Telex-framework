@@ -106,13 +106,14 @@ externalproject_add(libsockets
 set(SOCKETS_LIB_NAME uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
 #set(SOCKETS_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
 
-if(WIN32 OR ANDROID)
-    message("...")
+if(WIN32)
+    message("Not needed....")
 else()
     add_custom_command(
         OUTPUT ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
         COMMAND make && mv ${SOCKETS_LIB_NAME} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
         WORKING_DIRECTORY ${SOCKETS_SOURCES}
+        DEPENDS libsockets
     )
     add_custom_target(makecmd DEPENDS ${SOCKETS_DIR}/${SOCKETS_LIB_NAME})
 endif()
@@ -269,7 +270,6 @@ if (WIN32 OR ANDROID)
     add_dependencies(${PROJECT_NAME} libuv)
 else()
     add_dependencies(${PROJECT_NAME} makecmd)
-    add_dependencies(makecmd libsockets)
 endif()
 
 #add_dependencies(${PROJECT_NAME} gempyrejs)
@@ -300,7 +300,7 @@ elseif(ANDROID)
  #       )
 
     add_dependencies(${PROJECT_NAME} ranlib1)
-    add_dependencies(${PROJECT_NAME} ranlib2)
+#    add_dependencies(${PROJECT_NAME} ranlib2)
 
     target_link_libraries (${PROJECT_NAME}
        #PRIVATE ${CMAKE_THREAD_LIBS_INIT}

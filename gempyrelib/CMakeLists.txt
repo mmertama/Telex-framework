@@ -283,14 +283,13 @@ if(WIN32)
         )
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
-#    externalproject_Get_Property(libuv BINARY_DIR)
-#
-#    add_custom_target(uv_files
-#        DEPENDS libuv ${BINARY_DIR}
-#        COMMAND cmake -E copy "${BINARY_DIR}/*.*" "${UV_LIB_DIR}/"
-#        )
-#    add_dependencies(${PROJECT_NAME} uv_files)
-#    add_dependencies(${PROJECT_NAME} libuv)
+
+    add_custom_target(ranlib
+        DEPENDS libuv
+        BYPRODUCTS ${UV_LIB}
+        COMMAND ${RANLIB} ${UV_LIB}
+        )
+    add_dependencies(${PROJECT_NAME} ranlib)
 
     target_link_libraries (${PROJECT_NAME}
        #PRIVATE ${CMAKE_THREAD_LIBS_INIT}

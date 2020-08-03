@@ -175,11 +175,11 @@ set(CMAKE_C_FLAGS, "-DUWS_NO_ZLIB ${CMAKE_C_FLAGS}")
 
 
 if(NOT MSVC)
-	find_package (Threads REQUIRED)
+    find_package (Threads REQUIRED)
 endif()
 
 set(INCLUDES
-	${INCLUDES}
+    ${INCLUDES}
     include
     ${WEBSOCKETS_SOURCES}/src
     ${SOCKETS_SOURCES}/src

@@ -3,8 +3,8 @@ cmake_minimum_required (VERSION 3.14)
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
 include(GNUInstallDirs)
+include(ExternalProject)
 include(FetchContent)
-include(ExternalPrject)
 include(../scripts/addResource.cmake_script)
 
 project (gempyre VERSION 0.2.0 LANGUAGES CXX C)

@@ -285,13 +285,14 @@ if(WIN32)
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
 
-    if(NOT ${RANLIB})
-        if($ENV{RANLIB})
+    if(NOT EXISTS ${RANLIB})
+        if(EXISTS $ENV{RANLIB})
             set(${RANLIB} $ENV{RANLIB})
         else()
             message(FATAL_ERROR "RANLIB is not set")
         endif()
     endif()
+    message("ranlib ${RANLIB}")
 
     add_custom_target(ranlib1
         DEPENDS libuv

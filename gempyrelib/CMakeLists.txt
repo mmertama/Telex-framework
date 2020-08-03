@@ -285,8 +285,8 @@ if(WIN32)
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
 
-    if(NOT EXISTS ${RANLIB})
-        if(EXISTS $ENV{RANLIB})
+    if(NOT ${RANLIB})
+        if($ENV{RANLIB})
             set(${RANLIB} $ENV{RANLIB})
         else()
             message(FATAL_ERROR "RANLIB is not set")
@@ -297,7 +297,7 @@ elseif(ANDROID)
         DEPENDS libuv
         COMMENT "Running ranlib1 explicitly due some Android Toolchain bug"
         BYPRODUCTS ${UV_LIB}
-        COMMAND ${RANLIB} ${UV_LIB}
+        COMMAND echo "run ranlib" && ${RANLIB} ${UV_LIB}
         )
 
     #add_custom_target(ranlib2
@@ -314,7 +314,7 @@ elseif(ANDROID)
     add_custom_command(TARGET ${PROJECT_NAME}
                    POST_BUILD
                    COMMENT "Running ranlib explicitly due some Android Toolchain bug"
-                   COMMAND ${RANLIB} "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+                   COMMAND echo "run ranlib again" && ${RANLIB} "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
                    )
 
     target_link_libraries (${PROJECT_NAME}

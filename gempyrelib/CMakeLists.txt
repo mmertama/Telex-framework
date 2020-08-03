@@ -33,7 +33,7 @@ if (WIN32 OR ANDROID)
                  set(UV_LIB "${UV_LIB_DIR}/Release/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
             endif()
          else()
-             set(UV_LIB "${UV_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}"
+             set(UV_LIB "${UV_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
          endif()
 
 

@@ -188,7 +188,7 @@ set(CMAKE_CXX_FLAGS, "-DUWS_NO_ZLIB ${CMAKE_CXX_FLAGS}")
 set(CMAKE_C_FLAGS, "-DUWS_NO_ZLIB ${CMAKE_C_FLAGS}")
 
 
-if(NOT MSVC)
+if(NOT (MSVC OR ANDROID))
     find_package (Threads REQUIRED)
 endif()
 
@@ -281,12 +281,12 @@ if(WIN32)
         )
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
-    add_custom_target(foo ALL DEPENDS {UV_LIB})
-    add_dependencies(foo uvlib)
-    add_dependencies(${PROJECT_NAME} foo)
+    #add_custom_target(foo ALL DEPENDS {UV_LIB})
+    #add_dependencies(foo uvlib)
+    #add_dependencies(${PROJECT_NAME} foo)
     #set(ANDROID_LIB  psapi.lib userenv.lib iphlpapi.lib)
     target_link_libraries (${PROJECT_NAME}
-        PRIVATE ${CMAKE_THREAD_LIBS_INIT}
+       #PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${UV_LIB}
         PRIVATE ${ANDROID_LIB}
         -lstdc++

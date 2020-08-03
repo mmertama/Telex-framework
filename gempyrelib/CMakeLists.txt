@@ -58,15 +58,6 @@ if (WIN32 OR ANDROID)
             TEST_COMMAND ""
             )
 
-        externalproject_Get_Property(libuv BINARY_DIR)
-
-        add_custom_target(uv_files
-            DEPENDS libuv ${BINARY_DIR}
-            COMMAND cmake -E copy "${BINARY_DIR}/*.*" "${UV_LIB_DIR}/"
-            )
-
-        add_dependencies(${PROJECT_NAME} uv_files)
-			
         set(UV_SOURCES "${UV_DIR}/src/libuv")
         set(INCLUDES "${UV_SOURCES}/include")
 
@@ -288,10 +279,14 @@ if(WIN32)
         )
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
-    #add_custom_target(foo ALL DEPENDS {UV_LIB})
-    #add_dependencies(foo uvlib)
-    #add_dependencies(${PROJECT_NAME} foo)
-    #set(ANDROID_LIB  psapi.lib userenv.lib iphlpapi.lib)
+    externalproject_Get_Property(libuv BINARY_DIR)
+
+    add_custom_target(uv_files
+        DEPENDS libuv ${BINARY_DIR}
+        COMMAND cmake -E copy "${BINARY_DIR}/*.*" "${UV_LIB_DIR}/"
+        )
+    add_dependencies(${PROJECT_NAME} uv_files)
+
     target_link_libraries (${PROJECT_NAME}
        #PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${UV_LIB}

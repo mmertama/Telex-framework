@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 3.14)
 # locations on all platforms.
 include(GNUInstallDirs)
 include(ExternalProject)
-include(FetchContent)
+#include(FetchContent)
 include(../scripts/addResource.cmake_script)
 
 project (gempyre VERSION 0.2.0 LANGUAGES CXX C)
@@ -32,31 +32,31 @@ if (WIN32 OR ANDROID)
              set(UV_LIB "${UV_LIB_DIR}/Release/uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
         endif()
 
-        FetchContent_Declare(
-            libuv
-            GIT_REPOSITORY https://github.com/libuv/libuv.git
-            GIT_TAG v1.34.0
-        )
-
-        FetchContent_GetProperties(libuv)
-        if(NOT libuv_POPULATED)
-          FetchContent_Populate(libuv)
-          add_subdirectory(${libuv_SOURCE_DIR} ${libuv_BINARY_DIR})
-        endif()
-
-
-    #    externalproject_add(libuv
-    #        PREFIX ${UV_DIR}
+    #    FetchContent_Declare(
+    #        libuv
     #        GIT_REPOSITORY https://github.com/libuv/libuv.git
     #        GIT_TAG v1.34.0
-    #        GIT_PROGRESS true
-    #        CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
-    #        UPDATE_DISCONNECTED false
-    #        INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install
-    #        UPDATE_COMMAND ""
-    #        PATCH_COMMAND ""
-    #        TEST_COMMAND ""
-    #        )
+    #    )
+
+    #    FetchContent_GetProperties(libuv)
+    #    if(NOT libuv_POPULATED)
+    #      FetchContent_Populate(libuv)
+    #      add_subdirectory(${libuv_SOURCE_DIR} ${libuv_BINARY_DIR})
+    #    endif()
+
+
+        externalproject_add(libuv
+            PREFIX ${UV_DIR}
+            GIT_REPOSITORY https://github.com/libuv/libuv.git
+            GIT_TAG v1.34.0
+            GIT_PROGRESS true
+            CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
+            UPDATE_DISCONNECTED false
+            INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install
+            UPDATE_COMMAND ""
+            PATCH_COMMAND ""
+            TEST_COMMAND ""
+            )
 			
         set(UV_SOURCES "${UV_DIR}/src/libuv")
         set(INCLUDES "${UV_SOURCES}/include")

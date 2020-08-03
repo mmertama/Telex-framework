@@ -292,7 +292,7 @@ elseif(ANDROID)
             message(FATAL_ERROR "RANLIB is not set")
         endif()
     endif()
-    message("ranlib ${RANLIB}")
+    message("ranlib is required ${RANLIB}")
 
     add_custom_target(ranlib1
         DEPENDS libuv

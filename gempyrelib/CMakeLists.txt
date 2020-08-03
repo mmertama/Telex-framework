@@ -302,6 +302,12 @@ elseif(ANDROID)
     add_dependencies(${PROJECT_NAME} ranlib1)
 #    add_dependencies(${PROJECT_NAME} ranlib2)
 
+    add_custom_command(TARGET ${PROJECT_NAME}
+                   POST_BUILD
+                   COMMENT Running ranlib explicitly due some Android Toolchain bug  $ENV{RANLIB} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}
+                   COMMAND $ENV{RANLIB} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}
+                   )
+
     target_link_libraries (${PROJECT_NAME}
        #PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${UV_LIB}

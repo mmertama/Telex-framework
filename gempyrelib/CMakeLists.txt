@@ -61,8 +61,6 @@ if (WIN32 OR ANDROID)
         set(UV_SOURCES "${UV_DIR}/src/libuv")
         set(INCLUDES "${UV_SOURCES}/include")
 
-        add_custom_target()
-
 endif()
 
 

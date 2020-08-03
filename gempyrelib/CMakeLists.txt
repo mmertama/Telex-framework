@@ -285,27 +285,32 @@ if(WIN32)
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
 
+    if(NOT $ENV{RANLIB})
+        message(FATAL_ERROR "RANLIB is not set")
+    endif()
+
     add_custom_target(ranlib1
         DEPENDS libuv
-        COMMENT Running ranlib1 explicitly due some Android Toolchain bug
+        COMMENT "Running ranlib1 explicitly due some Android Toolchain bug"
         BYPRODUCTS ${UV_LIB}
         COMMAND $ENV{RANLIB} ${UV_LIB}
         )
 
- #   add_custom_target(ranlib2
- #       DEPENDS libsockets
- #       COMMENT Running ranlib2 explicitly due some Android Toolchain bug
- #       BYPRODUCTS ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
- #       COMMAND $ENV{RANLIB} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
- #       )
+    add_custom_target(ranlib2
+        DEPENDS libsockets
+        COMMENT "Running ranlib2 explicitly due some Android Toolchain bug"
+        BYPRODUCTS ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+        COMMAND $ENV{RANLIB} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+        )
 
     add_dependencies(${PROJECT_NAME} ranlib1)
-#    add_dependencies(${PROJECT_NAME} ranlib2)
+    add_dependencies(${PROJECT_NAME} ranlib2)
+
 
     add_custom_command(TARGET ${PROJECT_NAME}
                    POST_BUILD
-                   COMMENT Running ranlib explicitly due some Android Toolchain bug  $ENV{RANLIB} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}
-                   COMMAND $ENV{RANLIB} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}
+                   COMMENT "Running ranlib explicitly due some Android Toolchain bug  $ENV{RANLIB} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+                   COMMAND $ENV{RANLIB} "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
                    )
 
     target_link_libraries (${PROJECT_NAME}

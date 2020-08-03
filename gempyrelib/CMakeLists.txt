@@ -300,15 +300,15 @@ elseif(ANDROID)
         COMMAND ${RANLIB} ${UV_LIB}
         )
 
-    add_custom_target(ranlib2
-        DEPENDS libsockets
-        COMMENT "Running ranlib2 explicitly due some Android Toolchain bug"
-        BYPRODUCTS ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
-        COMMAND ${RANLIB} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
-        )
+    #add_custom_target(ranlib2
+    #    DEPENDS libsockets
+    #    COMMENT "Running ranlib2 explicitly due some Android Toolchain bug"
+    #    BYPRODUCTS ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+    #    COMMAND ${RANLIB} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+    #    )
 
     add_dependencies(${PROJECT_NAME} ranlib1)
-    add_dependencies(${PROJECT_NAME} ranlib2)
+   # add_dependencies(${PROJECT_NAME} ranlib2)
 
 
     add_custom_command(TARGET ${PROJECT_NAME}

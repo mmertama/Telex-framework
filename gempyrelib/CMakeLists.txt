@@ -287,7 +287,7 @@ elseif(ANDROID)
     add_custom_target(ranlib
         DEPENDS libuv
         BYPRODUCTS ${UV_LIB}
-        COMMAND ${RANLIB} ${UV_LIB}
+        COMMAND $ENV{RANLIB} ${UV_LIB}
         )
     add_dependencies(${PROJECT_NAME} ranlib)
 

@@ -50,6 +50,7 @@ if (WIN32 OR ANDROID)
             GIT_REPOSITORY https://github.com/libuv/libuv.git
             GIT_TAG v1.34.0
             GIT_PROGRESS true
+            BUILD_BYPRODUCTS ${UV_LIB}
             CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
             UPDATE_DISCONNECTED false
             INSTALL_COMMAND  ${CMAKE_COMMAND} --build . --target install
@@ -234,8 +235,6 @@ include_directories(
 if(WIN32 OR ANDROID)
     FILE(GLOB_RECURSE SOCKETS_SRC "${SOCKETS_SOURCES}/src/*.c") # its using plain Makefile so just add files IS easier
     FILE(GLOB_RECURSE SOCKETS_HRD "${SOCKETS_SOURCES}/src/*.h") # its using plain Makefile so just add files IS easier
-
-
     add_library("${PROJECT_NAME}"
         ${SOCKETS_SRC}
         ${SOCKETS_HRD}
@@ -279,13 +278,14 @@ if(WIN32)
         )
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
-    externalproject_Get_Property(libuv BINARY_DIR)
-
-    add_custom_target(uv_files
-        DEPENDS libuv ${BINARY_DIR}
-        COMMAND cmake -E copy "${BINARY_DIR}/*.*" "${UV_LIB_DIR}/"
-        )
-    add_dependencies(${PROJECT_NAME} uv_files)
+#    externalproject_Get_Property(libuv BINARY_DIR)
+#
+#    add_custom_target(uv_files
+#        DEPENDS libuv ${BINARY_DIR}
+#        COMMAND cmake -E copy "${BINARY_DIR}/*.*" "${UV_LIB_DIR}/"
+#        )
+#    add_dependencies(${PROJECT_NAME} uv_files)
+#    add_dependencies(${PROJECT_NAME} libuv)
 
     target_link_libraries (${PROJECT_NAME}
        #PRIVATE ${CMAKE_THREAD_LIBS_INIT}
@@ -297,7 +297,7 @@ else()
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
 #    PRIVATE nlohmann_json::nlohmann_json #this wont work properly with find_package as it assumes the lib is somewhere
-    PRIVATE ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+        PRIVATE ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
         -lstdc++)
 endif()
 

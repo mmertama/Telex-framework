@@ -55,7 +55,7 @@ if (WIN32 OR ANDROID)
             GIT_REPOSITORY https://github.com/libuv/libuv.git
             GIT_TAG v1.34.0
             GIT_PROGRESS true
-            BUILD_BYPRODUCTS ${UV_LIB}
+            #BUILD_BYPRODUCTS ${UV_LIB}
             CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
             UPDATE_DISCONNECTED false
             INSTALL_COMMAND  ${CMAKE_COMMAND} --build . --target install

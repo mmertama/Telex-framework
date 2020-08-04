@@ -55,7 +55,7 @@ if (WIN32 OR ANDROID)
             GIT_REPOSITORY https://github.com/libuv/libuv.git
             GIT_TAG v1.34.0
             GIT_PROGRESS true
-            #BUILD_BYPRODUCTS ${UV_LIB}
+            BUILD_BYPRODUCTS ${UV_LIB}
             CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
             UPDATE_DISCONNECTED false
             INSTALL_COMMAND  ${CMAKE_COMMAND} --build . --target install
@@ -285,21 +285,21 @@ if(WIN32)
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
 
-    if(NOT EXISTS ${RANLIB})
-        if(EXISTS $ENV{RANLIB})
-            set(${RANLIB} $ENV{RANLIB})
-        else()
-            message(FATAL_ERROR "RANLIB is not set")
-        endif()
-    endif()
-    message("ranlib is required ${RANLIB}")
+   # if(NOT EXISTS ${RANLIB})
+   #     if(EXISTS $ENV{RANLIB})
+   #         set(${RANLIB} $ENV{RANLIB})
+   #     else()
+   #         message(FATAL_ERROR "RANLIB is not set")
+   #     endif()
+   # endif()
+   # message("ranlib is required ${RANLIB}")
 
-    add_custom_target(ranlib1
-        DEPENDS libuv
-        COMMENT "Running ranlib1 explicitly due some Android Toolchain bug on ${UV_LIB}"
-        BYPRODUCTS ${UV_LIB}
-        COMMAND echo "run ranlib" && ${RANLIB} ${UV_LIB}
-        )
+   # add_custom_target(ranlib1
+   #     DEPENDS libuv
+   #     COMMENT "Running ranlib1 explicitly due some Android Toolchain bug on ${UV_LIB}"
+   #     BYPRODUCTS ${UV_LIB}
+   #     COMMAND echo "run ranlib" && ${RANLIB} ${UV_LIB}
+   #     )
 
     #add_custom_target(ranlib2
     #    DEPENDS libsockets
@@ -308,15 +308,15 @@ elseif(ANDROID)
     #    COMMAND ${RANLIB} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
     #    )
 
-    add_dependencies(${PROJECT_NAME} ranlib1)
+   # add_dependencies(${PROJECT_NAME} ranlib1)
    # add_dependencies(${PROJECT_NAME} ranlib2)
 
 
-    add_custom_command(TARGET ${PROJECT_NAME}
-                   POST_BUILD
-                   COMMENT "Running ranlib explicitly due some Android Toolchain bugon {CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                   COMMAND echo "run ranlib again" && ${RANLIB} "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                   )
+    #add_custom_command(TARGET ${PROJECT_NAME}
+    #               POST_BUILD
+    #               COMMENT "Running ranlib explicitly due some Android Toolchain bugon {CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+     #              COMMAND echo "run ranlib again" && ${RANLIB} "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+     #              )
 
     target_link_libraries (${PROJECT_NAME}
        #PRIVATE ${CMAKE_THREAD_LIBS_INIT}

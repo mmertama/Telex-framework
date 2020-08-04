@@ -18,7 +18,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     
 int androidLoadUi(const std::string& url) {
     if(nullptr == Androidenv || nullptr == Androidobj) {
-        log(LogLevel::Fatal, "setJNIENV not called");
+        GempyreUtils::log(GempyreUtils::LogLevel::Fatal, "setJNIENV not called");
         return 0;
     }
     jstring urlString = Androidenv->NewStringUTF(url.c_str());

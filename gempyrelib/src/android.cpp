@@ -17,11 +17,8 @@ Java_com_gempyre_myapp_MainActivity_callMain
     return main(0, nullptr);
 }
 
-JNIEXPORT jint JNICALL
-JNI_OnLoad_gempyre(JavaVM* vm, void*) {
-    const auto ver = JNI_VERSION_1_8;
-    printf("Gempyre loads on JNI VERSION %d", ver);
-    return ver;
+JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+    return JNI_VERSION_1_6;
 }
     
 int androidLoadUi(const std::string& url) {

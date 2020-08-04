@@ -252,7 +252,7 @@ if(ANDROID)
     #openssl is not there
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DLIBUS_NO_SSL")
     list(REMOVE_ITEM SOCKETS_SRC "${SOCKETS_SOURCES}/src/ssl.c")
-    add_library(${PROJECT_NAME} SHARED
+    add_library(${PROJECT_NAME}
         ${SOCKETS_SRC}
         ${SOCKETS_HRD}
         ${GEMPYRE_SRC}
@@ -284,7 +284,7 @@ if (WIN32 OR ANDROID)
     #add_dependencies(libsockets libuv)
     add_dependencies(${PROJECT_NAME} libuv)
 else()
-	add_dependencies(libwebsockets libsockets)
+    add_dependencies(libwebsockets libsockets)
     add_dependencies(${PROJECT_NAME} makecmd)
 endif()
 

@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <string>
+#include <stdio.h>
 
 JNIEnv* Androidenv;
 jobject Androidobj;
@@ -17,8 +18,10 @@ Java_com_gempyre_myapp_MainActivity_callMain
 }
 
 JNIEXPORT jint JNICALL
-JNI_OnLoad_gempyre(JavaVM*, void*) {
-    return JNI_VERSION_1_8;
+JNI_OnLoad_gempyre(JavaVM* vm, void*) {
+    const auto ver = version(vm);
+    printf("Gempyre loads on JNI VERSION %d", ver);
+    return ver;
 }
     
 int androidLoadUi(const std::string& url) {

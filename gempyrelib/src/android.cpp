@@ -19,7 +19,7 @@ Java_com_gempyre_myapp_MainActivity_callMain
 
 JNIEXPORT jint JNICALL
 JNI_OnLoad_gempyre(JavaVM* vm, void*) {
-    const auto ver = version(vm);
+    const auto ver = GetVersion(vm);
     printf("Gempyre loads on JNI VERSION %d", ver);
     return ver;
 }

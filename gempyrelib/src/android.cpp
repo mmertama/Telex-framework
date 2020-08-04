@@ -6,15 +6,10 @@ JNIEnv* Androidenv;
 jobject Androidobj;
 
 
-extern int main(int, char**);
-
-
 JNIEXPORT jint JNICALL
-Java_com_gempyre_myapp_MainActivity_callMain
-(JNIEnv* env, jobject obj) {
+Java_com_gempyre_myapp_MainActivity_registerJNI(JNIEnv* env, jobject obj) {
     Androidenv = env;
     Androidobj = obj;
-    return main(0, nullptr);
 }
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {

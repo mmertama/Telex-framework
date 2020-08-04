@@ -114,10 +114,8 @@ void CanvasElement::draw(const CanvasElement::CommandList &canvasCommands) {
     std::transform(canvasCommands.begin(), canvasCommands.end(), std::back_inserter(commandString), [](auto&& arg) -> std::string {
          if(const auto doubleval = std::get_if<double>(&arg))
             return std::to_string(*doubleval);
-#ifdef ANDROID_OS
          if(const auto intval = std::get_if<int>(&arg))
             return std::to_string(*intval);
-#endif
          return std::get<std::string>(arg);
     });
     send("canvas_draw", std::unordered_map<std::string, std::any>{{"commands", commandString}});

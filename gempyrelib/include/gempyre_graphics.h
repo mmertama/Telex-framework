@@ -31,7 +31,7 @@
     #endif
 #endif
 
-#define gempyre_graphics_assert(b, x) (b || GempyreUtils::doFatal(x, nullptr, __FILE__, __LINE__));
+#define gempyre_graphics_assert(b, x) ((b) || GempyreUtils::doFatal(x, nullptr, __FILE__, __LINE__));
 
 /**
  * @namespace Gempyre
@@ -106,11 +106,7 @@ class GEMPYRE_EX CanvasElement : public Element {
     static constexpr auto TileWidth = 64;  // used for server spesific stuff - bigger than a limit (16384) causes random crashes (There is a issue somewhere, this not really work if something else)
     static constexpr auto TileHeight = 63; // as there are some header info
 public:
-    #ifndef ANDROID_OS
-        using Command = std::variant<std::string, double>;
-    #else
-        using Command = std::variant<std::string, double, int>;
-    #endif
+    using Command = std::variant<std::string, double, int>;   
     using CommandList = std::vector<Command>;
     ~CanvasElement();
     /**

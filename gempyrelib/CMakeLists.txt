@@ -104,18 +104,19 @@ externalproject_add(libsockets
     )
 
 set(SOCKETS_LIB_NAME uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
+set(SOCKETS_LIB ${SOCKETS_DIR}/${SOCKETS_LIB_NAME})
 #set(SOCKETS_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
 
 if(WIN32)
     message("Not needed....")
 else()
     add_custom_command(
-        OUTPUT ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
-        COMMAND make && mv ${SOCKETS_LIB_NAME} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+        OUTPUT ${SOCKETS_LIB}
+        COMMAND make && mv ${SOCKETS_LIB_NAME} ${SOCKETS_LIB}
         WORKING_DIRECTORY ${SOCKETS_SOURCES}
         DEPENDS libsockets
     )
-    add_custom_target(makecmd DEPENDS ${SOCKETS_DIR}/${SOCKETS_LIB_NAME})
+    add_custom_target(makecmd DEPENDS ${SOCKETS_LIB})
 endif()
 
 
@@ -304,8 +305,8 @@ elseif(ANDROID)
     #add_custom_target(ranlib2
     #    DEPENDS libsockets
     #    COMMENT "Running ranlib2 explicitly due some Android Toolchain bug"
-    #    BYPRODUCTS ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
-    #    COMMAND ${RANLIB} ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+    #    BYPRODUCTS ${SOCKETS_LIB}
+    #    COMMAND ${RANLIB} ${SOCKETS_LIB}
     #    )
 
    # add_dependencies(${PROJECT_NAME} ranlib1)
@@ -321,14 +322,14 @@ elseif(ANDROID)
     target_link_libraries (${PROJECT_NAME}
        #PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${UV_LIB}
-        PRIVATE ${ANDROID_LIB}
+        PRIVATE ${SOCKETS_LIB}
+        #PRIVATE ${ANDROID_LIB}
         -lstdc++
         )
 else()
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
-#    PRIVATE nlohmann_json::nlohmann_json #this wont work properly with find_package as it assumes the lib is somewhere
-        PRIVATE ${SOCKETS_DIR}/${SOCKETS_LIB_NAME}
+        PRIVATE ${SOCKETS_LIB}
         -lstdc++)
 endif()
 

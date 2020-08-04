@@ -58,6 +58,13 @@ void Gempyre::setDebug(Gempyre::DebugLevel level) {
     GempyreUtils::setLogLevel(lvl.at(level), false);
 }
 
+
+#ifndef ANDROID_OS
+void Gempyre::setJNIENV(void*, void*) {
+    GempyreUtils::log(GempyreUtils::LogLevel::Fatal, "setJNIENV should not be called within current OS");
+}
+#endif
+
 #define STR(x) #x
 #define TOSTRING(x) STR(x)
 
@@ -671,5 +678,6 @@ bool Ui::addFile(const std::string& url, const std::string& file) {
     m_filemap.insert_or_assign(url, std::move(string));
     return true;
 }
+
 
 

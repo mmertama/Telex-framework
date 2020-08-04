@@ -83,10 +83,7 @@ namespace Gempyre {
      * Enable debug outputs
      */
     GEMPYRE_EX void setDebug(DebugLevel level = DebugLevel::Debug);
-
-#ifdef ANDROID_OS
     GEMPYRE_EX void setJNIENV(void* env, void* obj);
-#endif
 
     /**
      * @function version

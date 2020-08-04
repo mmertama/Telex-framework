@@ -107,10 +107,11 @@ class GEMPYRE_EX CanvasElement : public Element {
     static constexpr auto TileHeight = 63; // as there are some header info
 public:
     #ifndef ANDROID_OS
-        using CommandList = std::vector<std::variant<std::string, double>>;
+        using Command = std::variant<std::string, double>;
     #else
-        using CommandList = std::vector<std::variant<std::string, double, int>>;
+        using Command = std::variant<std::string, double, int>;
     #endif
+    using CommandList = std::vector<Command>;
     ~CanvasElement();
     /**
      * @function CanvasElement

@@ -239,10 +239,15 @@ endif()
 include_directories(
         ${INCLUDES}
         )
+        
 
 if(WIN32 OR ANDROID)
     FILE(GLOB_RECURSE SOCKETS_SRC "${SOCKETS_SOURCES}/src/*.c") # its using plain Makefile so just add files IS easier
     FILE(GLOB_RECURSE SOCKETS_HRD "${SOCKETS_SOURCES}/src/*.h") # its using plain Makefile so just add files IS easier
+    if(ANDROID) #openssl is not there
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DLIBUS_NO_SSL")
+        list(REMOVE_ITEM SOCKETS_SRC "${SOCKETS_SOURCES}/src/ssl.c")
+    endif()
     add_library("${PROJECT_NAME}"
         ${SOCKETS_SRC}
         ${SOCKETS_HRD}

@@ -70,3 +70,4 @@ affiliates/client/client
 test/drawcanvas/drawcanvastest
 test/drawcanvas/drawcanvastest
 _deps
+*.cbp

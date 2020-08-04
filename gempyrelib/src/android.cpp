@@ -13,7 +13,7 @@ JNIEXPORT jint JNICALL Java_MainActivity_CallMain(JNIEnv* env, jobject obj) {
     return main(0, nullptr);
 }
     
-int androidStart(const std::string& url) {
+int androidLoadUi(const std::string& url) {
     jstring urlString = Androidenv->NewStringUTF(url.c_str());
     jclass cls = Androidenv->GetObjectClass(Androidobj);
     jmethodID methodId = Androidenv->GetMethodID(cls, "onLoad", "([Ljava/lang/String;)I");

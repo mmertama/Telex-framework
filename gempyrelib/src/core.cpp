@@ -39,7 +39,7 @@ const std::string DefaultBrowser =
         ;
 
 #ifdef ANDROID_OS
-extern int android_start(const std::string&);
+extern int androidLoadUi(const std::string&);
 #endif
 
 #define CHECK_FATAL(x) if(ec) {error(ec, merge(x, " at ", __LINE__)); return;}  std::cout << x << " - ok" << std::endl;
@@ -227,7 +227,7 @@ Ui::Ui(const Filemap& filemap, const std::string& indexHtml, const std::string& 
 #ifndef ANDROID_OS
                     std::system((cmdLine + "&").c_str() );
 #else
-                    android_start(cmdLine);
+                    androidLoadUi(cmdLine);
 #endif
                     if(result != 0) {
                         GempyreUtils::log(GempyreUtils::LogLevel::Fatal,"Cannot open:", cmdLine);

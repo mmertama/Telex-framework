@@ -74,7 +74,6 @@ externalproject_add(libjson
 
 set(SOCKETS_NAME "uSockets")
 set(SOCKETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/uNetworking/${SOCKETS_NAME}")
-set(SOCKETS_SOURCES "${SOCKETS_DIR}/src/libsockets")
 
 if(WIN32 OR ANDROID)
     # Sources are just globbed in the project, see later
@@ -88,8 +87,10 @@ if(WIN32 OR ANDROID)
     if(NOT libsockets_POPULATED)
         FetchContent_Populate(libsockets)
     endif()
+	set(SOCKETS_SOURCES "${libsockets_SOURCE_DIR}")
 
 else()
+	set(SOCKETS_SOURCES "${SOCKETS_DIR}/src/libsockets")
     externalproject_add(libsockets
         PREFIX ${SOCKETS_DIR}
         GIT_REPOSITORY https://github.com/uNetworking/uSockets.git

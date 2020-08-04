@@ -106,7 +106,16 @@ class GEMPYRE_EX CanvasElement : public Element {
     static constexpr auto TileWidth = 64;  // used for server spesific stuff - bigger than a limit (16384) causes random crashes (There is a issue somewhere, this not really work if something else)
     static constexpr auto TileHeight = 63; // as there are some header info
 public:
+    #ifndef ANDROID_OS
     using CommandList = std::vector<std::variant<std::string, double>>;
+    #else
+        class CommandList : public std::vector<std::variant<std::string, double>> {
+            public:
+                void insert(CommandList::const_iterator it, const std::initializer_list<std::variant<std::string, double>>& lst) {
+                    std::vector<std::variant<std::string, double>>::insert(it, lst);
+                }
+        }
+    #endif
     ~CanvasElement();
     /**
      * @function CanvasElement

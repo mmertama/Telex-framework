@@ -26,12 +26,13 @@ if (WIN32 OR ANDROID)
         set(UV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/libuv")
         set(UV_LIB_DIR "${UV_DIR}/src/libuv-build")
 		
-        if (MSCV)
+        if (MSVC)
             if(CMAKE_BUILD_TYPE STREQUAL "Debug") #these actally pretty same, change if debug is needed.
                  set(UV_LIB "${UV_LIB_DIR}/Debug/uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
             else()
                  set(UV_LIB "${UV_LIB_DIR}/Release/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
             endif()
+			message("MSVC builds artifacts upon release type")
          else()
              set(UV_LIB "${UV_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
          endif()
@@ -85,7 +86,7 @@ if(WIN32 OR ANDROID)
     
     FetchContent_GetProperties(libsockets)
     if(NOT libsockets_POPULATED)
-        FetchContent_Populate(googletest)
+        FetchContent_Populate(libsockets)
     endif()
 
 else()
@@ -134,7 +135,7 @@ externalproject_add(libwebsockets
     TEST_COMMAND ""
     )
 set(WEBSOCKETS_SOURCES "${WEBSOCKETS_DIR}/src/libwebsockets")
-add_dependencies(libwebsockets libsockets)
+
 
 find_path(ZLIB_H zlib.h PATHS
     ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
@@ -260,14 +261,14 @@ endif()
 
 addResource(PROJECT ${PROJECT_NAME} ${JSMIN} TARGET src/generated/gempyre.js.h SOURCES js/gempyre.js)
 
-add_dependencies(${PROJECT_NAME} libsockets)
 add_dependencies(${PROJECT_NAME} libwebsockets)
 add_dependencies(${PROJECT_NAME} libjson)
 
 if (WIN32 OR ANDROID)
-    add_dependencies(libsockets libuv)
+    #add_dependencies(libsockets libuv)
     add_dependencies(${PROJECT_NAME} libuv)
 else()
+	add_dependencies(libwebsockets libsockets)
     add_dependencies(${PROJECT_NAME} makecmd)
 endif()
 

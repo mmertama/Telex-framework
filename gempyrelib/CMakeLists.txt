@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 3.14)
 # locations on all platforms.
 include(GNUInstallDirs)
 include(ExternalProject)
-#include(FetchContent)
+include(FetchContent)
 include(../scripts/addResource.cmake_script)
 
 project (gempyre VERSION 0.2.0 LANGUAGES CXX C)
@@ -36,20 +36,6 @@ if (WIN32 OR ANDROID)
              set(UV_LIB "${UV_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
          endif()
 
-
-    #    FetchContent_Declare(
-    #        libuv
-    #        GIT_REPOSITORY https://github.com/libuv/libuv.git
-    #        GIT_TAG v1.34.0
-    #    )
-
-    #    FetchContent_GetProperties(libuv)
-    #    if(NOT libuv_POPULATED)
-    #      FetchContent_Populate(libuv)
-    #      add_subdirectory(${libuv_SOURCE_DIR} ${libuv_BINARY_DIR})
-    #    endif()
-
-
         externalproject_add(libuv
             PREFIX ${UV_DIR}
             GIT_REPOSITORY https://github.com/libuv/libuv.git
@@ -66,7 +52,6 @@ if (WIN32 OR ANDROID)
 
         set(UV_SOURCES "${UV_DIR}/src/libuv")
         set(INCLUDES "${UV_SOURCES}/include")
-
 endif()
 
 
@@ -89,27 +74,40 @@ externalproject_add(libjson
 set(SOCKETS_NAME "uSockets")
 set(SOCKETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/uNetworking/${SOCKETS_NAME}")
 set(SOCKETS_SOURCES "${SOCKETS_DIR}/src/libsockets")
-externalproject_add(libsockets
-    PREFIX ${SOCKETS_DIR}
-    GIT_REPOSITORY https://github.com/uNetworking/uSockets.git
-    GIT_TAG v0.3.2
-    GIT_PROGRESS true
-    UPDATE_DISCONNECTED false
-    BUILD_COMMAND  "" #make ${SOCKETS_SOURCES}/Makefile
-    CONFIGURE_COMMAND ""
-    INSTALL_COMMAND ""
-    UPDATE_COMMAND ""
-    PATCH_COMMAND ""
-    TEST_COMMAND ""
+
+if(WIN32 OR ANDROID)
+    # Sources are just globbed in the project, see later
+    FetchContent_Declare(
+      libsockets
+      GIT_REPOSITORY https://github.com/uNetworking/uSockets.git
+      GIT_TAG v0.3.2
     )
+    
+    FetchContent_GetProperties(libsockets)
+    if(NOT libsockets_POPULATED)
+        FetchContent_Populate(googletest)
+    endif()
 
-set(SOCKETS_LIB_NAME uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
-set(SOCKETS_LIB ${SOCKETS_DIR}/${SOCKETS_LIB_NAME})
-#set(SOCKETS_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
-
-if(WIN32)
-    message("Not needed....")
 else()
+    externalproject_add(libsockets
+        PREFIX ${SOCKETS_DIR}
+        GIT_REPOSITORY https://github.com/uNetworking/uSockets.git
+        GIT_TAG v0.3.2
+        GIT_PROGRESS true
+        UPDATE_DISCONNECTED false
+        BUILD_COMMAND  "" #make ${SOCKETS_SOURCES}/Makefile
+        CONFIGURE_COMMAND ""
+        INSTALL_COMMAND ""
+        UPDATE_COMMAND ""
+        PATCH_COMMAND ""
+        TEST_COMMAND ""
+        )
+
+    set(SOCKETS_LIB_NAME uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
+    set(SOCKETS_LIB ${SOCKETS_DIR}/${SOCKETS_LIB_NAME})
+    #set(SOCKETS_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
+
+
     add_custom_command(
         OUTPUT ${SOCKETS_LIB}
         COMMAND make && mv ${SOCKETS_LIB_NAME} ${SOCKETS_LIB}
@@ -285,45 +283,8 @@ if(WIN32)
         )
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
-
-   # if(NOT EXISTS ${RANLIB})
-   #     if(EXISTS $ENV{RANLIB})
-   #         set(${RANLIB} $ENV{RANLIB})
-   #     else()
-   #         message(FATAL_ERROR "RANLIB is not set")
-   #     endif()
-   # endif()
-   # message("ranlib is required ${RANLIB}")
-
-   # add_custom_target(ranlib1
-   #     DEPENDS libuv
-   #     COMMENT "Running ranlib1 explicitly due some Android Toolchain bug on ${UV_LIB}"
-   #     BYPRODUCTS ${UV_LIB}
-   #     COMMAND echo "run ranlib" && ${RANLIB} ${UV_LIB}
-   #     )
-
-    #add_custom_target(ranlib2
-    #    DEPENDS libsockets
-    #    COMMENT "Running ranlib2 explicitly due some Android Toolchain bug"
-    #    BYPRODUCTS ${SOCKETS_LIB}
-    #    COMMAND ${RANLIB} ${SOCKETS_LIB}
-    #    )
-
-   # add_dependencies(${PROJECT_NAME} ranlib1)
-   # add_dependencies(${PROJECT_NAME} ranlib2)
-
-
-    #add_custom_command(TARGET ${PROJECT_NAME}
-    #               POST_BUILD
-    #               COMMENT "Running ranlib explicitly due some Android Toolchain bugon {CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-     #              COMMAND echo "run ranlib again" && ${RANLIB} "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${PROJECT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-     #              )
-
     target_link_libraries (${PROJECT_NAME}
-       #PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${UV_LIB}
-        PRIVATE ${SOCKETS_LIB}
-        #PRIVATE ${ANDROID_LIB}
         -lstdc++
         )
 else()

@@ -9,7 +9,7 @@ jobject Androidobj;
 
 void Gempyre::setJNIENV(void* env, void* obj) {
     Androidenv = static_cast<JNIEnv*>(env);
-    Androidobj = static::cast<jobject>(obj);
+    Androidobj = static_cast<jobject>(obj);
 }
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {

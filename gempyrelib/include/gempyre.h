@@ -81,8 +81,10 @@ namespace Gempyre {
     /**
      * @function setDebug
      * Enable debug outputs
+     * @param level
+     * @param useLog
      */
-    GEMPYRE_EX void setDebug(DebugLevel level = DebugLevel::Debug);
+    GEMPYRE_EX void setDebug(DebugLevel level = DebugLevel::Debug, bool useLog = false);
     GEMPYRE_EX void setJNIENV(void* env, void* obj);
 
     /**

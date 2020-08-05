@@ -446,7 +446,9 @@ inline void log(LogLevel level, const T& e) {
     } else {
         if(level <= logLevel()) {
             logStream(level).print() << '[' << GempyreUtils::currentTimeString() << "] " << toStr(level) << " " << e << std::endl;
-            if(level == LogLevel::Fatal) std::abort();
+            if(level == LogLevel::Fatal)  {
+                std::exit(-999);
+            }
         }
     }
 }
@@ -462,7 +464,9 @@ template<typename T>
 inline void log_t(LogLevel level, const T& e) {
     if(level <= logLevel()) {
         logStream(level).print() << e << std::endl;
-        if(level == LogLevel::Fatal) std::abort();
+        if(level == LogLevel::Fatal) {
+            std::exit(-999);
+        }
     }
 }
 

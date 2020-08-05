@@ -83,7 +83,7 @@ private:
 };
 
 
-static std::unique_ptr<SysLogStream<4096>> gSysLogStream;
+static std::unique_ptr<SysLogStream<1024>> gSysLogStream;
 #endif
 
 static GempyreUtils::LogLevel g_serverLogLevel = GempyreUtils::LogLevel::

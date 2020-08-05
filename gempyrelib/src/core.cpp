@@ -224,7 +224,9 @@ Ui::Ui(const Filemap& filemap, const std::string& indexHtml, const std::string& 
                     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Listening, Status change --> Running");
                     m_status = State::RUNNING;
                     const auto appPage = GempyreUtils::split<std::vector<std::string>>(indexHtml, '/').back();
+#ifndef ANDROID_OS
                     gempyre_utils_assert_x(!browser.empty() || !DefaultBrowser.empty(), "I have no idea what browser should be spawned, please use other constructor");
+#endif
                     const auto cmdLine = (browser.empty() ? DefaultBrowser : browser)
                             + " " + SERVER_ADDRESS + ":"
                             + std::to_string(port) + "/"

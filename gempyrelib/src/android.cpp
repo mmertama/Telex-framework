@@ -8,7 +8,7 @@ static JavaVM* Androidjvm = nullptr;
 static jobject AndroidActivity;
 
 void Gempyre::setJNIENV(void* env, void* obj) {
-    Androidjvm = static_cast<JNIEnv*>(env)->GetJavaVM(&Androidjvm);
+    static_cast<JNIEnv*>(env)->GetJavaVM(&Androidjvm);
     AndroidActivity = static_cast<JNIEnv*>(env)->NewGlobalRef(static_cast<jobject>(obj));
 }
 

@@ -28,7 +28,7 @@ int androidLoadUi(const std::string& url) {
         return -97;
     }
     jstring urlString = env->NewStringUTF(url.c_str());
-    jclass cls = env->GetObjectClass(Androidobj);
+    jclass cls = env->GetObjectClass(AndroidActivity);
     jmethodID methodId = env->GetMethodID(cls, "onUiLoad", "(Ljava/lang/String;)I");
     if (methodId == 0) {
         GempyreUtils::log(GempyreUtils::LogLevel::Fatal, "onUiLoad not found");

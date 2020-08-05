@@ -425,6 +425,7 @@ UTILS_EX std::string toStr(LogLevel l);
 UTILS_EX DebugStream logStream(LogLevel logLevel);
 UTILS_EX void init();
 UTILS_EX std::string currentTimeString();
+UTILS_EX std::string lastError();
 
 template <typename T, typename ...Args>
 inline void log(LogLevel level, const T& e, Args... args) {

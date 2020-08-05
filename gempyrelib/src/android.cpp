@@ -35,5 +35,5 @@ int androidLoadUi(const std::string& url) {
         return -99;
     }
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "onUiLoad called", url);
-    return Androidenv->CallIntMethod(Androidobj, methodId, urlString);
+    return Androidenv->CallIntMethod(AndroidActivity, methodId, urlString);
 }

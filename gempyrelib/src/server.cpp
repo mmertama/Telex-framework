@@ -313,7 +313,7 @@ std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
                 GempyreUtils::log(GempyreUtils::LogLevel::Error, "listening on port:", port, "failed", GempyreUtils::lastError());
                 m_onClose(Close::EXIT, -1);
             } else {
-                GempyreUtils::log(GempyreUtils::LogLevel::Warning, "listening on port:", m_port, "failed");
+                GempyreUtils::log(GempyreUtils::LogLevel::Warning, "try listen on port:", m_port, "failed", GempyreUtils::lastError());
                 m_onClose(Close::FAIL, -1);
             }
             }).run();

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.16)
 set(NAME tests)
 project (${NAME})
 add_subdirectory(eval)
@@ -7,5 +7,6 @@ add_subdirectory(tick)
 add_subdirectory(unittests)
 add_subdirectory(imageblit)
 add_subdirectory(drawcanvas)
-add_subdirectory(audio
-)
+add_subdirectory(audio)
+add_subdirectory(snowflakes)
+

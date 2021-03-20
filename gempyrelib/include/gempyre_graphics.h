@@ -37,7 +37,6 @@ namespace  Gempyre {
 
 class FrameComposer;
 
-
 class GEMPYRE_EX CanvasData : public Data {
 private:
     enum DataTypes : dataT {

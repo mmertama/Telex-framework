@@ -180,6 +180,13 @@ Container split(const std::string& str, const char splitChar = ' ') {
 }
 
 
+template <typename IT>
+inline constexpr std::string_view make_string_view(IT begin, IT end)
+{
+    return   (begin == end) ? std::string_view{nullptr} : std::string_view{&*begin, std::distance(begin, end)};
+}
+
+
 template <class T, typename K = typename T::key_type>
 std::vector<K> keys(const T& map) {
     std::vector<K> ks; ks.resize(map.size());
@@ -187,39 +194,16 @@ std::vector<K> keys(const T& map) {
     return ks;
 }
 
-template <class IT, typename J=typename IT::value_type, typename K=typename IT::value_type>
+template <class IT, typename In=typename IT::value_type, typename Out=typename IT::value_type>
 std::string join(const IT& begin,
                  const IT& end,
                  const std::string joinChar = "",
-                 const std::function<J (const K&)>& f = [](const K& k)->J{return k;}) {
+                 const std::function<Out (const In&)>& f = [](const In& k)->Out{return k;}) {
     std::string s;
     std::ostringstream iss(s);
     if(begin != end) {
         for(auto it = begin;;) {
             iss << f(*it);
-            if(++it == end) break;
-            if(!joinChar.empty())
-                iss << joinChar;
-        }
-    }
-    return iss.str();
-}
-
-template <class T, typename J=typename T::value_type, typename K=typename T::value_type>
-std::string join(const T& t,
-                 const std::string joinChar = "",
-                 const std::function<J (const K&)>& f = [](const K& k)->J{return k;}) {
-    return join(t.begin(), t.end(), joinChar, f);
-}
-
-
-template <class IT>
-std::string joinPairs(const IT& begin, const IT& end, const std::string& startChar = "{", const std::string& endChar = "}", const std::string& divChar = ":" , const std::string& joinChar = "" ) {
-    std::string s;
-    std::ostringstream iss(s);
-    if(begin != end) {
-        for(auto it = begin;;) {
-            iss << startChar << (*it).first << divChar << (*it).second << endChar;
             if(!(++it != end)) break;
             if(!joinChar.empty())
                 iss << joinChar;
@@ -228,10 +212,13 @@ std::string joinPairs(const IT& begin, const IT& end, const std::string& startCh
     return iss.str();
 }
 
-template <class T>
-std::string joinPairs(const T& obj, const std::string& startChar = "{", const std::string endChar = "}", const std::string& divChar = ":" , const std::string& joinChar = "" ) {
-    return joinPairs(obj.begin(), obj.end(), startChar, endChar, divChar, joinChar);
+template <class T, typename In=typename T::value_type, typename Out=typename T::value_type>
+std::string join(const T& t,
+                 const std::string joinChar = "",
+                 const std::function<Out (const In&)>& f = [](const In& v)->Out{return v;}) {
+    return join(t.begin(), t.end(), joinChar, f);
 }
+
 
 template <class T>
 T merge(const T& b1, const T& b2) {

@@ -37,7 +37,6 @@ public:
     bool isRunning() const {return m_server && m_server->joinable();}
     bool isConnected() const;
     bool retryStart();
-    bool hasRoom(size_t sz) const;
     void close(bool wait = false);
    // void send(const std::unordered_map<std::string, std::string>& object);
     bool send(const std::unordered_map<std::string, std::string>& object, const std::any& values = std::any());
@@ -70,7 +69,6 @@ private:
     bool m_uiready = false;
     mutable int m_queryId = 0;
     std::unique_ptr<Batch> m_batch;
-    size_t m_payloadSize = 0;
 };
 }
 

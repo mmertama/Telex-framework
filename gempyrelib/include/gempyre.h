@@ -100,6 +100,7 @@ namespace Gempyre {
         void send(const DataPtr& data);
         void send(const std::string& type, const std::any& data);
         static const std::string generateId(const std::string& prefix);
+        size_t payloadSize() const;
     protected:
         Ui* m_ui;
         std::string m_id;

@@ -111,13 +111,24 @@ void CanvasElement::draw(const CanvasElement::CommandList &canvasCommands) {
     if(canvasCommands.empty())
         return;
     std::vector<std::string> commandString;
-    std::transform(canvasCommands.begin(), canvasCommands.end(), std::back_inserter(commandString), [](auto&& arg) -> std::string {
+    /*std::transform(canvasCommands.begin(), canvasCommands.end(), std::back_inserter(commandString), [](auto&& arg) -> std::string {
          if(const auto doubleval = std::get_if<double>(&arg))
             return std::to_string(*doubleval);
          if(const auto intval = std::get_if<int>(&arg))
             return std::to_string(*intval);
          return std::get<std::string>(arg);
-    });
+    });*/
+    const auto str = [](auto&& arg) -> std::string {
+            if(const auto doubleval = std::get_if<double>(&arg))
+               return std::to_string(*doubleval);
+            if(const auto intval = std::get_if<int>(&arg))
+               return std::to_string(*intval);
+            return std::get<std::string>(arg);
+       };
+    for(auto&& cmd : canvasCommands)  {
+        auto s = str(cmd);
+        commandString.emplace_back(s);
+    }
     send("canvas_draw", std::unordered_map<std::string, std::any>{{"commands", commandString}});
 }
 

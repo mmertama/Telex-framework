@@ -136,7 +136,7 @@ private:
 
 class Gempyre::Broadcaster {
 public:
-    bool send(const std::string& text) {
+    bool send(const std::string_view& text) {
         for(auto& s : m_sockets) {
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "socket txt buffer", s->getBufferedAmount());
             s->send(text, uWS::OpCode::TEXT);
@@ -168,9 +168,11 @@ public:
         return m_sockets.size();
     }
     size_t bufferSize() const {
-        auto max = 0;
-        std::for_each(m_sockets.begin(), m_sockets.end(),[&max](const auto& a){max = std::max(max, a->getBufferedAmount());});
-        return static_cast<size_t>(max);
+        auto min = 0;
+        for(const auto& s : m_sockets) {
+            min = std::min(min, s->getBufferedAmount());
+        }
+        return static_cast<size_t>(min);
     }
 private:
     std::unordered_set<WSSocket*> m_sockets;
@@ -258,7 +260,6 @@ std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
                                                  GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Socket is closed");
                                              }
                                              );
-        m_payloadSize = static_cast<size_t>(behavior.maxPayloadLength);
         WSServer()
         .ws<SomeData>("/" + toLower(serviceName),  std::move(behavior))
         .get("/*", [this, serviceName](auto* res, auto* req) {
@@ -287,9 +288,13 @@ std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
                     fullPath = m_rootFolder + url;
                 GempyreUtils::log(GempyreUtils::LogLevel::Debug, "GET",
                        "Uri:", url,
-                       "query:", req->getQuery(),
-                       "path:", fullPath,
-                       "header:", GempyreUtils::joinPairs(req->begin(), req->end()));
+                      "query:", req->getQuery(),
+                      "path:", fullPath,
+                      "header:", GempyreUtils::join<uWS::HttpRequest::HeaderIterator, std::pair<std::string_view, std::string_view>, std::string>(
+                          req->begin(),
+                          req->end(),
+                          ",",
+                          [](const auto& p) {return std::string(p.first) + " " + std::string(p.second);}));
                 if(page.empty() && GempyreUtils::fileExists(fullPath)) {
                     page = GempyreUtils::slurp(fullPath);
                 } else {
@@ -386,12 +391,8 @@ bool Server::beginBatch() {
 bool Server::endBatch() {
     if(m_batch) {
         const auto str = m_batch->dump();
-        if(hasRoom(str.size())) {
-            m_broadcaster->send(str);
-            m_batch.reset();
-            return true;
-        }
-        return false;
+        m_broadcaster->send(str);
+        m_batch.reset();
     }
     return true;
 }
@@ -411,26 +412,15 @@ bool Server::send(const std::unordered_map<std::string, std::string>& object, co
         m_batch->push_back(std::move(js));
     } else {
         const auto str = js.dump();
-        if(!hasRoom(str.length())) {
-            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Not enough room Text", str.length());
-            return false;
-        }
         m_broadcaster->send(str);
+
     }
     return true;
 }
 
 bool Server::send(const char *data, size_t len) {
-    if(!hasRoom(len)) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Not enough room Data", len);
-        return false;
-    }
     return m_broadcaster->send(data, len);
     return true;
-}
-
-bool Server::hasRoom(size_t sz) const {
-    return sz <= (m_payloadSize - m_broadcaster->bufferSize()) ;
 }
 
 void Server::doClose() {

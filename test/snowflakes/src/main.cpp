@@ -4,13 +4,14 @@
 #include <iostream>
 #include <cmath>
 #include "koch.h"
+#include <unordered_map>
 
 using namespace std::chrono_literals;
 
 class Flake {
 public:
-    Flake(int iterarations) : m_vertices(Koch::koch_points(m_size, iterarations)) {
-        std::cout << "snow flake with " << m_vertices.size() << " vertices on " << iterarations << " iterations." << std::endl;
+    using Vertices = std::vector<Koch::point>;
+    Flake(const Vertices& vertices, int size) : m_vertices(vertices), m_size(size) {
     }
     void draw(Gempyre::FrameComposer& f) const {
         f.save();
@@ -31,36 +32,51 @@ public:
 private:
     int m_x = 0;
     int m_y = 0;
-    int m_size = 100;
-    const std::vector<Koch::point> m_vertices;
+    const Vertices& m_vertices;
+    const int m_size;
 };
 
+constexpr int Size = 400;
+
 int main(int /*argc*/, char** /*argv*/) {
-    Gempyre::setDebug();
+    Gempyre::setDebug(Gempyre::DebugLevel::Warning);
     Gempyre::Ui ui({{"/snowflakes.html", Snowflakeshtml}}, "snowflakes.html");
     Gempyre::CanvasElement canvas(ui, "canvas");
     Gempyre::Element flakes_count(ui, "flakes_count");
+    Gempyre::Element flakes_label(ui, "flakes_label");
 
     Gempyre::Element::Rect rect;
+    std::unordered_map<int, std::vector<Koch::point>> m_cache;
 
-    const auto draw_a_flake = [&canvas, &rect](int iterations) {
-        Flake f(iterations);
-        const auto r = canvas.rect();
-        f.setPos(r->width / 2, r->height / 2);
+
+
+    const auto draw_a_flake = [&canvas, &rect, &m_cache](int iterations) {
+        if(m_cache.find(iterations) == m_cache.end()) {
+            m_cache.emplace(iterations, Koch::koch_points(Size, iterations));
+            std::cout << "snow flake with " << m_cache[iterations].size() << " vertices on " << iterations << " iterations." << std::endl;
+        }
+        Flake f(m_cache[iterations], Size);
+        f.setPos(rect.width / 2, rect.height / 2);
         Gempyre::FrameComposer fc;
         fc.clearRect(rect);
         f.draw(fc);
         canvas.draw(fc);
     };
 
-    flakes_count.subscribe("change", [&draw_a_flake](const Gempyre::Event& ev) {
+    const auto update_a_label = [&flakes_label](int iterations) {
+          flakes_label.setHTML("Iterations: " + std::to_string(iterations));
+    };
+
+    flakes_count.subscribe("change", [&draw_a_flake, &update_a_label](const Gempyre::Event& ev) {
         const auto v = GempyreUtils::to<int>(ev.properties.at("value"));
+        update_a_label(v);
         draw_a_flake(v);
     }, {"value"});
 
-    ui.onOpen([&flakes_count, &draw_a_flake, &canvas, &rect]() {
+    ui.onOpen([&flakes_count, &draw_a_flake, &update_a_label, &canvas, &rect]() {
         rect = *canvas.rect();
         const auto v = GempyreUtils::to<int>(flakes_count.values()->at("value"));
+        update_a_label(v);
         draw_a_flake(v);
     });
 

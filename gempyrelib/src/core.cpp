@@ -212,14 +212,14 @@ Ui::Ui(const Filemap& filemap, const std::string& indexHtml, const std::string& 
                         m_sema->signal();
                 }
                 },
-                [this](const std::string& name)->std::optional<std::string> { //get
+                [this](const std::string_view& name)->std::optional<std::string> { //get
                     GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "HTTP get", name);
                     if(name == "/gempyre.js") {
                         const auto encoded = Base64::decode(Gempyrejs);
                         const auto page = GempyreUtils::join(encoded.begin(), encoded.end());
                         return std::make_optional(page);
                     }
-                    const auto it = m_filemap.find(name);
+                    const auto it = m_filemap.find(std::string(name));
                     if(it != m_filemap.end()) {
                         if(it->second.size() == 0) {
                             GempyreUtils::log(GempyreUtils::LogLevel::Warning, "Empty data:", it->first);

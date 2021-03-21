@@ -24,7 +24,7 @@ public:
     using MessageFunction = std::function<void (const Object&)>;
     using CloseFunction =  std::function<void (Close, int)>;
     using OpenFunction =  std::function<void (int)>;
-    using GetFunction =  std::function<std::optional<std::string> (const std::string& filename)>;
+    using GetFunction =  std::function<std::optional<std::string> (const std::string_view& filename)>;
     using ListenFunction =  std::function<bool (unsigned short)>;
     Server(unsigned short port,
            const std::string& rootFolder,
@@ -53,6 +53,8 @@ private:
                                                       const std::string& serviceName);
     void doClose();
     void closeSocket();
+    enum class DataType{Json, Bin};
+    int addPulled(DataType, const std::string_view& data);
 private:
     std::string m_rootFolder;
     std::unique_ptr<Broadcaster> m_broadcaster;
@@ -69,6 +71,8 @@ private:
     bool m_uiready = false;
     mutable int m_queryId = 0;
     std::unique_ptr<Batch> m_batch;
+    std::unordered_map<std::string, std::pair<DataType, std::string>> m_pulled;
+    int m_pulledId = 0;
 };
 }
 

@@ -367,7 +367,8 @@ if(NOT WIN32)
        FILES ${HEADERS}
        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} 
        )
-    install(FILES ${PROJECT_NAME}Config.cmake DESTINATION lib/cmake/Foo)
+    install(FILES ${PROJECT_NAME}Config.cmake
+        DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 	
 endif()
 

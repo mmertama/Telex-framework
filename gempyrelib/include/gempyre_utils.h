@@ -14,6 +14,7 @@
 #include <future>
 #include <limits>
 #include <iomanip>
+#include <any>
 
 /**
   * ![wqe](https://avatars1.githubusercontent.com/u/7837709?s=400&v=4)
@@ -413,6 +414,10 @@ std::vector<T> slurp(const std::string& file, const size_t max = std::numeric_li
  }
 
 UTILS_EX std::string slurp(const std::string& file, const size_t max = std::numeric_limits<size_t>::max());
+
+UTILS_EX std::optional<std::string> toJsonString(const std::any& any);
+UTILS_EX std::optional<std::any> jsonToAny(const std::string& str);
+
 
 }
 

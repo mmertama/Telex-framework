@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.14)
 
-project (gempyre VERSION 0.3.3 LANGUAGES CXX C)
+project (gempyre VERSION 0.3.4 LANGUAGES CXX C)
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
 include(GNUInstallDirs)
@@ -237,7 +237,6 @@ set(GEMPYRE_SRC
     src/semaphore.h
     src/idlist.h
     js/gempyre.js
-    src/json.h
     src/json.cpp
     src/graphics.cpp
     src/element.cpp
@@ -354,7 +353,10 @@ export(
     )
 
  
-file(GLOB HEADERS include/*.h) 
+file(GLOB HEADERS include/*.h)
+file(GLOB AFFILIATES ${CMAKE_SOURCE_DIR}/affiliates/include/*.h) 
+
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS} ${AFFILIATES}")
 
 if(NOT WIN32)
     install(
@@ -364,12 +366,11 @@ if(NOT WIN32)
        COMPONENT library
        )
     install(
-       FILES ${HEADERS}
+       FILES ${HEADERS} ${AFFILIATES}
        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} 
        )
-    install(FILES ${PROJECT_NAME}Config.cmake
-        DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
-	
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/{$PROJECT_NAME}/cmake")	
 endif()
 
 

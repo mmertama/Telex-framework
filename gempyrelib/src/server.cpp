@@ -22,10 +22,10 @@
 #pragma clang diagnostic pop
 #pragma gcc diagnostic pop
 
-#include "json.h"
-
 #include <nlohmann/json.hpp>
+
 // for convenience
+
 using json = nlohmann::json;
 using namespace std::chrono_literals;
 
@@ -435,7 +435,7 @@ bool Server::endBatch() {
 bool Server::send(const std::unordered_map<std::string, std::string>& object, const std::any& values) {
     json js;
     if(values.has_value()) {
-        const auto jopt = toString(values);
+        const auto jopt = GempyreUtils::toJsonString(values);
         if(jopt.has_value()) {
             js = json::parse(*jopt);
         }

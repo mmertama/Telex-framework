@@ -17,7 +17,6 @@
 
 #include "idlist.h"
 #include "timer.h"
-#include "json.h"
 
 #include "internal.h"
 
@@ -661,7 +660,7 @@ std::optional<std::any> Ui::extension(const std::string& callId, const std::unor
     }
     const auto queryId = std::to_string(m_server->queryId());
 
-    const auto json = toString(parameters);
+    const auto json = GempyreUtils::toJsonString(parameters);
 
     gempyre_utils_assert_x(json.has_value(), "Invalid parameter");
 

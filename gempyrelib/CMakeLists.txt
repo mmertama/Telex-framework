@@ -256,6 +256,12 @@ if(WIN32 OR ANDROID)
     FILE(GLOB_RECURSE SOCKETS_HRD "${SOCKETS_SOURCES}/src/*.h") # its using plain Makefile so just add files IS easier
 endif()
 
+if(DEFINED GEMPYRE_SHARED)
+    set(LIB_TYPE SHARED)
+else()
+    set(LIB_TYPE STATIC)
+endif()
+
 if(ANDROID)
     #openssl is not there
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DLIBUS_NO_SSL")
@@ -266,13 +272,13 @@ if(ANDROID)
         ${GEMPYRE_SRC}
     )
 elseif(WIN32)
-    add_library(${PROJECT_NAME}
+    add_library(${PROJECT_NAME} ${LIB_TYPE}
         ${SOCKETS_SRC}
         ${SOCKETS_HRD}
         ${GEMPYRE_SRC}
     )
 else()
-    add_library(${PROJECT_NAME}
+    add_library(${PROJECT_NAME} ${LIB_TYPE}
         ${GEMPYRE_SRC}
     )
 endif()
@@ -316,10 +322,15 @@ elseif(ANDROID)
         PRIVATE ${UV_LIB}
         -lstdc++
         )
-else()
+elseif(APPLE)
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${SOCKETS_LIB}
+        -lstdc++)
+else()
+    target_link_libraries (${PROJECT_NAME}
+        PRIVATE ${CMAKE_THREAD_LIBS_INIT}
+        PUBLIC ${SOCKETS_LIB}
         -lstdc++)
 endif()
 

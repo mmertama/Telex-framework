@@ -5,7 +5,9 @@
 #include <tuple>
 #include <functional>
 #include <set>
-#include "unittests_resource.h"
+#include "apitests_resource.h"
+
+#include <gtest/gtest.h>
 
 using namespace std::chrono_literals;
 

@@ -37,7 +37,7 @@ add_subdirectory(gempyrelib)
 
 option(HAS_AFFILIATES "Affiliats are built" ON)
 option(HAS_TEST "Test are built" ON)
-option(HAS_BLOG "Blog examples are built" ON)
+option(HAS_EXAMPLES "Examples are built" ON)
 
 
 if(HAS_AFFILIATES)
@@ -48,8 +48,8 @@ if(HAS_TEST)
     add_subdirectory(test)
 endif()
 
-if(HAS_BLOG)
-    add_subdirectory(blog)
+if(HAS_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 

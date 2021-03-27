@@ -1,12 +1,12 @@
-cmake_minimum_required (VERSION 3.16)
-set(NAME tests)
-project (${NAME})
-add_subdirectory(eval)
-add_subdirectory(helloworld)
-add_subdirectory(tick)
-add_subdirectory(unittests)
-add_subdirectory(imageblit)
-add_subdirectory(drawcanvas)
-add_subdirectory(audio)
-add_subdirectory(snowflakes)
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+set(TEST_INCLUDE_DIRS ${googletest_SOURCE_DIR}/googletest/include())
+
+add_subdirectory(apitests)
 

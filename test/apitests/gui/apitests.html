@@ -1,11 +1,16 @@
 <html>
 <header>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta charset="UTF-8">
     <style>
     #styled {
         color:red;
         font-size:32px
     }
     </style>
+    <title>Api Tests</title>
 </header>
 <body>
     <script src="/gempyre.js"></script>
@@ -38,7 +43,7 @@
         const callback = function(mutationsList, observer) {
             for(let mutation of mutationsList) {
                 if (mutation.type === 'attributes') {
-                    sendGempyre Event('test-1', 'test_event', mutation.target);
+                    sendGempyreEvent('test-1', 'test_event', mutation.target);
                 }
             }
         };

@@ -153,7 +153,7 @@ namespace Gempyre {
         ///Starts the event loop.
         void run();
 
-        ///Set HTML messages to std::cout.
+        ///Set broser to verbose mode
         void setLogging(bool logging);
         ///Executes eval string in UI context.
         void eval(const std::string& eval);

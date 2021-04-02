@@ -34,7 +34,7 @@ public:
            const CloseFunction& onClose,
            const GetFunction& onGet,
            const ListenFunction& onListen);
-    bool isRunning() const {return m_server && m_server->joinable();}
+    bool isRunning() const {return m_serverThread && m_serverThread->joinable();}
     bool isConnected() const;
     bool retryStart();
     void close(bool wait = false);
@@ -65,7 +65,7 @@ private:
     const GetFunction m_onGet;
     const ListenFunction m_onListen;
     std::function<std::unique_ptr<std::thread> ()> m_startFunction = nullptr;
-    std::unique_ptr<std::thread> m_server;
+    std::unique_ptr<std::thread> m_serverThread;
     std::any m_closeData; //arbitrary
     unsigned short m_port = 0;
     bool m_uiready = false;

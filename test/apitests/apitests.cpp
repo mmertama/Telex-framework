@@ -5,13 +5,16 @@
 #include <tuple>
 #include <functional>
 #include <set>
+#include <filesystem>
 #include "apitests_resource.h"
+#include <cassert>
 
 #include <gtest/gtest.h>
 
+
 using namespace std::chrono_literals;
 
-#define CONSTRUCT_UI Gempyre::Ui ui({{"/test.html", Unittestshtml}}, "test.html", browser);
+
 
 std::string headlessParams() {
     switch(GempyreUtils::currentOS()) {
@@ -19,7 +22,6 @@ std::string headlessParams() {
     default:return "--headless --disable-gpu";
     }
 }
-
 
 std::string defaultChrome() {
     switch(GempyreUtils::currentOS()) {
@@ -29,73 +31,79 @@ std::string defaultChrome() {
     default: return "";
     }
 }
+/*
+class ApiTest : testing::Test {
+    protected:
+    void SetUp() override {
+    }
+    Gempyre::Ui m_ui;
+};
 
+#define CONSTRUCT_UI Gempyre::Ui ui({{"/test.html", Unittestshtml}}, "test.html", browser);
+*/
+/*
 class Waiter {
     Waiter() {}
 };
+*/
+
+#define TEST_FAIL (assert(false))
 
 
-const std::vector<std::tuple<std::string, std::function<bool (const std::string&)>>>Uitests = {
-
-{R"(explicit Ui(const std::string& indexHtml, const std::string& browser, const std::string& extraParams, unsigned short port))",
-        [](const std::string& ){
-    const std::string html = GempyreUtils::systemEnv("GEMPYRE-UNITTEST-HTML") ;
-    if(html.empty()) {
-        std::cerr << "no GEMPYRE-UNITTEST-HTML set" << std::endl;
-        return false;
-    }
-
-    const std::string browser = GempyreUtils::systemEnv("GEMPYRE-UNITTEST-HTML") ;
-    if(browser.empty()) {
-        std::cerr << "no GEMPYRE-UNITTEST-BROWSER set" << std::endl;
-        return false;
-    }
-    Gempyre::Ui ui(html, browser, "", 50000);
-    ui.exit();
+TEST(UiTests, openPage_with_page_browser) {
+    const auto htmlPage = TEST_HTML;
+    ASSERT_TRUE(std::filesystem::exists(htmlPage));
+    const auto browser = defaultChrome();
+    Gempyre::Ui ui(htmlPage, defaultChrome(), "", 50000);
+    ui.onOpen([&ui]() { ui.exit();});
+    ui.onError([](const auto& element, const auto& info){
+        std::cerr << element << " err:" << info; TEST_FAIL;});
+    const auto raii_ex = GempyreUtils::waitExpire(4s, []() {TEST_FAIL;});
     ui.run();
-    return true;
-}},
-{R"(explicit Ui(const std::string& indexHtml))",
-        [](const std::string& ){
-    const std::string html = GempyreUtils::systemEnv("GEMPYRE-UNITTEST-HTML") ;
-    if(html.empty()) {
-        std::cerr << "no GEMPYRE-UNITTEST-HTML set" << std::endl;
-        return false;
-    }
-    Gempyre::Ui ui(html);
-    ui.exit();
+}
+
+
+TEST(UiTests, openPage_with_page) {
+    const auto htmlPage = TEST_HTML;
+    ASSERT_TRUE(std::filesystem::exists(htmlPage));
+    Gempyre::Ui ui(htmlPage);
+    ui.onOpen([&ui]() { ui.exit();});
+    ui.onError([](const auto& element, const auto& info){std::cerr << element << " err:" << info; TEST_FAIL;});
+    const auto raii_ex = GempyreUtils::waitExpire(4s, []() {TEST_FAIL;});
     ui.run();
-    return true;
-}},
-{R"(explicit Ui(const Filemap& filemap, const std::string& indexHtml, const std::string& browser, const std::string& extraParams, unsigned short port))",
-        [](const std::string& ){
-    const std::string browser = GempyreUtils::systemEnv("GEMPYRE-UNITTEST-HTML") ;
-    if(browser.empty()) {
-        std::cerr << "no GEMPYRE-UNITTEST-BROWSER set" << std::endl;
-        return false;
-    }
-    Gempyre::Ui ui({{"/test.html", Unittestshtml}}, "test.html", browser, "", 50000);
-    return true;
-}},
-{R"(explicit Ui(const Filemap& filemap, const std::string& indexHtml, unsigned short port))",
-        [](const std::string& browser){
-    CONSTRUCT_UI
-    return true;
-}},
-{R"(exit on time))",
-        [](const std::string& browser){
-    CONSTRUCT_UI
+}
+
+
+TEST(UiTests, openPage_with_browser) {
+    const auto browser = defaultChrome();
+    Gempyre::Ui ui({{"/foobar.html", Apitestshtml}}, "foobar.html", browser, "", 50000);
+    ui.onOpen([&ui]() { ui.exit();});
+    ui.onError([](const auto& element, const auto& info){std::cerr << element << " err:" << info; TEST_FAIL;});
+    const auto raii_ex = GempyreUtils::waitExpire(4s, []() {TEST_FAIL;});
+    ui.run();
+}
+
+TEST(UiTests, openPage_defaults) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    ui.onOpen([&ui]() { ui.exit();});
+    ui.onError([](const auto& element, const auto& info){std::cerr << element << " err:" << info; TEST_FAIL;});
+    const auto raii_ex = GempyreUtils::waitExpire(4s, []() {TEST_FAIL;});
+    ui.run();
+}
+
+TEST(UiTests, exit_on_time) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.startTimer(1000ms, true, [&ui, &ok]()  {
        ui.exit();
        ok = true;
     });
     ui.run();
-    return ok;
-}},
-{R"(void close())",
-        [](const std::string& browser){
-    CONSTRUCT_UI
+    EXPECT_TRUE(ok);
+}
+
+TEST(UiTests, close) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui](){
        ok = true;
@@ -105,12 +113,13 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
        ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(Ui& onExit(std::function<void ()> onExitFunction = nullptr))",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
-    ui.startTimer(10s, true, [&ui]() {
+    EXPECT_TRUE(ok);
+}
+
+
+TEST(UiTests, onExit) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    ui.startTimer(2s, true, [&ui]() {
        ui.close();
     });
     bool ok = false;
@@ -119,11 +128,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(Ui& onReload(std::function<void ()> onExitFunction = nullptr))",
-        [](const std::string& browser){
-    CONSTRUCT_UI
+    EXPECT_TRUE(ok);
+}
+
+TEST(UiTests, onReload) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     ui.startTimer(1000ms, true, [&ui]()  {
        ui.eval("window.location.reload(false);");
     });
@@ -136,22 +145,22 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
        ok = true;
     });
     ui.run();
-    return ok;
-}},
-{R"(Ui& onOpen(std::function<void ()> onOpenFunction = nullptr))",
-        [](const std::string& browser){
-    CONSTRUCT_UI
+    EXPECT_TRUE(ok);
+}
+
+TEST(UiTests, onOpen){
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui](){
       ok = true;
       ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(void run())",
-        [](const std::string& browser){
-    CONSTRUCT_UI
+    EXPECT_TRUE(ok);
+}
+
+TEST(UiTests, run) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui](){
         ui.startTimer(1000ms, true, [&ui, &ok]()  {
@@ -159,82 +168,90 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
            ok = true;
         });
     });
+    ui.onError([](const auto& element, const auto& info){std::cerr << element << " err:" << info; TEST_FAIL;});
     ui.run();
-    return ok;
-}},
-{R"(void setLogging(bool logging))",
-        [](const std::string& browser){
-    CONSTRUCT_UI
-    ui.startTimer(1000ms, true, [&ui]()  {
+    EXPECT_TRUE(ok);
+}
+
+TEST(UiTests, setLogging) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    ui.startTimer(3s, true, [&ui]()  {
        ui.exit();
     });
-    ui.setLogging(false); //how to test?
+    ui.onError([](const auto& element, const auto& info){std::cerr << element << " err:" << info; TEST_FAIL;});
+    ui.setLogging(true); //how to test? TODO get log from UI
     ui.run();
-    return true;
-}},
-{R"(void eval(const std::string& eval))",
-        [](const std::string& browser){
-        CONSTRUCT_UI
+}
+
+
+TEST(UiTests, eval) {
+        Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
         ui.eval("document.write('<h3 id=\\\"foo\\\">Bar</h3>')");
         bool ok = false;
         ui.onOpen([&ok, &ui]() {
             Gempyre::Element el(ui, "foo");
             const auto html = el.html();
-            ok = html.has_value() && html.value() == "Bar";
+            ASSERT_TRUE(html);
+            ok = html.value() == "Bar";
             ui.exit();
         });
         ui.run();
-        return ok;
-}},
-{R"(void debug(const std::string& msg))", [](const std::string& browser) {
-    CONSTRUCT_UI
+        EXPECT_TRUE(ok);
+}
+
+TEST(UiTests, debug) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     ui.startTimer(1000ms, true, [&ui]()  {
        ui.exit();
     });
+    ui.onError([](const auto& element, const auto& info){std::cerr << element << " err:" << info; TEST_FAIL;});
     ui.debug("Test - Debug");
     ui.run();
-    return true;
-}},
-{R"(void alert(const std::string& msg))", [](const std::string& browser) {
-    CONSTRUCT_UI
+}
+
+TEST(Apitests, alert) {
+ /*
+  * Requires user interaction, skip
+  *
+  * Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     ui.startTimer(1000ms, true, [&ui]()  {
        ui.exit();
     });
+    ui.onError([](const auto& element, const auto& info){std::cerr << element << " err:" << info; TEST_FAIL;});
     ui.alert("Test - Alert");
+    ui.run();*/
+}
+
+
+TEST(UiTests, open) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    ui.startTimer(1000ms, true, [&ui]()  {
+       ui.exit();
+    });
+    ui.onError([](const auto& element, const auto& info){std::cerr << element << " err:" << info; TEST_FAIL;});
+    ui.open("http://www.google.com");
     ui.run();
-    return true;
-}},
-{R"(void open(const std::string& url, const std::string& name = ""))",
-        [](const std::string& browser){
-        CONSTRUCT_UI
-        ui.startTimer(1000ms, true, [&ui]()  {
-           ui.exit();
-        });
-        ui.open("http://www.google.com");
-        ui.run();
-        return true;
-}},
-{R"(TimerId startTimer(const std::chrono::milliseconds& ms, const std::function<bool (TimerId id)>& timerFunc))",
-        [](const std::string& browser) {
-        CONSTRUCT_UI
-        ui.startTimer(1000ms, true, [&ui](Gempyre::Ui::TimerId /*id*/)  {
-           ui.exit();
-        });
-        ui.run();
-        return true;
-}},
-{R"(TimerId startTimer(const std::chrono::milliseconds& ms, const std::function<bool ()>& timerFunc))",
-        [](const std::string& browser) {
-        CONSTRUCT_UI
-        ui.startTimer(1000ms, true, [&ui]()  {
-           ui.exit();
-        });
-        ui.run();
-        return true;
-}},
-{R"(bool stopTimer(TimerId))",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+}
+
+TEST(UiTests, startTimer) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    ui.startTimer(1000ms, true, [&ui](Gempyre::Ui::TimerId id)  {
+       (void)id;
+       ui.exit();
+    });
+    ui.run();
+}
+
+TEST(UiTests, startTimerNoId) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    ui.startTimer(1000ms, true, [&ui]()  {
+       ui.exit();
+    });
+    ui.run();
+}
+
+TEST(UiTests, stopTimer) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = true;
     auto id = ui.startTimer(1000ms, true, [&ui, &ok]()  {
        ok = false;
@@ -245,39 +262,37 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
        });
     ui.stopTimer(id);
     ui.run();
-    return ok;
-}},
-{R"(Element root() const)",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
-    return ui.root().id() == ""; //root has no id
-}},
-{R"(std::string addressOf(const std::string& filepath) const)",
-        [](const std::string& browser){
-    const std::string html = GempyreUtils::systemEnv("GEMPYRE-UNITTEST-HTML") ;
-    if(html.empty()) {
-        std::cerr << "no GEMPYRE-UNITTEST-HTML set" << std::endl;
-        return false;
-    }
-    CONSTRUCT_UI
-    return ui.addressOf(html).length() > 0;
-}},
-{R"(std::optional<Element::Elements> byClass(const std::string& className) const)",
-[](const std::string& browser) {
-    CONSTRUCT_UI
-    bool ok = false;
-    ui.onOpen([&ok, &ui](
-              ) {
+    EXPECT_TRUE(ok);
+}
+
+TEST(UiTests, root) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    EXPECT_EQ(ui.root().id(), ""); //root has no id
+}
+
+TEST(UiTests, addressOf) {
+    const auto htmlPage = TEST_HTML;
+    ASSERT_TRUE(std::filesystem::exists(htmlPage));
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    ui.onOpen([&ui, htmlPage](){
+        EXPECT_TRUE(ui.addressOf(htmlPage).length() > 0); //TODO better test would be write this as html and open it
+        ui.exit();
+    });
+}
+
+TEST(UiTests, byClass) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    ui.onOpen([&ui]() {
         const auto classes = ui.byClass("test-class");
-        ok = classes.has_value() && classes->size() == 4; //4 test-classes
+        ASSERT_TRUE(classes);
+        EXPECT_EQ(classes->size(), 4); //4 test-classes
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(std::optional<Element::Elements> byName(const std::string& className) const)",
-[](const std::string& browser) {
-    CONSTRUCT_UI
+}
+
+TEST(UiTests, byName) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui](){
         const auto names = ui.byName("test-name");
@@ -285,11 +300,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(std::optional<std::pair<std::chrono::milliseconds, std::chrono::milliseconds>> ping() const)",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+    EXPECT_TRUE(ok);
+}
+
+TEST(UiTests, ping) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui](){
         const auto ping = ui.ping();
@@ -297,83 +312,107 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(std::vector<uint8_t> resource(const std::string& url))",
-        [](const std::string& browser){
-    CONSTRUCT_UI
-    const auto r = ui.resource("/test.html");
-    if(!r)
-        return false;
+    EXPECT_TRUE(ok);
+}
+
+TEST(UiTests, resource) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    const auto r = ui.resource("/apitests.html");
+    ASSERT_TRUE(r);
     const std::string html = GempyreUtils::join(*r);
     const auto p1 = html.find("html");
     const auto p2 = html.find("html");
-    return p1 == p2;
-}},
-{R"(bool addFile(const std::string& url, const std::string& file)",
-        [](const std::string& browser){
-    CONSTRUCT_UI
+    ASSERT_EQ(p1, p2);
+}
+
+TEST(UiTests, addFile) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     const std::string test = "The quick brown fox jumps over the lazy dog";
     const auto tempFile = GempyreUtils::writeToTemp(test);
     const auto ok = ui.addFile("test_data", tempFile);
-    if(!ok)
-        return false;
+    ASSERT_TRUE(ok);
     GempyreUtils::removeFile(tempFile);
     const auto r = ui.resource("test_data");
     const std::string text = GempyreUtils::join(*r);
     const auto p1 = text.find("quick");
-    return p1 != std::string::npos && text.length() == test.length();
-}}
+    EXPECT_NE(p1, std::string::npos);
+    EXPECT_EQ(text.length(), test.length());
+}
 
-        };
+TEST(UiTests, devicePixelRatio) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    ui.onOpen([&ui](){
+        const auto dr = ui.devicePixelRatio();
+        ASSERT_TRUE(dr);
+        EXPECT_TRUE(*dr > 0);
+    });
+    ui.run();
+}
 
-const std::vector<std::tuple<std::string, std::function<bool (const std::string& browser)>>>Eltests = {
-{R"(Element(Ui& ui, const std::string& id))",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+TEST(Elementtests, ElementCreate) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    Gempyre::Element parent(ui, "test-1");
+    Gempyre::Element(ui, "boing", "div", parent);
+    bool ok = false;
+    ui.onOpen([&ok, &ui, &parent]() {
+        const auto cop = parent.children();
+        ok = cop.has_value() && std::find_if(cop->begin(), cop->end(), [](const auto el ){return el.id() == "boing";}) != cop->end();
+        ui.exit();
+    });
+    ui.run();
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, ElementCreateLater) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    bool ok = false;
+    ui.onOpen([&ok, &ui]() {
+        Gempyre::Element parent(ui, "test-1");
+        Gempyre::Element(ui, "boing", "div", parent);
+        const auto cop = parent.children();
+        ok = cop.has_value() && std::find_if(cop->begin(), cop->end(), [](const auto el ){return el.id() == "boing";}) != cop->end();
+        ui.exit();
+    });
+    ui.run();
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, idTest) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     Gempyre::Element foo(ui, "test-1");
-    return true;
-}},
-{R"(Element(Ui& ui, const std::string& id, const std::string& htmlElement, Element& parent))",
-        [](const std::string& browser) {
-        CONSTRUCT_UI
-        bool ok = false;
-        ui.onOpen([&ok, &ui]() {
-            Gempyre::Element parent(ui, "test-1");
-            Gempyre::Element(ui, "boing", "div", parent);
-            const auto cop = parent.children();
-            ok = cop.has_value() && std::find_if(cop->begin(), cop->end(), [](const auto el ){return el.id() == "boing";}) != cop->end();
-            ui.exit();
-        });
-        ui.run();
-        return ok;}},
-{R"(std::string id() const)",
-        [](const std::string& browser){
-    CONSTRUCT_UI
-    Gempyre::Element foo(ui, "test-1");
-    return foo.id() == "test-1";
-}},
-{R"(Element& subscribe(const std::string& name, Handler handler))",
-        [](const std::string& browser) {
-        CONSTRUCT_UI
-        bool ok = false;
-        Gempyre::Element el(ui, "test-1");
-        el.subscribe("test_event", [&ok, &ui, &el](const Gempyre::Event& eel) {
-            ok = eel.element.id() == el.id();
-            ui.exit();
-        });
-        ui.startTimer(2s, true, [&el]()  {
-              el.setAttribute("style", "color:green");
-           });
-        ui.startTimer(3s, true, [&ui]()  {
-              ui.exit();
-           });
-        ui.run();
-        return ok;
-}},
-{R"(Element& setHTML(const std::string& htmlText))",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_EQ(foo.id(), "test-1");
+}
+
+
+TEST(Elementtests, subscribe) {
+    Gempyre::setDebug();
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+    bool ok = false;
+    Gempyre::Element el(ui, "test-1");
+    bool is_open = false;
+    ui.onOpen([&is_open]() {
+        is_open = true;
+    });
+    el.subscribe("test_event", [&](const Gempyre::Event& eel) {
+        ok = eel.element.id() == el.id();
+        ASSERT_TRUE(ok);
+        ASSERT_TRUE(is_open);
+        ui.exit();
+    });
+    ui.startTimer(2s, true, [&]()  {
+          el.setAttribute("style", "color:green");
+       });
+    ui.startTimer(3s, true, [&]()  {
+          ui.exit();
+          ASSERT_TRUE(is_open);
+       });
+    ui.run();
+    ASSERT_TRUE(is_open);
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, setHTML) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     Gempyre::Element el(ui, "test-1");
     el.setHTML("Test-dyn");
     bool ok = false;
@@ -383,11 +422,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(Element& setAttribute(const std::string& attr, const std::string& values))",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, setAttribute) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     Gempyre::Element el(ui, "test-1");
     el.setAttribute("value", "Test-attr-dyn");
     bool ok = false;
@@ -399,11 +438,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(std::optional<Attributes> attributes() const)",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, attributes) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui]() {
         Gempyre::Element el(ui, "test-1");
@@ -414,11 +453,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(std::optional<Elements> children() const)",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, children) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui]() {
         Gempyre::Element el(ui, "test-1");
@@ -429,11 +468,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(std::optional<Values> values() const)",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, values) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui]() {
         Gempyre::Element el(ui, "checkbox-1");
@@ -444,11 +483,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(std::optional<std::string> html() const)",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, html) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui]() {
         Gempyre::Element el(ui, "test-1");
@@ -457,11 +496,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(void remove())",
-        [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, remove) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui]() {
         Gempyre::Element el(ui, "test-1");
@@ -469,35 +508,35 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ok = chlds.has_value()
                 && chlds->size() > 3
                 && (*chlds)[3].id() == "test-child-3";
-        if(ok) {
-            Gempyre::Element c(ui,"test-child-3");
-            c.remove();
-            const auto cop = el.children();
-            ok = cop.has_value() && std::find_if(cop->begin(), cop->end(), [](const auto el ){return el.id() == "test-child-3";}) == cop->end();
-        }
+        ASSERT_TRUE(ok);
+        Gempyre::Element c(ui,"test-child-3");
+        c.remove();
+        const auto cop = el.children();
+        ok = cop.has_value() && std::find_if(cop->begin(), cop->end(), [](const auto el ){return el.id() == "test-child-3";}) == cop->end();
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(Element& removeAttribute(const std::string& attr))", [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, removeAttribute) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui]() {
         Gempyre::Element el(ui, "hidden");
         auto attrs0 = el.attributes();
-        if(attrs0->find("hidden") == attrs0->end())
-            return;
+        ASSERT_NE(attrs0->find("hidden"), attrs0->end());
         el.removeAttribute("hidden");
         const auto attrs = el.attributes();
         ok = attrs->find("hidden") == attrs->end();
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(Element& removeStyle(const std::string& attr))", [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, removeStyle) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui]() {
         Gempyre::Element el(ui, "styled");
@@ -514,10 +553,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(Element& setStyle(const std::string& attr))", [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, setStyle) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui]() {
         Gempyre::Element el(ui, "test-1");
@@ -527,10 +567,11 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}},
-{R"(std::optional<Values> styles() const)", [](const std::string& browser) {
-    CONSTRUCT_UI
+    ASSERT_TRUE(ok);
+}
+
+TEST(Elementtests, styles) {
+    Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
     bool ok = false;
     ui.onOpen([&ok, &ui]() {
         Gempyre::Element el(ui, "styled");
@@ -540,128 +581,33 @@ const std::vector<std::tuple<std::string, std::function<bool (const std::string&
         ui.exit();
     });
     ui.run();
-    return ok;
-}}};
+    ASSERT_TRUE(ok);
+}
 
+TEST(Elementtests, type) {
+      Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+      ui.onOpen([&ui]() {
+          Gempyre::Element el(ui, "test-1");
+          const auto t = el.type();
+          ASSERT_TRUE(t);
+          ASSERT_EQ(*t, "dev");
+      });
+      ui.run();
+}
 
-static std::unordered_map<unsigned, std::string> nonRun {
-    {1, "needs an env"},
-    {2, "needs an env"},
-    {3, "Needs an env"},
-    {8, "Broken test"},
-    {20, "Needs an env"},
-    {14, "Needs user interaction"},
-    {27, "Broken test"},
-    {28, "Broken test"}
-};
+TEST(Elementtests, rect) {
+      Gempyre::Ui ui(Apitests_resourceh, "apitests.html");
+      ui.onOpen([&ui]() {
+          Gempyre::Element el(ui, "test-1");
+          const auto r = el.rect();
+          ASSERT_TRUE(r);
+          EXPECT_TRUE(r->width > 0 && r->height > 0);
+      });
+      ui.run();
+}
 
-int main(int args, char* argv[]) {
-    const auto tests =  GempyreUtils::merge(Uitests, Eltests);
-    const auto alist = GempyreUtils::parseArgs(args, argv, {
-                                            {"tests", 't', GempyreUtils::ArgType::REQ_ARG},
-                                            {"skipped", 's', GempyreUtils::ArgType::REQ_ARG},
-                                            {"debug", 'd', GempyreUtils::ArgType::NO_ARG},
-                                            {"chrome", 'c', GempyreUtils::ArgType::REQ_ARG},
-                                            {"headless", 'h', GempyreUtils::ArgType::NO_ARG}
-                                        });
-    const auto params = std::get_if<GempyreUtils::Params>(&alist);
-    std::set<unsigned> skipped;
-    std::string browser;
-    if(params) {
-        const auto opts = std::get<GempyreUtils::Options>(*params);
-        if(GempyreUtils::contains(opts, "debug")) {
-            Gempyre::setDebug();
-        }
-        if(GempyreUtils::contains(opts, "browser")) {
-            browser = GempyreUtils::qq(opts.find("browser")->second)  + " " + headlessParams();
-        }
-        if(GempyreUtils::contains(opts, "headless")) {
-            browser = defaultChrome() + " " + headlessParams();
-            nonRun.emplace(5, "Not work on headless");
-            nonRun.emplace(6, "Not work on headless");
-            nonRun.emplace(9, "Not work on headless");
-            nonRun.emplace(10, "Not work on headless");
-            nonRun.emplace(12, "Not work on headless");
-            nonRun.emplace(21, "Not work on headless");
-            nonRun.emplace(22, "Not work on headless");
-            nonRun.emplace(23, "Not work on headless");
-            nonRun.emplace(29, "Not work on headless");
-            nonRun.emplace(30, "Not work on headless");
-            nonRun.emplace(31, "Not work on headless");
-            nonRun.emplace(32, "Not work on headless");
-            nonRun.emplace(33, "Not work on headless");
-            nonRun.emplace(35, "Not work on headless");
-            nonRun.emplace(34, "Not work on headless");
-            nonRun.emplace(36, "Not work on headless");
-        }
-        const auto lp = opts.find("tests");
-        if(lp != opts.end()) {
-            for(auto i = 1U; i <= tests.size(); i++)
-                skipped.emplace(i);
-            const auto list = GempyreUtils::split<std::vector<std::string>>(lp->second, ',');
-            for(const auto& l : list) {
-                const auto lop = GempyreUtils::toOr<unsigned>(l);
-                if(lop.has_value()) {
-                    const auto index = lop.value();
-                    const auto it = skipped.find(index);
-                    skipped.erase(it);
-                }
-            }
-        }
-        const auto sp = opts.find("skipped");
-        if(sp != opts.end()) {
-            const auto list = GempyreUtils::split<std::vector<std::string>>(sp->second, ',');
-            for(const auto& l : list) {
-                const auto lop = GempyreUtils::toOr<unsigned>(l);
-                if(lop.has_value()) {
-                    const auto index = lop.value();
-                    skipped.emplace(index);
-                }
-            }
-        }
-    }
-
-    auto testNo = 0U;
-    int skippedTotal = 0;
-    int failedTotal = 0;
-    int successTotal = 0;
-    for(const auto& [n, f] : tests) {
-        ++testNo;
-        if(skipped.find(testNo) != skipped.end()) {
-            std::cout << "skip " << testNo << std::endl;
-            ++skippedTotal;
-            continue;
-        }
-        if(nonRun.find(testNo) != nonRun.end()) {
-            std::cout << "not run " << testNo << " due " << nonRun.find(testNo)->second << std::endl;
-            ++skippedTotal;
-            continue;
-        }
-        std::cout << testNo << " ";
-        if(f) {
-            const auto result = std::time(nullptr);
-            std::cout << "Execute test for " << n << "..." << '[' << GempyreUtils::chop(std::asctime(std::localtime(&result))) << "]" << std::flush;
-            std::cerr << std::flush;
-            auto wait = GempyreUtils::waitExpire(30s, [testNo, &failedTotal](){
-                 const auto result = std::time(nullptr);
-                 std::cerr << "Test " << testNo << " took too long " << "fail " << '[' << GempyreUtils::chop(std::asctime(std::localtime(&result))) << "]" << std::endl;
-                 ++failedTotal;
-            });
-            const bool success = f(browser);
-            if(success) {
-                ++successTotal;
-                std::cout << "ok" << "\n" << std::endl;
-            } else {
-                ++failedTotal;
-                std::cout <<  "fail" << "\n" << std::endl;
-            }
-
-        } else {
-             std::cerr << "Test for " << n << " not implemented" << std::endl;
-              ++skippedTotal;
-        }
-    }
-    std::cout << "skipped:" << skippedTotal << " failed:" << failedTotal << " passed:" << successTotal << std::endl;
-    return 0;
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
 

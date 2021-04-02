@@ -39,8 +39,9 @@ constexpr size_t WS_MAX_LEN = 16 * 1024;
 
 static std::string fileToMime(const std::string_view& filename) {
     const auto index = filename.find_last_of('.');
-    if(index == std::string::npos)
+    if(index == std::string::npos) {
         return "";
+    }
     const std::string_view ext(&filename[index], filename.length() - index);
     static const std::unordered_map<std::string_view, std::string_view> mimes = {
         {".html", "text/html;charset=utf-8"},
@@ -67,28 +68,24 @@ std::any convert(const nlohmann::json& js) {
             params.emplace(key, convert(value));
         }
 #if 0
-        for(const auto& [key, value] : params)
+        for(const auto& [key, value] : params) {
             std::cerr << key << "->" << value.type().name() << std::endl;
+        }
 #endif
         return std::move(params);
-    }
-    else if(js.is_array()) {
+    } else if(js.is_array()) {
         Server::Array params;
         for(const auto& value : js) {
             params.push_back(convert(value));
         }
         return std::move(params);
-    }
-    else if(js.is_boolean()) {
+    } else if(js.is_boolean()) {
         return std::move(std::string(js.get<bool>() ? "true" : "false"));
-    }
-    else if(js.is_number()) {
-         return std::move(std::to_string(js.get<double>()));
-    }
-    else if(js.is_string()) {
+    } else if(js.is_number()) {
+        return std::move(std::to_string(js.get<double>()));
+    } else if(js.is_string()) {
         return std::move(js.get<std::string>());
-    }
-    else {
+    } else {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "conversion dicards", js);
         return std::move(std::string("false"));
     }
@@ -97,23 +94,23 @@ std::any convert(const nlohmann::json& js) {
 
 static std::string toLower(const std::string& str) {
     std::string s = str;
-    std::transform(s.begin(), s.end(), s.begin(), [](auto c){return std::tolower(c);});
+    std::transform(s.begin(), s.end(), s.begin(), [](auto c) {return std::tolower(c);});
     return s;
 }
 
-WSServer::WebSocketBehavior options(decltype (WSServer::WebSocketBehavior::open)&& open,  decltype (WSServer::WebSocketBehavior::message)&& message, decltype (WSServer::WebSocketBehavior::close)&& close) {
+WSServer::WebSocketBehavior options(decltype(WSServer::WebSocketBehavior::open)&& open,  decltype(WSServer::WebSocketBehavior::message)&& message, decltype(WSServer::WebSocketBehavior::close)&& close) {
     WSServer::WebSocketBehavior bh;
     bh.open = std::move(open);
     bh.message = std::move(message);
     bh.close = std::move(close);
-  //  bh.maxPayloadLength = 1024 * 1024;
-    bh.drain = [](auto ws){
+    //  bh.maxPayloadLength = 1024 * 1024;
+    bh.drain = [](auto ws) {
         GempyreUtils::log(GempyreUtils::LogLevel::Warning, "drain", ws->getBufferedAmount());
     };
     return bh;
 }
 
-struct SomeData{};
+struct SomeData {};
 
 using WSSocket = uWS::WebSocket<false, true>;
 
@@ -141,34 +138,44 @@ public:
         for(auto& s : m_sockets) {
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "socket txt buffer", s->getBufferedAmount());
             const auto success = s->send(text, uWS::OpCode::TEXT);
-            if(!success)
-                 GempyreUtils::log(GempyreUtils::LogLevel::Warning, "socket t2 buffer", s->getBufferedAmount());
+            if(!success) {
+                GempyreUtils::log(GempyreUtils::LogLevel::Warning, "socket t2 buffer", s->getBufferedAmount());
+            }
         }
         return !m_sockets.empty();
     }
+
     bool send(const char* data, size_t len) {
         for(auto& s : m_sockets) {
-             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "socket bin buffer", s->getBufferedAmount());
-             const auto success = s->send(std::string_view(data, len), uWS::OpCode::BINARY);
-             if(!success)
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "socket bin buffer", s->getBufferedAmount());
+            const auto success = s->send(std::string_view(data, len), uWS::OpCode::BINARY);
+            if(!success) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Warning, "socket b2 buffer", s->getBufferedAmount());
+            }
         }
         return !m_sockets.empty();
     }
+
     void append(WSSocket* socket) {
         m_sockets.emplace(socket);
     }
+
     void remove(WSSocket* socket) {
         auto it = m_sockets.find(socket);
-        if(it != m_sockets.end())
+        if(it != m_sockets.end()) {
             m_sockets.erase(it);
+        }
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "socket erased", m_sockets.size());
     }
+
     bool empty() const {
         return m_sockets.empty();
     }
+
     bool size() const {
         return m_sockets.size();
     }
+
     size_t bufferSize() const {
         auto min = 0;
         for(const auto& s : m_sockets) {
@@ -183,14 +190,14 @@ private:
 
 
 Server::Server(
-        unsigned short port,
-        const std::string& root,
-        const std::string& serviceName,
-        const OpenFunction& onOpen,
-        const MessageFunction& onMessage,
-        const CloseFunction& onClose,
-        const GetFunction& onGet,
-        const ListenFunction& onListen) :
+    unsigned short port,
+    const std::string& root,
+    const std::string& serviceName,
+    const OpenFunction& onOpen,
+    const MessageFunction& onMessage,
+    const CloseFunction& onClose,
+    const GetFunction& onGet,
+    const ListenFunction& onListen) :
     m_rootFolder(root),
     m_broadcaster(std::make_unique<Broadcaster>()),
     m_onOpen(onOpen),
@@ -198,10 +205,10 @@ Server::Server(
     m_onClose(onClose),
     m_onGet(onGet),
     m_onListen(onListen),
-    m_startFunction([=]()->std::unique_ptr<std::thread> {
-        return makeServer(port, serviceName);
-    }),
-    m_server(m_startFunction()) {
+    m_startFunction([ = ]()->std::unique_ptr<std::thread> {
+    return makeServer(port, serviceName);
+}),
+m_serverThread(m_startFunction()) {
 #ifdef RANDOM_PORT
     const auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
@@ -210,78 +217,94 @@ Server::Server(
 #endif
 }
 
+static std::string notFoundPage(const std::string_view& url, const std::string_view& info = "") {
+    return R"(<html>
+           <header>
+               <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0 "/>
+               <meta http-equiv="Pragma" content="no-cache" />
+               <meta http-equiv="Expires" content="0" />
+               <meta charset="UTF-8">
+               <style>
+               #styled {
+                   color:red;
+                   font-size:32px
+               }
+               </style>
+           </header>
+      <body><h1>Ooops</h1><h3 class="styled">404 Data Not Found </h3><h5>)" + std::string(url) + "</h5><i>" + std::string(info) + "</i></body></html>";
+}
 
 std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
-                                                  const std::string& serviceName) {
+        const std::string& serviceName) {
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "makeServe - create");
 
     return std::make_unique<std::thread>([this, port, serviceName]() {
 
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "makeServe - execute");
         auto behavior = options(
-                                             [this](auto ws, auto) {
-                                                                      GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS open");
-                                                                      m_broadcaster->append(ws);
-                                                                      m_onOpen(m_broadcaster->size());
-                                                                   },
-                                             [this](auto ws, auto message, auto opCode) {
-                                                                       GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS message", message, opCode);
-                                                                       const auto jsObj = json::parse(message);
-                                                                       const auto f = jsObj.find("type");
-                                                                       if(f != jsObj.end()) {
-                                                                         if(*f == "keepalive") {
-                                                                           return;
-                                                                         }
-                                                                         if(*f == "uiready") {
-                                                                             m_uiready = true;
-                                                                         }
-                                                                         if(*f == "extensionready") {
-                                                                             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "exteansionready");
-                                                                             return;
-                                                                         }
-                                                                       }
-                                                                     const auto js = convert(jsObj);
-                                                                     auto object = std::any_cast<Object>(js);
-                                                                     m_onMessage(std::move(object));
+        [this](auto ws, auto) {
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS open");
+            m_broadcaster->append(ws);
+            m_onOpen(m_broadcaster->size());
+        },
+        [this](auto ws, auto message, auto opCode) {
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS message", message, opCode);
+            const auto jsObj = json::parse(message);
+            const auto f = jsObj.find("type");
+            if(f != jsObj.end()) {
+                if(*f == "keepalive") {
+                    return;
+                }
+                if(*f == "uiready") {
+                    m_uiready = true;
+                }
+                if(*f == "extensionready") {
+                    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "exteansionready");
+                    return;
+                }
+            }
+            const auto js = convert(jsObj);
+            auto object = std::any_cast<Object>(js);
+            m_onMessage(std::move(object));
 
-                                             },
-                                             [this](auto ws, auto code, auto message) {
-                                                 if(code != 1001 && code != 1006) {  //browser window closed
-                                                     if(code == 1000 || (code >= 1002 && code <= 1015)  || (code >= 3000 && code <= 3999) || (code >= 4000 && code <= 4999)) {
-                                                         GempyreUtils::log(GempyreUtils::LogLevel::Error, "WS", "closed on error", code, message);
-                                                     }   else if(code != 0) {
-                                                         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "Non closing error", code, message);
-                                                         return;
-                                                     }
-                                                 }
-                                                 //exit request
-                                                 GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "close", code, message);
-                                                 m_broadcaster->remove(ws);
-                                                 m_onClose(Close::CLOSE, code);
-                                                 ws->close();
-                                                 GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Socket is closed");
-                                             }
-                                             );
+        },
+        [this](auto ws, auto code, auto message) {
+            if(code != 1001 && code != 1006) {  //browser window closed
+                if(code == 1000 || (code >= 1002 && code <= 1015)  || (code >= 3000 && code <= 3999) || (code >= 4000 && code <= 4999)) {
+                    GempyreUtils::log(GempyreUtils::LogLevel::Error, "WS", "closed on error", code, message);
+                }   else if(code != 0) {
+                    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "Non closing error", code, message);
+                    return;
+                }
+            }
+            //exit request
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "close", code, message);
+            m_broadcaster->remove(ws);
+            m_onClose(Close::CLOSE, code);
+            ws->close();
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Socket is closed");
+        });
+
         WSServer()
-        .ws<SomeData>("/" + toLower(serviceName),  std::move(behavior))
-                .get("/data/:id", [this](auto *res, auto *req) {
-                    const auto id = std::string(req->getParameter(0)); //till c++20 ?
-                    const auto it = m_pulled.find(id);
-                    if(it == m_pulled.end()) {
-                        res->writeStatus("404 Not Found");
-                        res->writeHeader("Content-Type", "text/html; charset=utf-8");
-                        res->end("<html><body><h1>Ooops</h1><h3>404 Data Not Found </h3><h5>" + std::string(req->getUrl()) + "</body></html>");
-                        GempyreUtils::log(GempyreUtils::LogLevel::Error, "pull not found", id);
+        .ws<SomeData>("/" + toLower(serviceName), std::move(behavior))
+        .get("/data/:id", [this](auto * res, auto * req) {
+            const auto id = std::string(req->getParameter(0)); //till c++20 ?
+            const auto it = m_pulled.find(id);
+            if(it == m_pulled.end()) {
+                res->writeStatus("404 Not Found");
+                res->writeHeader("Content-Type", "text/html; charset=utf-8");
+                res->end(notFoundPage(req->getUrl()));
+                GempyreUtils::log(GempyreUtils::LogLevel::Error, "pull not found", id);
 
-                    } else {
-                        const auto mime = std::get<DataType>(it->second) == DataType::Json ? "application/json" : "application/octet-stream";
-                        res->writeHeader("Content-Type", mime);
-                        res->writeStatus(uWS::HTTP_200_OK);
-                        res->end(std::get<std::string>(it->second));
-                        m_pulled.erase(it);
-                    }
-                })
-                .get("/*", [this, serviceName](auto* res, auto* req) {
+            } else {
+                const auto mime = std::get<DataType>(it->second) == DataType::Json ? "application/json" : "application/octet-stream";
+                res->writeHeader("Content-Type", mime);
+                res->writeStatus(uWS::HTTP_200_OK);
+                res->end(std::get<std::string>(it->second));
+                m_pulled.erase(it);
+            }
+        })
+        .get("/*", [this, serviceName](auto * res, auto * req) {
             const auto url = req->getUrl();
             const auto serverData = m_onGet(url);
             std::string page;
@@ -308,14 +331,14 @@ std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
                     fullPath.append(url);
                 }
                 GempyreUtils::log(GempyreUtils::LogLevel::Debug, "GET",
-                       "Uri:", url,
-                      "query:", req->getQuery(),
-                      "path:", fullPath,
-                      "header:", GempyreUtils::join<uWS::HttpRequest::HeaderIterator, std::pair<std::string_view, std::string_view>, std::string>(
-                          req->begin(),
-                          req->end(),
-                          ",",
-                          [](const auto& p) {return std::string(p.first) + " " + std::string(p.second);}));
+                                  "Uri:", url,
+                                  "query:", req->getQuery(),
+                                  "path:", fullPath,
+                                  "header:", GempyreUtils::join<uWS::HttpRequest::HeaderIterator, std::pair<std::string_view, std::string_view>, std::string>(
+                                      req->begin(),
+                                      req->end(),
+                                      ",",
+                [](const auto & p) {return std::string(p.first) + " " + std::string(p.second);}));
                 if(page.empty() && GempyreUtils::fileExists(fullPath)) {
                     page = GempyreUtils::slurp(fullPath);
                 } else {
@@ -330,16 +353,16 @@ std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
             } else {
                 res->writeStatus("404 Not Found");
                 res->writeHeader("Content-Type", "text/html; charset=utf-8");
-                res->end("<html><body><h1>Ooops</h1><h3>404 Not Found </h3><h5>" + std::string(req->getUrl()) + "</h5><i>" + serviceName + "</i></body></html>");
+                res->end(notFoundPage(req->getUrl(), serviceName));
                 GempyreUtils::log(GempyreUtils::LogLevel::Error, "404, not found", url);
             }
-            })
-        .listen(getPort(port), [this, port](auto* socket) {
+        })
+        .listen(getPort(port), [this, port](auto * socket) {
             char PADDING[2];
-            if (socket) {
+            if(socket) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Debug, "listening on port:", m_port);
                 m_closeData = socket;
-                if(!m_onListen(m_port)){
+                if(!m_onListen(m_port)) {
                     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "List callback failed, closing");
                     doClose();
                 } else {
@@ -352,7 +375,7 @@ std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
                 GempyreUtils::log(GempyreUtils::LogLevel::Warning, "try listen on port:", m_port, "failed", GempyreUtils::lastError());
                 m_onClose(Close::FAIL, -1);
             }
-            }).run();
+        }).run();
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server is about go close");
     });
 }
@@ -364,33 +387,36 @@ Server::~Server() {
 
 int Server::addPulled(DataType type, const std::string_view& data) {
     ++m_pulledId;
-    m_pulled.emplace(std::to_string(m_pulledId), std::pair<DataType, std::string>{type, std::string(data)});
+    m_pulled.emplace(std::to_string(m_pulledId), std::pair<DataType, std::string> {type, std::string(data)});
     return m_pulledId;
 }
 
 void Server::closeSocket() {
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server", "closeSocket", m_closeData.has_value());
     if(m_closeData.has_value()) {
-        auto socket = std::any_cast<us_listen_socket_t*>(m_closeData);
+        auto socket = std::any_cast<us_listen_socket_t*>(m_closeData);      
         us_listen_socket_close(0, socket);
         m_closeData.reset();
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server", "listen socket closed");
     }
 }
 
 bool Server::retryStart() {
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Retry", m_port);
-    if(m_port >= PORT_MAX)
+    if(m_port >= PORT_MAX) {
         return false;
+    }
 
     closeSocket();
 
-    if(m_server) {
+    if(m_serverThread) {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Joining server");
-        m_server->join();
+        m_serverThread->join();
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server joined");
     }
-    if(m_startFunction)
-        m_server = m_startFunction();
+    if(m_startFunction) {
+        m_serverThread = m_startFunction();
+    }
     return true;
 }
 
@@ -460,7 +486,7 @@ bool Server::send(const std::unordered_map<std::string, std::string>& object, co
     return true;
 }
 
-bool Server::send(const char *data, size_t len) {
+bool Server::send(const char* data, size_t len) {
     if(len < WS_MAX_LEN) {
         m_broadcaster->send(data, len);
     } else {
@@ -480,9 +506,9 @@ void Server::doClose() {
 
 void Server::close(bool wait) {
     doClose();
-    if(wait && m_server && m_server->joinable()) {
+    if(wait && m_serverThread && m_serverThread->joinable()) {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Wait server to close");
-        m_server->join();
+        m_serverThread->join();
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server close");
     }
 }

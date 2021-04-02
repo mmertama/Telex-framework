@@ -10,8 +10,9 @@ socket.binaryType = 'arraybuffer';
 var logging = true;
 
 function log(...logStr) {
-    if(logging)
+    if(logging) {
         console.log(...logStr);
+    }
 } 
 
 function errlog(source, text) {

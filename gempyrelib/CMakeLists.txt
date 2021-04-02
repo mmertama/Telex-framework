@@ -8,6 +8,11 @@ include(ExternalProject)
 include(FetchContent)
 include(../scripts/addResource.cmake_script)
 
+# set(LIB_UV_VER  v1.34.0)
+# set(LIB_JSON_VER v3.7.0)
+# set(LIB_SOCKETS_VER v0.3.2)
+# set(LIB_WS_VER v0.16.1)
+# set(LIB_ZLIB_VER v1.2.11)
 
 set(CMAKE_CXX_FLAGS "-DGEMPYRE_PROJECT_VERSION=${PROJECT_VERSION} ${CMAKE_CXX_FLAGS}")
 

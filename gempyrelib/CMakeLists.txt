@@ -369,10 +369,9 @@ export(
     )
 
  
-file(GLOB HEADERS include/*.h)
-file(GLOB AFFILIATES ${CMAKE_SOURCE_DIR}/affiliates/include/*.h) 
+file(GLOB HEADERS include/*.h  ${CMAKE_SOURCE_DIR}/affiliates/include/*.h)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS} ${AFFILIATES}")
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 if(NOT WIN32)
     install(
@@ -382,10 +381,6 @@ if(NOT WIN32)
        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
        COMPONENT library
        )
-#    install(
-#       FILES ${HEADERS} ${AFFILIATES}
-#       DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-#       )
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake
         DESTINATION "${CMAKE_INSTALL_DATADIR}/{$PROJECT_NAME}/cmake")	
 endif()

@@ -207,9 +207,9 @@ Server::Server(
     m_onListen(onListen),
     m_currentPort(m_requestedPort),
     //mStartFunction([this]()->std::unique_ptr<std::thread> {
- //   return makeServer();
+//   return makeServer();
 //}),
-    m_serverThread(std::make_unique<std::thread>([this](){serverThread(m_currentPort);})) {
+    m_serverThread(std::make_unique<std::thread>([this]() {serverThread(m_currentPort);})) {
 #ifdef RANDOM_PORT
     const auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
@@ -236,140 +236,140 @@ static std::string notFoundPage(const std::string_view& url, const std::string_v
 }
 
 void Server::serverThread(unsigned short port) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "makeServe - execute, using port:", port);
-        auto behavior = options(
-        [this](auto ws, auto) {
-            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS open");
-            m_broadcaster->append(ws);
-            m_onOpen(m_broadcaster->size());
-        },
-        [this](auto ws, auto message, auto opCode) {
-            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS message", message, opCode);
-            const auto jsObj = json::parse(message);
-            const auto f = jsObj.find("type");
-            if(f != jsObj.end()) {
-                if(*f == "keepalive") {
-                    return;
-                }
-                if(*f == "uiready") {
-                    m_uiready = true;
-                }
-                if(*f == "extensionready") {
-                    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "exteansionready");
-                    return;
-                }
+    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "makeServe - execute, using port:", port);
+    auto behavior = options(
+    [this](auto ws, auto) {
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS open");
+        m_broadcaster->append(ws);
+        m_onOpen(m_broadcaster->size());
+    },
+    [this](auto ws, auto message, auto opCode) {
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS message", message, opCode);
+        const auto jsObj = json::parse(message);
+        const auto f = jsObj.find("type");
+        if(f != jsObj.end()) {
+            if(*f == "keepalive") {
+                return;
             }
-            const auto js = convert(jsObj);
-            auto object = std::any_cast<Object>(js);
-            m_onMessage(std::move(object));
-
-        },
-        [this](auto ws, auto code, auto message) {
-            if(code != 1001 && code != 1006) {  //browser window closed
-                if(code == 1000 || (code >= 1002 && code <= 1015)  || (code >= 3000 && code <= 3999) || (code >= 4000 && code <= 4999)) {
-                    GempyreUtils::log(GempyreUtils::LogLevel::Error, "WS", "closed on error", code, message);
-                }   else if(code != 0) {
-                    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "Non closing error", code, message);
-                    return;
-                }
+            if(*f == "uiready") {
+                m_uiready = true;
             }
-            //exit request
-            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "close", code, message);
-            m_broadcaster->remove(ws);
-            m_onClose(Close::CLOSE, code);
-            ws->close();
-            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Socket is closed");
-        });
-
-        auto server = std::make_unique<decltype (WSServer())>();
-        server->ws<SomeData>("/" + toLower(SERVICE_NAME), std::move(behavior))
-        .get("/data/:id", [this](auto * res, auto * req) {
-            const auto id = std::string(req->getParameter(0)); //till c++20 ?
-            const auto it = m_pulled.find(id);
-            if(it == m_pulled.end()) {
-                res->writeStatus("404 Not Found");
-                res->writeHeader("Content-Type", "text/html; charset=utf-8");
-                res->end(notFoundPage(req->getUrl()));
-                GempyreUtils::log(GempyreUtils::LogLevel::Error, "pull not found", id);
-
-            } else {
-                const auto mime = std::get<DataType>(it->second) == DataType::Json ? "application/json" : "application/octet-stream";
-                res->writeHeader("Content-Type", mime);
-                res->writeStatus(uWS::HTTP_200_OK);
-                res->end(std::get<std::string>(it->second));
-                m_pulled.erase(it);
+            if(*f == "extensionready") {
+                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "exteansionready");
+                return;
             }
-        })
-        .get("/*", [this](auto * res, auto * req) {
-            const auto url = req->getUrl();
-            const auto serverData = m_onGet(url);
-            std::string page;
-            if(serverData.has_value()) {
-                page = serverData.value();
-                GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "server get:", page.size());
-            } else {
-                GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "server get does an file query");
-                std::string fullPath;
-                const auto query = req->getQuery();
-                if(!query.empty()) {
-                    const auto queries = GempyreUtils::split<std::vector<std::string>>(std::string(query), '&');
-                    for(const auto& q : queries) {
-                        const auto queries = GempyreUtils::split<std::vector<std::string>>(q, '=');
-                        if(queries.size() == 2) {
-                            if(queries[0] == "file") {
-                                fullPath = GempyreUtils::unhexify(queries[1]);
-                            }
+        }
+        const auto js = convert(jsObj);
+        auto object = std::any_cast<Object>(js);
+        m_onMessage(std::move(object));
+
+    },
+    [this](auto ws, auto code, auto message) {
+        if(code != 1001 && code != 1006) {  //browser window closed
+            if(code == 1000 || (code >= 1002 && code <= 1015)  || (code >= 3000 && code <= 3999) || (code >= 4000 && code <= 4999)) {
+                GempyreUtils::log(GempyreUtils::LogLevel::Error, "WS", "closed on error", code, message);
+            }   else if(code != 0) {
+                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "Non closing error", code, message);
+                return;
+            }
+        }
+        //exit request
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "close", code, message);
+        m_broadcaster->remove(ws);
+        m_onClose(Close::CLOSE, code);
+        ws->close();
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Socket is closed");
+    });
+
+    WSServer()
+    .ws<SomeData>("/" + toLower(SERVICE_NAME), std::move(behavior))
+    .get("/data/:id", [this](auto * res, auto * req) {
+        const auto id = std::string(req->getParameter(0)); //till c++20 ?
+        const auto it = m_pulled.find(id);
+        if(it == m_pulled.end()) {
+            res->writeStatus("404 Not Found");
+            res->writeHeader("Content-Type", "text/html; charset=utf-8");
+            res->end(notFoundPage(req->getUrl()));
+            GempyreUtils::log(GempyreUtils::LogLevel::Error, "pull not found", id);
+
+        } else {
+            const auto mime = std::get<DataType>(it->second) == DataType::Json ? "application/json" : "application/octet-stream";
+            res->writeHeader("Content-Type", mime);
+            res->writeStatus(uWS::HTTP_200_OK);
+            res->end(std::get<std::string>(it->second));
+            m_pulled.erase(it);
+        }
+    })
+    .get("/*", [this](auto * res, auto * req) {
+        const auto url = req->getUrl();
+        const auto serverData = m_onGet(url);
+        std::string page;
+        if(serverData.has_value()) {
+            page = serverData.value();
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "server get:", page.size());
+        } else {
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "server get does an file query");
+            std::string fullPath;
+            const auto query = req->getQuery();
+            if(!query.empty()) {
+                const auto queries = GempyreUtils::split<std::vector<std::string>>(std::string(query), '&');
+                for(const auto& q : queries) {
+                    const auto queries = GempyreUtils::split<std::vector<std::string>>(q, '=');
+                    if(queries.size() == 2) {
+                        if(queries[0] == "file") {
+                            fullPath = GempyreUtils::unhexify(queries[1]);
                         }
                     }
                 }
-                if(fullPath.empty()) {
-                    fullPath = m_rootFolder;
-                    fullPath.append(url);
-                }
-                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "GET",
-                                  "Uri:", url,
-                                  "query:", req->getQuery(),
-                                  "path:", fullPath,
-                                  "header:", GempyreUtils::join<uWS::HttpRequest::HeaderIterator, std::pair<std::string_view, std::string_view>, std::string>(
-                                      req->begin(),
-                                      req->end(),
-                                      ",",
-                [](const auto & p) {return std::string(p.first) + " " + std::string(p.second);}));
-                if(page.empty() && GempyreUtils::fileExists(fullPath)) {
-                    page = GempyreUtils::slurp(fullPath);
-                } else {
-                    GempyreUtils::log(GempyreUtils::LogLevel::Warning, "path:", fullPath, "Not found");
-                }
             }
-            if(!page.empty()) {
-                const auto mime = fileToMime(url);
-                res->writeHeader("Content-Type", mime);
-                res->writeStatus(uWS::HTTP_200_OK);
-                res->end(page);
+            if(fullPath.empty()) {
+                fullPath = m_rootFolder;
+                fullPath.append(url);
+            }
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "GET",
+                              "Uri:", url,
+                              "query:", req->getQuery(),
+                              "path:", fullPath,
+                              "header:", GempyreUtils::join<uWS::HttpRequest::HeaderIterator, std::pair<std::string_view, std::string_view>, std::string>(
+                                  req->begin(),
+                                  req->end(),
+                                  ",",
+            [](const auto & p) {return std::string(p.first) + " " + std::string(p.second);}));
+            if(page.empty() && GempyreUtils::fileExists(fullPath)) {
+                page = GempyreUtils::slurp(fullPath);
             } else {
-                res->writeStatus("404 Not Found");
-                res->writeHeader("Content-Type", "text/html; charset=utf-8");
-                res->end(notFoundPage(req->getUrl(), SERVICE_NAME));
-                GempyreUtils::log(GempyreUtils::LogLevel::Error, "404, not found", url);
+                GempyreUtils::log(GempyreUtils::LogLevel::Warning, "path:", fullPath, "Not found");
             }
-        })
-        .listen(port, [this, port](auto* socket) {
-            char PADDING[2];
-            if(socket) {
-                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "listening on port:", port);
-                m_closeData = socket;
-                if(!m_onListen(port)) {
-                    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "List callback failed, closing");
-                    doClose();
-                } else {
-                    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Listen ok, wait for event");
-                }
+        }
+        if(!page.empty()) {
+            const auto mime = fileToMime(url);
+            res->writeHeader("Content-Type", mime);
+            res->writeStatus(uWS::HTTP_200_OK);
+            res->end(page);
+        } else {
+            res->writeStatus("404 Not Found");
+            res->writeHeader("Content-Type", "text/html; charset=utf-8");
+            res->end(notFoundPage(req->getUrl(), SERVICE_NAME));
+            GempyreUtils::log(GempyreUtils::LogLevel::Error, "404, not found", url);
+        }
+    })
+    .listen(port, [this, port](auto * socket) {
+        char PADDING[2];
+        if(socket) {
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "listening on port:", port);
+            m_closeData = socket;
+            if(!m_onListen(port)) {
+                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "List callback failed, closing");
+                doClose();
             } else {
-                GempyreUtils::log(GempyreUtils::LogLevel::Warning, "try listen on port:", port, "failed", GempyreUtils::lastError());
-                m_onClose(Close::FAIL, -1);
+                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Listen ok, wait for event");
             }
-        }).run();
-        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server is about go close");
+        } else {
+            GempyreUtils::log(GempyreUtils::LogLevel::Warning, "try listen on port:", port, "failed", GempyreUtils::lastError());
+            m_onClose(Close::FAIL, -1);
+        }
+    }).run();
+    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server is about go close");
 }
 
 
@@ -386,7 +386,7 @@ int Server::addPulled(DataType type, const std::string_view& data) {
 void Server::closeSocket() {
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server", "closeSocket", m_closeData.has_value());
     if(m_closeData.has_value()) {
-        auto socket = std::any_cast<us_listen_socket_t*>(m_closeData);      
+        auto socket = std::any_cast<us_listen_socket_t*>(m_closeData);
         us_listen_socket_close(0, socket);
         m_closeData.reset();
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server", "listen socket closed");
@@ -412,7 +412,7 @@ bool Server::retryStart() {
 
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "retry end", m_doExit);
     if(!m_doExit) {
-        m_serverThread = std::make_unique<std::thread>([this](){serverThread(m_currentPort);});
+        m_serverThread = std::make_unique<std::thread>([this]() {serverThread(m_currentPort);});
         return true;
     } else {
         return false;

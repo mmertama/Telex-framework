@@ -36,9 +36,9 @@ src/generated
 x64
 Debug
 Release
-test/tick/tick
-test/hello/hello
-est/treeview/treeview
+examples/tick/tick
+examples/hello/hello
+examples/treeview/treeview
 build-*
 *.html.h
 *.js.h
@@ -54,20 +54,18 @@ mpfr*
 apps/calc/calc
 apps/mandelbrot/mandelbrot
 apps/treeview/treeviewblog/hello/hello
-test/unittest/unittest
-test/imageblit/imageblittest
+examples/unittest/unittest
+examples/imageblit/imageblittest
 blog/minihello/minihello
-test/eval/evaltest
+examples/eval/evaltest
 blog/hexview/hexview
-test/unittests/unittests
-test/helloworld/helloworld
-test/helloworld/helloworld.html
-blog/minihello/minihello.html
+examples/unittests/unittests
+examples/helloworld/helloworld
 apps/treeview/treeview
 blog/hello/hello
 
 affiliates/client/client
-test/drawcanvas/drawcanvastest
+examples/drawcanvas/drawcanvastest
 test/drawcanvas/drawcanvastest
 _deps
 *.cbp
@@ -77,5 +75,15 @@ affiliates/test_rpc/affiliates_test_rpc
 install_manifest.txt
 
 .vscode
-test/audio/audiotest
-test/snowflakes/snowflakestest
+examples/audio/audiotest
+examples/snowflakes/snowflakestest
+examples/apitests/apitests
+examples/audio/audiotest
+examples/eval/evaltest
+examples/hello/hello
+examples/hello2/hello2
+examples/hello2/hello2
+examples/hello2/hello2
+examples/hello2/hello2
+examples/hello/hello
+test/apitests/apitests

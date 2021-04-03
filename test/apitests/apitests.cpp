@@ -35,10 +35,10 @@ std::string defaultChrome() {
 }
 
 void killHeadless() {
-    if(GempyreUtils::currentOS() == GempyreUtils::OS::WinOs) {
-        constexpr auto cmd = R"(Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%chrome.exe%--headless%'" | %{Stop-Process $_.ProcessId})";
-    }
-    constexpr auto cmd = "pkill -f \"(chrome)?(--headless)\"";
+     const auto cmd =
+     GempyreUtils::currentOS() == GempyreUtils::OS::WinOs
+        ? R"(powershell.exe -command "Get-CimInstance Win32_Process -Filter \"CommandLine LIKE%--headless%'\" | %{Stop-Process $_.ProcessId}")"
+        : "pkill -f \"(chrome)?(--headless)\"";
     std::system(cmd);
 }
 

@@ -373,9 +373,21 @@ std::string GempyreUtils::readProcess(const std::string& processName) {
 std::string GempyreUtils::tempName() {
 #ifndef USE_TEMPNAM
 //in MT this may NOT be any more safe than the std::tmpnam
+#ifdef MAC_OS
+    const auto tmp = std::getenv("TMPDIR");
+    assert(tmp); // should alway be there;
+    assert(tmp[std::strlen(tmp) - 1] == '/');
+    constexpr char ext[] = "ecutils_XXXXXX";
+    char name[1024] = {0};
+    std::strcat(name, tmp);
+    std::strcat(name, ext);
+#else
     constexpr char tpl[] = "/tmp/ecutils_XXXXXX";
     char name[sizeof tpl];
     std::strcpy(name, tpl);
+    char name[sizeof tpl];
+    std::strcpy(name, tpl);
+#endif
     const auto fd = ::mkstemp(name);
     ::close(fd);
 #else

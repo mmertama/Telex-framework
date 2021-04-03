@@ -28,7 +28,6 @@ public:
     using ListenFunction =  std::function<bool (unsigned short)>;
     Server(unsigned short port,
            const std::string& rootFolder,
-           const std::string& serviceName,
            const OpenFunction& onOpen,
            const MessageFunction& onMessage,
            const CloseFunction& onClose,
@@ -42,20 +41,20 @@ public:
     bool send(const std::unordered_map<std::string, std::string>& object, const std::any& values = std::any());
     bool send(const char* data, size_t len);
     int queryId() const {return ++m_queryId;}
-    unsigned short port() const {return m_port;}
+    unsigned short port() const {return m_currentPort;}
     std::function<std::string (const std::string&)> onFile(const std::function<std::string (const std::string&)>&f );
     ~Server();
     bool beginBatch();
     bool endBatch();
 private:
-    unsigned short getPort(unsigned short port);
-    std::unique_ptr<std::thread> makeServer(unsigned short port,
-                                                      const std::string& serviceName);
+    std::unique_ptr<std::thread> makeServer(unsigned short port);
     void doClose();
     void closeSocket();
     enum class DataType{Json, Bin};
     int addPulled(DataType, const std::string_view& data);
+    void serverThread(unsigned short port);
 private:
+    const unsigned short m_requestedPort;
     std::string m_rootFolder;
     std::unique_ptr<Broadcaster> m_broadcaster;
     std::unique_ptr<Broadcaster> m_extensions;
@@ -64,15 +63,16 @@ private:
     const CloseFunction m_onClose;
     const GetFunction m_onGet;
     const ListenFunction m_onListen;
-    std::function<std::unique_ptr<std::thread> ()> m_startFunction = nullptr;
+   // std::function<std::unique_ptr<std::thread> ()> mStartFunction = nullptr;
     std::unique_ptr<std::thread> m_serverThread;
     std::any m_closeData; //arbitrary
-    unsigned short m_port = 0;
+    unsigned short m_currentPort = 0;
     bool m_uiready = false;
     mutable int m_queryId = 0;
     std::unique_ptr<Batch> m_batch;
     std::unordered_map<std::string, std::pair<DataType, std::string>> m_pulled;
     int m_pulledId = 0;
+    bool m_doExit = false;
 };
 }
 

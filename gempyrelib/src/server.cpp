@@ -32,10 +32,10 @@ using namespace std::chrono_literals;
 using  WSServer = uWS::TemplatedApp<false>;
 using namespace Gempyre;
 
-constexpr unsigned short PORT_MIN = 30000;
-constexpr unsigned short PORT_MAX = 30500;
-
+constexpr unsigned short DEFAULT_PORT  = 30000;
+constexpr unsigned short PORT_ATTEMPTS = 50;
 constexpr size_t WS_MAX_LEN = 16 * 1024;
+constexpr auto SERVICE_NAME = "Gempyre";
 
 static std::string fileToMime(const std::string_view& filename) {
     const auto index = filename.find_last_of('.');
@@ -192,12 +192,12 @@ private:
 Server::Server(
     unsigned short port,
     const std::string& root,
-    const std::string& serviceName,
     const OpenFunction& onOpen,
     const MessageFunction& onMessage,
     const CloseFunction& onClose,
     const GetFunction& onGet,
     const ListenFunction& onListen) :
+    m_requestedPort(port == 0 ? DEFAULT_PORT : port),
     m_rootFolder(root),
     m_broadcaster(std::make_unique<Broadcaster>()),
     m_onOpen(onOpen),
@@ -205,10 +205,11 @@ Server::Server(
     m_onClose(onClose),
     m_onGet(onGet),
     m_onListen(onListen),
-    m_startFunction([ = ]()->std::unique_ptr<std::thread> {
-    return makeServer(port, serviceName);
-}),
-m_serverThread(m_startFunction()) {
+    m_currentPort(m_requestedPort),
+    //mStartFunction([this]()->std::unique_ptr<std::thread> {
+ //   return makeServer();
+//}),
+    m_serverThread(std::make_unique<std::thread>([this](){serverThread(m_currentPort);})) {
 #ifdef RANDOM_PORT
     const auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
@@ -234,13 +235,8 @@ static std::string notFoundPage(const std::string_view& url, const std::string_v
       <body><h1>Ooops</h1><h3 class="styled">404 Data Not Found </h3><h5>)" + std::string(url) + "</h5><i>" + std::string(info) + "</i></body></html>";
 }
 
-std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
-        const std::string& serviceName) {
-    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "makeServe - create");
-
-    return std::make_unique<std::thread>([this, port, serviceName]() {
-
-        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "makeServe - execute");
+void Server::serverThread(unsigned short port) {
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "makeServe - execute, using port:", port);
         auto behavior = options(
         [this](auto ws, auto) {
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS open");
@@ -285,8 +281,8 @@ std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Socket is closed");
         });
 
-        WSServer()
-        .ws<SomeData>("/" + toLower(serviceName), std::move(behavior))
+        auto server = std::make_unique<decltype (WSServer())>();
+        server->ws<SomeData>("/" + toLower(SERVICE_NAME), std::move(behavior))
         .get("/data/:id", [this](auto * res, auto * req) {
             const auto id = std::string(req->getParameter(0)); //till c++20 ?
             const auto it = m_pulled.find(id);
@@ -304,7 +300,7 @@ std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
                 m_pulled.erase(it);
             }
         })
-        .get("/*", [this, serviceName](auto * res, auto * req) {
+        .get("/*", [this](auto * res, auto * req) {
             const auto url = req->getUrl();
             const auto serverData = m_onGet(url);
             std::string page;
@@ -353,31 +349,27 @@ std::unique_ptr<std::thread> Server::makeServer(unsigned short port,
             } else {
                 res->writeStatus("404 Not Found");
                 res->writeHeader("Content-Type", "text/html; charset=utf-8");
-                res->end(notFoundPage(req->getUrl(), serviceName));
+                res->end(notFoundPage(req->getUrl(), SERVICE_NAME));
                 GempyreUtils::log(GempyreUtils::LogLevel::Error, "404, not found", url);
             }
         })
-        .listen(getPort(port), [this, port](auto * socket) {
+        .listen(port, [this, port](auto* socket) {
             char PADDING[2];
             if(socket) {
-                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "listening on port:", m_port);
+                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "listening on port:", port);
                 m_closeData = socket;
-                if(!m_onListen(m_port)) {
+                if(!m_onListen(port)) {
                     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "List callback failed, closing");
                     doClose();
                 } else {
                     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Listen ok, wait for event");
                 }
-            } else if(port > 0) {
-                GempyreUtils::log(GempyreUtils::LogLevel::Error, "listening on port:", port, "failed", GempyreUtils::lastError());
-                m_onClose(Close::EXIT, -1);
             } else {
-                GempyreUtils::log(GempyreUtils::LogLevel::Warning, "try listen on port:", m_port, "failed", GempyreUtils::lastError());
+                GempyreUtils::log(GempyreUtils::LogLevel::Warning, "try listen on port:", port, "failed", GempyreUtils::lastError());
                 m_onClose(Close::FAIL, -1);
             }
         }).run();
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server is about go close");
-    });
 }
 
 
@@ -402,8 +394,9 @@ void Server::closeSocket() {
 }
 
 bool Server::retryStart() {
-    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Retry", m_port);
-    if(m_port >= PORT_MAX) {
+    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Retry", m_currentPort);
+    if(++m_currentPort > m_requestedPort + PORT_ATTEMPTS) {
+        GempyreUtils::log(GempyreUtils::LogLevel::Error, "Listen ports:", m_requestedPort, "-", m_currentPort, "failed", GempyreUtils::lastError());
         return false;
     }
 
@@ -414,23 +407,20 @@ bool Server::retryStart() {
         m_serverThread->join();
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Server joined");
     }
-    if(m_startFunction) {
-        m_serverThread = m_startFunction();
-    }
-    return true;
-}
 
-unsigned short Server::getPort(unsigned short port) {
-    if(port == 0) {
-        if(m_port == 0) {
-            m_port = PORT_MIN;
-        } else {
-            ++m_port;
-        }
+    m_serverThread.reset();
+
+    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "retry end", m_doExit);
+    if(!m_doExit) {
+        m_serverThread = std::make_unique<std::thread>([this](){serverThread(m_currentPort);});
+        return true;
     } else {
-        m_port = port;
+        return false;
     }
-    return m_port;
+    /*if(mStartFunction) {
+        m_serverThread = mStartFunction();
+    }*/
+    return true;
 }
 
 bool Server::isConnected() const {
@@ -500,7 +490,8 @@ bool Server::send(const char* data, size_t len) {
 
 void Server::doClose() {
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Do Close", m_closeData.has_value());
-    m_startFunction = nullptr; //mutexx?
+    m_doExit = true;
+    //mStartFunction = nullptr; //mutexx?
     closeSocket();
 }
 

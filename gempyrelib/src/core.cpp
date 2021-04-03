@@ -32,7 +32,6 @@ extern int androidLoadUi(const std::string&);
 #endif
 
 #define CHECK_FATAL(x) if(ec) {error(ec, merge(x, " at ", __LINE__)); return;}  std::cout << x << " - ok" << std::endl;
-constexpr char Name[] = "Gempyre";
 
 void Gempyre::setDebug(Gempyre::DebugLevel level, bool useLog) {
     const std::unordered_map<Gempyre::DebugLevel, GempyreUtils::LogLevel> lvl =  {
@@ -268,7 +267,6 @@ m_filemap(normalizeNames(filemap)) {
         m_server = std::make_unique<Server>(
                        port,
                        root.empty() ? GempyreUtils::workingDir() : root,
-                       Name,
                        openHandler,
                        messageHandler,
                        closeHandler,
@@ -499,7 +497,10 @@ void Ui::eventLoop() {
 
         if(m_status == State::RETRY) {
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Eventloop will retry");
-            m_server->retryStart();
+            if(!m_server->retryStart()) {
+                m_status = State::EXIT;
+                break;
+            }
             continue;
         }
 

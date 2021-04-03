@@ -373,6 +373,7 @@ UTILS_EX std::string pathPop(const std::string& filename, int steps = 1);
 UTILS_EX std::vector<std::tuple<std::string, bool, std::string>> directory(const std::string& dirname);
 UTILS_EX std::string readProcess(const std::string& processName);
 UTILS_EX std::string baseName(const std::string& filename);
+/// Generate unique name (prefer <filesystem> if available)
 UTILS_EX std::string tempName();
 UTILS_EX std::string hostName();
 UTILS_EX std::string systemEnv(const std::string& env);

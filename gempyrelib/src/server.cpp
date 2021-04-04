@@ -101,18 +101,6 @@ static std::string toLower(const std::string& str) {
     return s;
 }
 
-WSBehaviour options(decltype(WSBehaviour::open)&& open,  decltype(WSBehaviour::message)&& message, decltype(WSBehaviour::close)&& close) {
-    WSBehaviour bh;
-    bh.open = std::move(open);
-    bh.message = std::move(message);
-    bh.close = std::move(close);
-    //  bh.maxPayloadLength = 1024 * 1024;
-    bh.drain = [](auto ws) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Warning, "drain", ws->getBufferedAmount());
-    };
-    return bh;
-}
-
 class Gempyre::Batch {
 public:
     Batch() {
@@ -132,6 +120,7 @@ private:
 };
 
 class Gempyre::Broadcaster {
+    static constexpr auto DELAY = 100ms;
 public:
     bool send(const std::string_view& text) {
         for(auto& s : m_sockets) {
@@ -139,6 +128,8 @@ public:
             const auto success = s->send(text, uWS::OpCode::TEXT);
             if(!success) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Warning, "socket t2 buffer", s->getBufferedAmount());
+                m_backPressureMutex.try_lock_for(DELAY);
+                return false;
             }
         }
         return !m_sockets.empty();
@@ -150,6 +141,8 @@ public:
             const auto success = s->send(std::string_view(data, len), uWS::OpCode::BINARY);
             if(!success) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Warning, "socket b2 buffer", s->getBufferedAmount());
+                m_backPressureMutex.try_lock_for(DELAY);
+                return false;
             }
         }
         return !m_sockets.empty();
@@ -182,8 +175,14 @@ public:
         }
         return static_cast<size_t>(min);
     }
+
+    void unlock() {
+        m_backPressureMutex.unlock();
+    }
+
 private:
     std::unordered_set<WSSocket*> m_sockets;
+    std::timed_mutex m_backPressureMutex;
 };
 
 
@@ -281,7 +280,17 @@ void Server::serverThread(unsigned short port) {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Socket is closed");
     };
 
-    auto behavior = options (openHandler,messageHandler,closeHandler);
+    WSBehaviour behavior;
+    behavior.open = openHandler;
+    behavior.message = messageHandler;
+    behavior.close = closeHandler;
+    //  bh.maxPayloadLength = 1024 * 1024;
+    behavior.drain = [this](auto ws) {
+        GempyreUtils::log(GempyreUtils::LogLevel::Warning, "drain", ws->getBufferedAmount());
+        m_broadcaster->unlock(); //release backpressure wait
+    };
+
+
 
     WSServer()
     .ws<SomeData>("/" + toLower(SERVICE_NAME), std::move(behavior))
@@ -438,12 +447,14 @@ bool Server::endBatch() {
     if(m_batch) {
         const auto str = m_batch->dump();
         if(str.size() < WS_MAX_LEN) {
-            m_broadcaster->send(str);
+            if(!m_broadcaster->send(str))
+                return false;
         } else {
             const auto pull = addPulled(DataType::Json, str);
             const json obj = {{"type", "pull_json"}, {"id", pull}};
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "add batch pull", str.size(), pull);
-            m_broadcaster->send(obj.dump());
+            if(!m_broadcaster->send(obj.dump()))
+                return false;
         }
         m_batch.reset();
     }
@@ -466,12 +477,14 @@ bool Server::send(const std::unordered_map<std::string, std::string>& object, co
     } else {
         const auto str = js.dump();
         if(str.size() < WS_MAX_LEN) {
-            m_broadcaster->send(str);
+            if(!m_broadcaster->send(str))
+                return false;
         } else {
             const auto pull = addPulled(DataType::Json, str);
             const json obj = {{"type", "pull_json"}, {"id", pull}};
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "add text pull", str.size(), pull);
-            m_broadcaster->send(obj.dump());
+            if(!m_broadcaster->send(obj.dump()))
+                   return false;
         }
 
     }
@@ -480,12 +493,14 @@ bool Server::send(const std::unordered_map<std::string, std::string>& object, co
 
 bool Server::send(const char* data, size_t len) {
     if(len < WS_MAX_LEN) {
-        m_broadcaster->send(data, len);
+        if(!m_broadcaster->send(data, len))
+            return false;
     } else {
         const auto pull = addPulled(DataType::Bin, {data, len});
         const json obj = {{"type", "pull_binary"}, {"id", pull}};
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "add bin pull", len, pull);
-        m_broadcaster->send(obj.dump());
+        if(!m_broadcaster->send(obj.dump()))
+            return false;
     }
     return true;
 }

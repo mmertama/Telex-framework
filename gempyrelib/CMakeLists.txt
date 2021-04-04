@@ -8,11 +8,29 @@ include(ExternalProject)
 include(FetchContent)
 include(../scripts/addResource.cmake_script)
 
-# set(LIB_UV_VER  v1.34.0)
-# set(LIB_JSON_VER v3.7.0)
-# set(LIB_SOCKETS_VER v0.3.2)
-# set(LIB_WS_VER v0.16.1)
-# set(LIB_ZLIB_VER v1.2.11)
+option(BLEEDING_EDGE OFF)
+
+#googletest-src release-1.10.0-612-g6c5c4554
+#libjson v3.9.0-47-g350ff4f7c
+#libdeflate v1.7-14-g4d3c0f0
+#libwebsockets v19.0.0a5-3-g42d480e
+#uSockets v0.7.1
+#libsockets v0.7.1
+
+if(DEFINED BLEEDING_EDGE)
+    message("Using bleeding edge libaries")
+    set(LIB_UV_VER  master)
+    set(LIB_JSON_VER master)
+    set(LIB_SOCKETS_VER master)
+    set(LIB_WS_VER master)
+    set(LIB_ZLIB_VER master)
+else()
+    set(LIB_UV_VER  v1.41.0)
+    set(LIB_JSON_VER v3.9.0)
+    set(LIB_SOCKETS_VER v0.7.1)
+    set(LIB_WS_VER v0.19.0)
+    set(LIB_ZLIB_VER v1.2.11)
+endif()
 
 set(CMAKE_CXX_FLAGS "-DGEMPYRE_PROJECT_VERSION=${PROJECT_VERSION} ${CMAKE_CXX_FLAGS}")
 
@@ -57,7 +75,7 @@ if (WIN32 OR ANDROID)
         externalproject_add(libuv
             PREFIX ${UV_DIR}
             GIT_REPOSITORY https://github.com/libuv/libuv.git
-            GIT_TAG v1.34.0
+            GIT_TAG ${LIB_UV_VER}
             GIT_PROGRESS true
             BUILD_BYPRODUCTS ${UV_LIB}
             CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
@@ -78,7 +96,7 @@ set(JSON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/${JSON_NAME}")
 externalproject_add(libjson
     PREFIX ${JSON_DIR}
     GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.7.0
+    GIT_TAG ${LIB_JSON_VER}
     GIT_PROGRESS true
     UPDATE_DISCONNECTED false
     INSTALL_COMMAND ""
@@ -97,7 +115,7 @@ if(WIN32 OR ANDROID)
     FetchContent_Declare(
       libsockets
       GIT_REPOSITORY https://github.com/uNetworking/uSockets.git
-      GIT_TAG v0.3.2
+      GIT_TAG ${LIB_SOCKETS_VER}
     )
     
     FetchContent_GetProperties(libsockets)
@@ -111,7 +129,7 @@ else()
     externalproject_add(libsockets
         PREFIX ${SOCKETS_DIR}
         GIT_REPOSITORY https://github.com/uNetworking/uSockets.git
-        GIT_TAG v0.3.2
+        GIT_TAG ${LIB_SOCKETS_VER}
         GIT_PROGRESS true
         UPDATE_DISCONNECTED false
         BUILD_COMMAND  "" #make ${SOCKETS_SOURCES}/Makefile
@@ -142,7 +160,7 @@ set(WEBSOCKETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/uNetworking/${WEBSOCKETS_N
 externalproject_add(libwebsockets
     PREFIX ${WEBSOCKETS_DIR}
     GIT_REPOSITORY https://github.com/uNetworking/uWebSockets.git
-    GIT_TAG v0.16.1
+    GIT_TAG ${LIB_WS_VER}
     GIT_PROGRESS true
     UPDATE_DISCONNECTED false
     BUILD_COMMAND ""
@@ -169,7 +187,7 @@ if(NOT ZLIB_H)
     externalproject_add(zlib
         PREFIX ${ZLIB_DIR}
         GIT_REPOSITORY https://github.com/madler/zlib.git
-        GIT_TAG v1.2.11
+        GIT_TAG ${LIB_ZLIB_VER}
         GIT_PROGRESS true
         UPDATE_DISCONNECTED false
         BUILD_COMMAND ""

@@ -29,7 +29,10 @@
 using json = nlohmann::json;
 using namespace std::chrono_literals;
 
-using  WSServer = uWS::TemplatedApp<false>;
+struct SomeData {};
+using WSServer = uWS::TemplatedApp<false>;
+using WSBehaviour = WSServer::WebSocketBehavior<SomeData>;
+using WSSocket = uWS::WebSocket<false, true, SomeData>;
 using namespace Gempyre;
 
 constexpr unsigned short DEFAULT_PORT  = 30000;
@@ -98,8 +101,8 @@ static std::string toLower(const std::string& str) {
     return s;
 }
 
-WSServer::WebSocketBehavior options(decltype(WSServer::WebSocketBehavior::open)&& open,  decltype(WSServer::WebSocketBehavior::message)&& message, decltype(WSServer::WebSocketBehavior::close)&& close) {
-    WSServer::WebSocketBehavior bh;
+WSBehaviour options(decltype(WSBehaviour::open)&& open,  decltype(WSBehaviour::message)&& message, decltype(WSBehaviour::close)&& close) {
+    WSBehaviour bh;
     bh.open = std::move(open);
     bh.message = std::move(message);
     bh.close = std::move(close);
@@ -109,10 +112,6 @@ WSServer::WebSocketBehavior options(decltype(WSServer::WebSocketBehavior::open)&
     };
     return bh;
 }
-
-struct SomeData {};
-
-using WSSocket = uWS::WebSocket<false, true>;
 
 class Gempyre::Batch {
 public:
@@ -177,7 +176,7 @@ public:
     }
 
     size_t bufferSize() const {
-        auto min = 0;
+        auto min = 0U;
         for(const auto& s : m_sockets) {
             min = std::min(min, s->getBufferedAmount());
         }
@@ -237,34 +236,35 @@ static std::string notFoundPage(const std::string_view& url, const std::string_v
 
 void Server::serverThread(unsigned short port) {
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "makeServe - execute, using port:", port);
-    auto behavior = options(
-    [this](auto ws, auto) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS open");
-        m_broadcaster->append(ws);
-        m_onOpen(m_broadcaster->size());
-    },
-    [this](auto ws, auto message, auto opCode) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS message", message, opCode);
-        const auto jsObj = json::parse(message);
-        const auto f = jsObj.find("type");
-        if(f != jsObj.end()) {
-            if(*f == "keepalive") {
-                return;
-            }
-            if(*f == "uiready") {
-                m_uiready = true;
-            }
-            if(*f == "extensionready") {
-                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "exteansionready");
-                return;
-            }
-        }
-        const auto js = convert(jsObj);
-        auto object = std::any_cast<Object>(js);
-        m_onMessage(std::move(object));
+    auto openHandler =
+            [this](auto ws) {
+                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS open");
+                m_broadcaster->append(ws);
+                m_onOpen(m_broadcaster->size());
+            };
+    auto messageHandler =
+            [this](auto ws, auto message, auto opCode) {
+                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS message", message, opCode);
+                const auto jsObj = json::parse(message);
+                const auto f = jsObj.find("type");
+                if(f != jsObj.end()) {
+                    if(*f == "keepalive") {
+                        return;
+                    }
+                    if(*f == "uiready") {
+                        m_uiready = true;
+                    }
+                    if(*f == "extensionready") {
+                        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "exteansionready");
+                        return;
+                    }
+                }
+                const auto js = convert(jsObj);
+                auto object = std::any_cast<Object>(js);
+                m_onMessage(std::move(object));
 
-    },
-    [this](auto ws, auto code, auto message) {
+            };
+    auto closeHandler = [this](auto ws, auto code, auto message) {
         if(code != 1001 && code != 1006) {  //browser window closed
             if(code == 1000 || (code >= 1002 && code <= 1015)  || (code >= 3000 && code <= 3999) || (code >= 4000 && code <= 4999)) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Error, "WS", "closed on error", code, message);
@@ -279,7 +279,9 @@ void Server::serverThread(unsigned short port) {
         m_onClose(Close::CLOSE, code);
         ws->close();
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Socket is closed");
-    });
+    };
+
+    auto behavior = options (openHandler,messageHandler,closeHandler);
 
     WSServer()
     .ws<SomeData>("/" + toLower(SERVICE_NAME), std::move(behavior))

@@ -10,8 +10,7 @@ include_directories(
     ${TEST_INCLUDE_DIR}
 )
 
-
-find_package (gempyre REQUIRED PATHS ../..)
+#find_package (gempyre REQUIRED PATHS ../..)
 
 add_executable(${PROJECT_NAME}
     apitests.cpp
@@ -32,5 +31,5 @@ configure_file(gui/${PROJECT_NAME}.html ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NA
 
 find_library(gtest PATHS ${TEST_LIBRARY_DIR})
 
-target_link_libraries (${PROJECT_NAME} gempyre gtest)
+target_link_libraries (${PROJECT_NAME}  PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,socket_lib>" gtest)
 

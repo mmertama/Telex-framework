@@ -1,16 +1,35 @@
-include(FindPackageHandleStandardArgs)
-set(${CMAKE_FIND_PACKAGE_NAME}_CONFIG ${CMAKE_CURRENT_LIST_FILE})
-find_package_handle_standard_args(@PROJECT_NAME@
-CONFIG_MODE)
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/@GEMPYRE_TARGETS_EXPORT_NAME@Targets.cmake")
+include(CMakeFindDependencyMacro)
+set(GEMPYRE_SCRIPTS_DIR "@CMAKE_INSTALL_DATADIR@/@PROJECT_NAME@")
 
-if(NOT TARGET @PROJECT_NAME@)
-    include("${CMAKE_CURRENT_LIST_DIR}/@GEMPYRE_TARGETS_EXPORT_NAME@Targets.cmake")
-    if((NOT TARGET @PROJECT_NAME@) AND
-       (NOT @PROJECT_NAME@_FIND_VERSION OR
-        @PROJECT_NAME@_FIND_VERSION VERSION_LESS 0.3.3))
-        add_library(@PROJECT_NAME@ INTERFACE IMPORTED)
-        set_target_properties(@PROJECT_NAME@ PROPERTIES
-            INTERFACE_LINK_LIBRARIES @PROJECT_NAME@
-        )
-    endif()
-endif()
+
+
+add_library(@PROJECT_NAME@ INTERFACE IMPORTED)
+set_target_properties(@PROJECT_NAME@ PROPERTIES
+    INTERFACE_LINK_LIBRARIES @PROJECT_NAME@
+    )
+check_required_components(@PROJECT_NAME@)
+
+#find_dependency(@SOCKETS_LIB@
+#    PATHS @CMAKE_PREFIX_PATH@ # Where to find config script
+#    NO_DEFAULT_PATH # Do not search other places
+#)
+
+#include(FindPackageHandleStandardArgs)
+#set(${CMAKE_FIND_PACKAGE_NAME}_CONFIG ${CMAKE_CURRENT_LIST_FILE})
+#find_package_handle_standard_args(@PROJECT_NAME@ CONFIG_MODE)
+
+#if(NOT TARGET @PROJECT_NAME@)
+#    include("${CMAKE_CURRENT_LIST_DIR}/@GEMPYRE_TARGETS_EXPORT_NAME@Targets.cmake")
+#    if((NOT TARGET @PROJECT_NAME@) AND
+#       (NOT @PROJECT_NAME@_FIND_VERSION OR
+#        @PROJECT_NAME@_FIND_VERSION VERSION_LESS @PACKAGE_VERSION@))
+#        add_library(@PROJECT_NAME@ INTERFACE IMPORTED)
+#        set_target_properties(@PROJECT_NAME@ PROPERTIES
+#            INTERFACE_LINK_LIBRARIES @PROJECT_NAME@
+#        )
+#    endif()
+#endif()
+
+

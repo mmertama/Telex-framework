@@ -8,11 +8,11 @@ include_directories(
      ../../gempyrelib/include
 )
 
-find_package (gempyre REQUIRED PATHS ../..)
+#find_package (gempyre REQUIRED PATHS ../..)
 
 add_executable(helloworld main.cpp)
 
-target_link_libraries (helloworld gempyre)
+target_link_libraries (helloworld  PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,socket_lib>")
 
 
 

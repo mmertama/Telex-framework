@@ -17,7 +17,7 @@ option(BLEEDING_EDGE OFF)
 #uSockets v0.7.1
 #libsockets v0.7.1
 
-if(DEFINED BLEEDING_EDGE)
+if(BLEEDING_EDGE)
     message("Using bleeding edge libaries")
     set(LIB_UV_VER  master)
     set(LIB_JSON_VER master)
@@ -88,6 +88,7 @@ if (WIN32 OR ANDROID)
 
         set(UV_SOURCES "${UV_DIR}/src/libuv")
         set(INCLUDES "${UV_SOURCES}/include")
+
 endif()
 
 
@@ -122,10 +123,10 @@ if(WIN32 OR ANDROID)
     if(NOT libsockets_POPULATED)
         FetchContent_Populate(libsockets)
     endif()
-	set(SOCKETS_SOURCES "${libsockets_SOURCE_DIR}")
+    set(SOCKETS_SOURCES "${libsockets_SOURCE_DIR}")
 
 else()
-	set(SOCKETS_SOURCES "${SOCKETS_DIR}/src/libsockets")
+    set(SOCKETS_SOURCES "${SOCKETS_DIR}/src/libsockets")
     externalproject_add(libsockets
         PREFIX ${SOCKETS_DIR}
         GIT_REPOSITORY https://github.com/uNetworking/uSockets.git
@@ -142,8 +143,8 @@ else()
 
     set(SOCKETS_LIB_NAME uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
     set(SOCKETS_LIB ${SOCKETS_DIR}/${SOCKETS_LIB_NAME})
-    #set(SOCKETS_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
 
+    #file(GLOB SOCKETS_OBJ "${SOCKETS_SOURCES}/*.o") # get bored with depencies, maybe fix later
 
     add_custom_command(
         OUTPUT ${SOCKETS_LIB}
@@ -303,6 +304,7 @@ elseif(WIN32)
 else()
     add_library(${PROJECT_NAME} ${LIB_TYPE}
         ${GEMPYRE_SRC}
+      #  ${SOCKETS_OBJ}
     )
 endif()
 
@@ -345,15 +347,11 @@ elseif(ANDROID)
         PRIVATE ${UV_LIB}
         -lstdc++
         )
-elseif(APPLE)
+else()
+    set_target_properties(${PROJECT_NAME} PROPERTIES socket_lib ${SOCKETS_LIB})
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${SOCKETS_LIB}
-        -lstdc++)
-else()
-    target_link_libraries (${PROJECT_NAME}
-        PRIVATE ${CMAKE_THREAD_LIBS_INIT}
-        PUBLIC ${SOCKETS_LIB}
         -lstdc++)
 endif()
 
@@ -362,22 +360,20 @@ endif()
 set(GEMPYRE_CONFIG_INSTALL_DIR        "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE INTERNAL "")
 set(GEMPYRE_TARGETS_EXPORT_NAME       "${PROJECT_NAME}")
 set(GEMPYRE_CMAKE_CONFIG_TEMPLATE     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake.in")
-set(GEMPYRE_CMAKE_CONFIG_DIR          "${CMAKE_CURRENT_SOURCE_DIR}")
-set(GEMPYRE_CMAKE_VERSION_CONFIG_FILE "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
-set(GEMPYRE_CMAKE_PROJECT_CONFIG_FILE "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
-set(GEMPYRE_CMAKE_PROJECT_TARGETS_FILE "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Targets.cmake")
+set(GEMPYRE_CMAKE_CONFIG_DIR          "${CMAKE_CURRENT_BINARY_DIR}")
+set(GEMPYRE_CMAKE_VERSION_CONFIG_FILE   "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+set(GEMPYRE_CMAKE_PROJECT_CONFIG_FILE   "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
+set(GEMPYRE_CMAKE_PROJECT_TARGETS_FILE  "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Targets.cmake")
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     ${GEMPYRE_CMAKE_VERSION_CONFIG_FILE} COMPATIBILITY SameMajorVersion
 )
 
-message("--> ${CMAKE_INSTALL_LIBDIR}")
-
-configure_file(
+configure_package_config_file(
     ${GEMPYRE_CMAKE_CONFIG_TEMPLATE}
     ${GEMPYRE_CMAKE_PROJECT_CONFIG_FILE}
-    @ONLY
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 )
 
 
@@ -391,16 +387,37 @@ file(GLOB HEADERS include/*.h  ${CMAKE_SOURCE_DIR}/affiliates/include/*.h)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-if(NOT WIN32)
+if(WIN32 OR ANDROID)
+    # TODO
+else()
+    set(USOCKETS_CMAKE_PROJECT_CONFIG_FILE ${GEMPYRE_CMAKE_CONFIG_DIR}/FindUsocket.cmake)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindUsocket.cmake.in ${USOCKETS_CMAKE_PROJECT_CONFIG_FILE} @ONLY)
     install(
        TARGETS ${PROJECT_NAME}
+       EXPORT GempyreTargets
        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
        COMPONENT library
        )
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/{$PROJECT_NAME}/cmake")	
+
+   install(FILES
+       ${GEMPYRE_CMAKE_PROJECT_CONFIG_FILE}
+       ${GEMPYRE_CMAKE_VERSION_CONFIG_FILE}
+       ${USOCKETS_CMAKE_PROJECT_CONFIG_FILE}
+       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+
+    install(FILES
+        ${CMAKE_SOURCE_DIR}/scripts/genStringResource.py
+        ${CMAKE_SOURCE_DIR}/scripts/addResource.cmake_script
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}")
+
+    install(EXPORT GempyreTargets
+        FILE ${PROJECT_NAME}Targets.cmake
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/cmake")
+
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/scripts/jsmin-2.2.2
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}")
 endif()
 
 

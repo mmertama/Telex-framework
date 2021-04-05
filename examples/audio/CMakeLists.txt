@@ -10,7 +10,7 @@ include_directories(
     include
 )
 
-find_package (gempyre REQUIRED PATHS ../..)
+#find_package (gempyre REQUIRED PATHS ../..)
 
 add_executable(${PROJECT_NAME}
     src/main.cpp
@@ -21,7 +21,7 @@ add_executable(${PROJECT_NAME}
 
 addResource(PROJECT ${PROJECT_NAME} TARGET include/${NAME}_resource.h SOURCES gui/${NAME}.html gui/gempyre.ogg)
 
-target_link_libraries (${PROJECT_NAME} gempyre)
+target_link_libraries (${PROJECT_NAME}  PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,socket_lib>")
 
 
 

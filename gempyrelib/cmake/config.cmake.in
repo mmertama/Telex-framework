@@ -1,35 +1,28 @@
 @PACKAGE_INIT@
+
 include("${CMAKE_CURRENT_LIST_DIR}/@GEMPYRE_TARGETS_EXPORT_NAME@Targets.cmake")
 include(CMakeFindDependencyMacro)
-set(GEMPYRE_SCRIPTS_DIR "@CMAKE_INSTALL_DATADIR@/@PROJECT_NAME@")
 
+set(gempyre_SCRIPTS_DIR "@CMAKE_INSTALL_FULL_DATADIR@/@PROJECT_NAME@")
+add_library(Gempyre::Gempyre ALIAS Gempyre::gempyre)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
-add_library(@PROJECT_NAME@ INTERFACE IMPORTED)
-set_target_properties(@PROJECT_NAME@ PROPERTIES
-    INTERFACE_LINK_LIBRARIES @PROJECT_NAME@
-    )
+find_dependency(uSockets)
+find_library(LIB_NAME NAMES gempyre PATHS @LIBRARY_FULL_DIR@ NO_DEFAULT_PATH REQUIRED)
+get_filename_component(THIS_LIB ${LIB_NAME} NAME)
+
+set_and_check(gempyre_INCLUDE_DIR "@INCLUDE_FULL_DIR@")
+set_and_check(gempyre_LIBRARY_DIR "@LIBRARY_FULL_DIR@")
+set_and_check(gempyre_LIBRARY "@LIBRARY_FULL_DIR@/${THIS_LIB}")
+set_and_check(gempyre_LIBRARY_DIR "@CMAKE_INSTALL_FULL_LIBDIR@")
+
 check_required_components(@PROJECT_NAME@)
 
-#find_dependency(@SOCKETS_LIB@
-#    PATHS @CMAKE_PREFIX_PATH@ # Where to find config script
-#    NO_DEFAULT_PATH # Do not search other places
-#)
+include_directories(${gempyre_INCLUDE_DIR})
 
-#include(FindPackageHandleStandardArgs)
-#set(${CMAKE_FIND_PACKAGE_NAME}_CONFIG ${CMAKE_CURRENT_LIST_FILE})
-#find_package_handle_standard_args(@PROJECT_NAME@ CONFIG_MODE)
 
-#if(NOT TARGET @PROJECT_NAME@)
-#    include("${CMAKE_CURRENT_LIST_DIR}/@GEMPYRE_TARGETS_EXPORT_NAME@Targets.cmake")
-#    if((NOT TARGET @PROJECT_NAME@) AND
-#       (NOT @PROJECT_NAME@_FIND_VERSION OR
-#        @PROJECT_NAME@_FIND_VERSION VERSION_LESS @PACKAGE_VERSION@))
-#        add_library(@PROJECT_NAME@ INTERFACE IMPORTED)
-#        set_target_properties(@PROJECT_NAME@ PROPERTIES
-#            INTERFACE_LINK_LIBRARIES @PROJECT_NAME@
-#        )
-#    endif()
-#endif()
+
+
 
 

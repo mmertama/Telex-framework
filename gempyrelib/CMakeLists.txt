@@ -7,7 +7,7 @@ include(GNUInstallDirs)
 include(ExternalProject)
 include(FetchContent)
 include(GenerateExportHeader)
-include(../scripts/addResource.cmake_script)
+include(../scripts/addResource.cmake)
 
 option(BLEEDING_EDGE OFF)
 
@@ -86,6 +86,7 @@ if (WIN32 OR ANDROID)
             PATCH_COMMAND ""
             TEST_COMMAND ""
             )
+
 
         set(UV_SOURCES "${UV_DIR}/src/libuv")
         set(INCLUDES "${UV_SOURCES}/include")
@@ -349,14 +350,14 @@ elseif(ANDROID)
     message("uvdir ${UV_LIB}")
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${UV_LIB}
-        -lstdc++
+        PRIVATE -lstdc++
         )
 else()
     set_target_properties(${PROJECT_NAME} PROPERTIES socket_lib ${SOCKETS_LIB})
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${SOCKETS_LIB}
-        -lstdc++)
+        PRIVATE -lstdc++)
 endif()
 
 set(GEMPYRE_CONFIG_INSTALL_DIR        "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE INTERNAL "")
@@ -369,27 +370,24 @@ set(GEMPYRE_CMAKE_PROJECT_TARGETS_FILE  "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_N
 
 generate_export_header(${PROJECT_NAME})
 
+#set(RESOURCE_SCRIPTS_DIR "${CMAKE_PREFIX_PATH}/${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 set(LIBRARY_DIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME})
 set(LIBRARY_FULL_DIR ${CMAKE_INSTALL_PREFIX}/${LIBRARY_DIR})
 set(INCLUDE_FULL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 get_target_property(TARGET_LIBRARY_NAME ${PROJECT_NAME} OUTPUT_NAME)
 
 include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    ${GEMPYRE_CMAKE_VERSION_CONFIG_FILE} COMPATIBILITY SameMajorVersion
-)
-
 configure_package_config_file(
     ${GEMPYRE_CMAKE_CONFIG_TEMPLATE}
     ${GEMPYRE_CMAKE_PROJECT_CONFIG_FILE}
     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
-
-export(
-    TARGETS ${PROJECT_NAME}
-    FILE ${GEMPYRE_CMAKE_PROJECT_TARGETS_FILE}
-    NAMESPACE Gempyre::
     )
+write_basic_package_version_file(
+    ${GEMPYRE_CMAKE_VERSION_CONFIG_FILE}
+    COMPATIBILITY SameMajorVersion
+    )
+
+
 
 file(GLOB HEADERS include/*.h  ${CMAKE_SOURCE_DIR}/affiliates/include/*.h)
 
@@ -399,10 +397,10 @@ if(WIN32 OR ANDROID)
     # TODO
 else()
 
-    set(USOCKETS_CMAKE_PROJECT_CONFIG_FILE ${GEMPYRE_CMAKE_CONFIG_DIR}/FindUsockets.cmake)
+    set(USOCKETS_CMAKE_PROJECT_CONFIG_FILE ${GEMPYRE_CMAKE_CONFIG_DIR}/FinduSockets.cmake)
 
     configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindUsockets.cmake.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FinduSockets.cmake.in
         ${USOCKETS_CMAKE_PROJECT_CONFIG_FILE}
         @ONLY)
 
@@ -410,33 +408,37 @@ else()
        TARGETS ${PROJECT_NAME}
        EXPORT GempyreTargets
        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}
-       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}
        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
        )
 
+   export(EXPORT GempyreTargets
+     FILE  "${PROJECT_NAME}Targets.cmake"
+     NAMESPACE gempyre::
+     )
+
    install(EXPORT GempyreTargets
-       NAMESPACE Gempyre::
+       NAMESPACE gempyre::
        FILE ${PROJECT_NAME}Targets.cmake
-       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+       )
 
    install(FILES
        ${SOCKETS_LIB}
        DESTINATION ${LIBRARY_DIR}
        )
 
+   set(PROJECT_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+
    install(FILES
        ${GEMPYRE_CMAKE_PROJECT_CONFIG_FILE}
        ${GEMPYRE_CMAKE_VERSION_CONFIG_FILE}
        ${USOCKETS_CMAKE_PROJECT_CONFIG_FILE}
-       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
-
-    install(FILES
-        ${CMAKE_SOURCE_DIR}/scripts/genStringResource.py
-        ${CMAKE_SOURCE_DIR}/scripts/addResource.cmake_script
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}")
+       ${CMAKE_SOURCE_DIR}/scripts/genStringResource.py
+       ${CMAKE_SOURCE_DIR}/scripts/addResource.cmake
+       DESTINATION "${PROJECT_CMAKE_DIR}")
 
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/scripts/jsmin-2.2.2
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}")
+        DESTINATION "${PROJECT_CMAKE_DIR}")
 
 endif()
 

@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.16)
 set(NAME snowflakes)
 project (${NAME}test)
 
-include(../../scripts/addResource.cmake_script)
+include(../../scripts/addResource.cmake)
 
 set(CMAKE_CXX_STANDARD 17)
 

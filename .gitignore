@@ -23,7 +23,6 @@ extra
 extra/**
 builds
 src/generated
-*.cmake
 *.a
 *.autosave
 *.pyc

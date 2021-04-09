@@ -53,12 +53,13 @@ How to build on Windows 10
  Things in pipeline
 --------------------
 * Update / improve documentation (C++ and Python)  
-* make install for system install
+* make install for system install (done)
 * Binary releases (Maybe installer / some packet manager support / pip)
-* Use GTest for API testing
+* Use GTest for API testing (done)
 * Raspberry build (remote and local UI)
 * Native application window for OSX, Linux and Windows as default
 * Support for secure web socket (nice for remote UIs)
+* Compile time resources (static map + static string_views) 
 
 
 Copyright

@@ -74,7 +74,6 @@ function throttled(delay, fn) {
 }
 
 function addEvent(el, source, eventname, properties, throttle) {
-    console.log("addEventing", el, source, eventname, throttle);
     handler = (event) => {
 
         if(socket.readyState !== 1)
@@ -107,9 +106,15 @@ function addEvent(el, source, eventname, properties, throttle) {
 
     const usedHandler = throttle && throttle > 0 ? throttled(throttle, handler) : handler;
     if(eventname === 'resize') { //Only window supports the resize event
+        console.log("addEventing", "window", source, eventname, throttle);
         window.addEventListener(eventname, usedHandler);
     }
+    else if(el === document.body && eventname === 'scroll' ) { //root == document.body, document listens scroll
+        console.log("addEventing", "document", source, eventname, throttle);
+        document.addEventListener(eventname, usedHandler);
+    }
     else {
+        console.log("addEventing", el, source, eventname, throttle);
         el.addEventListener(eventname, usedHandler);
     }
 }

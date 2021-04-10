@@ -10,10 +10,6 @@ include_directories(
     include
 )
 
-#add_library(gempyre STATIC IMPORTED)
-#set_property(TARGET gempyre PROPERTY
-#             IMPORTED_LOCATION)
-
 add_executable(${PROJECT_NAME}
     src/${NAME}.cpp
     gui/${NAME}.html
@@ -22,4 +18,4 @@ add_executable(${PROJECT_NAME}
 addResource(PROJECT ${PROJECT_NAME} TARGET include/${NAME}_resource.h SOURCES gui/${NAME}.html)
 
 target_link_libraries (${PROJECT_NAME} PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,socket_lib>")
- 
+

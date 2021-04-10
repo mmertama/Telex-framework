@@ -29,7 +29,7 @@ else()
     set(LIB_UV_VER  v1.41.0)
     set(LIB_JSON_VER v3.9.0)
     set(LIB_SOCKETS_VER v0.7.1)
-    set(LIB_WS_VER v0.19.0)
+    set(LIB_WS_VER 0b97cc7)
     set(LIB_ZLIB_VER v1.2.11)
 endif()
 
@@ -37,10 +37,6 @@ set(CMAKE_CXX_FLAGS "-DGEMPYRE_PROJECT_VERSION=${PROJECT_VERSION} ${CMAKE_CXX_FL
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
-endif()
-
-if(WIN32 AND NOT MSVC)
-
 endif()
 
 if(WIN32)
@@ -341,6 +337,7 @@ if(WIN32)
     else()
         set(WIN_LIB psapi.lib userenv.lib iphlpapi.lib ws2_32.lib)
     endif()
+    set_property(TARGET ${PROJECT_NAME} PROPERTY socket_lib ${UV_LIB} ${WIN_LIB})
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${UV_LIB}
@@ -348,6 +345,7 @@ if(WIN32)
         )
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES socket_lib ${UV_LIB})
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${UV_LIB}
         PRIVATE -lstdc++
@@ -393,8 +391,8 @@ file(GLOB HEADERS include/*.h  ${CMAKE_SOURCE_DIR}/affiliates/include/*.h)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-if(WIN32 OR ANDROID)
-    # TODO
+if(ANDROID)
+    # Where to install for crosscompile? Maybe just use a ENV as this far
 else()
 
     set(USOCKETS_CMAKE_PROJECT_CONFIG_FILE ${GEMPYRE_CMAKE_CONFIG_DIR}/FinduSockets.cmake)

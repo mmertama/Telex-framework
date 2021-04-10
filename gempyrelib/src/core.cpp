@@ -3,6 +3,7 @@
 #include <thread>
 #include <sstream>
 #include <future>
+#include <cassert>
 
 
 #include "semaphore.h"

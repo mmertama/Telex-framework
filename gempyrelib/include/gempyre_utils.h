@@ -39,17 +39,13 @@
 #define gempyre_utils_auto_close(p, f) GempyreUtils::_Close<std::decay_t<decltype(p)>, decltype(&f)> _ ## p (p, &f)
 
 
-//#ifdef WINDOWS_OS
 #ifdef WINDOWS_EXPORT
 	#define UTILS_EX __declspec(dllexport)
-//    #else
-//        #define UTILS_EX __declspec(dllimport)
-//    #endif
 #else
     #define UTILS_EX
 #endif
 
-#ifdef WINDOWS_OS
+#ifdef _MSC_VER
 using SSIZE_T = long long;
 #else
 using SSIZE_T = ssize_t;

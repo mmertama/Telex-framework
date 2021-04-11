@@ -9,6 +9,10 @@ include(FetchContent)
 include(GenerateExportHeader)
 include(../scripts/addResource.cmake)
 
+if(WIN32)
+     set (CMAKE_DEBUG_POSTFIX "d")
+endif()
+
 option(BLEEDING_EDGE OFF)
 
 #googletest-src release-1.10.0-612-g6c5c4554
@@ -331,6 +335,7 @@ endif()
 #add_dependencies(${PROJECT_NAME} gempyrejs)
 
 if(WIN32)
+
     message("uvlib is set as:${UV_LIB}")
     if(MSVC)
         set(WIN_LIB psapi.lib userenv.lib iphlpapi.lib)

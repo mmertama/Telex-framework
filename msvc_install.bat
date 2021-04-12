@@ -12,6 +12,7 @@ set PREFIX=
 if not exist "build" mkdir build
 
 pushd build
+if not exist "install.log" rm install.log
 cmake .. -DCMAKE_BUILD_TYPE=Debug -DHAS_AFFILIATES=OFF -DHAS_TEST=OFF -DHAS_EXAMPLES=OFF %PREFIX%
 cmake --build . --config Debug
 set BUILD_PATH=%CD%

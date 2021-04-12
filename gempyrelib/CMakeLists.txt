@@ -442,6 +442,13 @@ else()
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/scripts/jsmin-2.2.2
         DESTINATION "${GEMPYRE_CONFIG_INSTALL_DIR}")
 
+    if(MSVC)
+        install(FILES #CMAKE does not support (exp gen) static lib's pdb location
+            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dir/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.pdb"
+            DESTINATION ${LIBRARY_DIR}
+            OPTIONAL)
+    endif()
+
 endif()
 
 

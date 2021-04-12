@@ -4,5 +4,4 @@ echo The location is documented along GnuInstallDirs.
 set PARAM=
 if "%2"=="Debug" set PARAM=--config Debug
 cd %1
-cmake --install . %PARAM%
-
+cmake --install . %PARAM% >> install.log

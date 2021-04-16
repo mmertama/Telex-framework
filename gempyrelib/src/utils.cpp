@@ -12,7 +12,7 @@
 #include <netdb.h>
 
 #else
-
+#define _WIN32_WINNT 0x0A00 
 #ifndef _WINSOCKAPI_                              
     #include <winsock2.h>                           
 #endif   
@@ -827,8 +827,8 @@ std::vector<std::string> GempyreUtils::ipAddresses(int addressType) {
         if(err == ERROR_SUCCESS )
             break;
         else if(err == ERROR_BUFFER_OVERFLOW) {
-            buf_ptr.swap(std::make_unique<uint8_t[]>(adapterBufferSize));
-             adapters = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(buf_ptr.get());
+            buf_ptr = std::make_unique<uint8_t[]>(adapterBufferSize);
+            adapters = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(buf_ptr.get());
         }
         else {
             log(LogLevel::Error, "ipAddresses error:", lastError(err));

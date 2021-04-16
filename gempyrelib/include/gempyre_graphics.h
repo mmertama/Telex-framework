@@ -25,9 +25,9 @@
 
 #ifdef WINDOWS_EXPORT
     #ifndef GEMPYRE_EX
-        #define GEMPYRE_EX __declspec( dllexport )
-    #else
-        #define GEMPYRE_EX
+        #define GGEMPYRE_EX __declspec( dllexport )
+    //#else
+    //    #define GEMPYRE_EX
     #endif
 #endif
 

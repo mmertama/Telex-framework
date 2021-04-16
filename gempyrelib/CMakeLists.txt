@@ -47,6 +47,9 @@ if(WIN32)
     set(CMAKE_CXX_FLAGS "-DWINDOWS_EXPORT -D_WIN32 ${CMAKE_CXX_FLAGS}")
     add_compile_options(-DWINDOWS_EXPORT)
     add_compile_options(-D_WIN32)
+    if(NOT MSVC)
+        add_compile_definitions(_WIN32_WINNT=0x0A00)  #win10, needed for mingw
+    endif()
 endif()
 
 if (WIN32 OR ANDROID)

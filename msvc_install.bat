@@ -9,10 +9,10 @@ if not "%1"=="" set PREFIX=-DCMAKE_INSTALL_PREFIX=%1
 if "%1"=="" set PREFIX=-UCMAKE_INSTALL_PREFIX
 set PREFIX=
 
-if not exist "build" mkdir build
+if not exist "mscv_build" mkdir mscv_build
 
-pushd build
-if exist "install.log" rm install.log
+pushd mscv_build
+if exist "install.log" del install.log
 cmake .. -DCMAKE_BUILD_TYPE=Debug -DHAS_AFFILIATES=OFF -DHAS_TEST=OFF -DHAS_EXAMPLES=OFF %PREFIX%
 cmake --build . --config Debug
 set BUILD_PATH=%CD%
@@ -20,7 +20,7 @@ popd
 echo Start an elevated prompt for an install.
 powershell -Command "Start-Process scripts\win_inst.bat -Verb RunAs -ArgumentList "%BUILD_PATH%,Debug"
 
-pushd build
+pushd mscv_build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DHAS_AFFILIATES=OFF -DHAS_TEST=OFF -DHAS_EXAMPLES=OFF %PREFIX%
 cmake --build . --config Release
 set BUILD_PATH=%CD%

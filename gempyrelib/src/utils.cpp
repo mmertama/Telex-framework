@@ -12,7 +12,6 @@
 #include <netdb.h>
 
 #else
-#define _WIN32_WINNT 0x0A00 
 #ifndef _WINSOCKAPI_                              
     #include <winsock2.h>                           
 #endif   

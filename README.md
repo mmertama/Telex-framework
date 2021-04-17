@@ -38,10 +38,15 @@ How to build on Windows 10
 * Install git bash from https://gitforwindows.org/
 * Run git clone https://github.com/mmertama/Gempyre.git on git bash console.
 * Install cmake https://cmake.org/download/ (let it to be added in path)
-* Install Visual Studio https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019, and pick Desktop development with C++
-* Install Python 3.8 (3.6 >= shall be ok) https://www.python.org/downloads/windows/
-* From Windows menu, Visual Stuudio: Open "x64 Native Tools Command Prompt for VS 2019"
-* Run "msvc_build.bat" at Gempyre folder
+* MSVC:
+    * Install Visual Studio https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019, and pick Desktop development with C++
+    * Install Python 3.8 (3.6 >= shall be ok) https://www.python.org/downloads/windows/
+    * From Windows menu, Visual Stuudio: Open "x64 Native Tools Command Prompt for VS 2019"
+    * Run "msvc_install.bat" at Gempyre folder.
+* MinGW
+	* Install MinGW https://sourceforge.net/projects/mingw-w64/
+	* Install Ninja https://ninja-build.org/
+	* Run "mingw_install.bat" at Gemmpyre folder.
  
  Projects using Gempyre:
  * [mandelbrot-Gempyre](https://github.com/mmertama/mandelbrot-Gempyre)

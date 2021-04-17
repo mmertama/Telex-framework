@@ -37,6 +37,8 @@ else()
     set(LIB_ZLIB_VER v1.2.11)
 endif()
 
+set(EXTRA_DIR "${CMAKE_CURRENT_BINARY_DIR}/extra")
+
 set(CMAKE_CXX_FLAGS "-DGEMPYRE_PROJECT_VERSION=${PROJECT_VERSION} ${CMAKE_CXX_FLAGS}")
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -55,7 +57,7 @@ endif()
 if (WIN32 OR ANDROID)
         message("Need Libuv...")
 
-        set(UV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/libuv")
+        set(UV_DIR "${EXTRA_DIR}/libuv")
         set(UV_LIB_DIR "${UV_DIR}/src/libuv-build")
 		
         if (MSVC)
@@ -98,7 +100,7 @@ endif()
 
 
 set(JSON_NAME "nlohmann_json")
-set(JSON_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/${JSON_NAME}")
+set(JSON_DIR "${EXTRA_DIR}/${JSON_NAME}")
 externalproject_add(libjson
     PREFIX ${JSON_DIR}
     GIT_REPOSITORY https://github.com/nlohmann/json.git
@@ -114,7 +116,7 @@ externalproject_add(libjson
 
 
 set(SOCKETS_NAME "uSockets")
-set(SOCKETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/uNetworking/${SOCKETS_NAME}")
+set(SOCKETS_DIR "${EXTRA_DIR}/uNetworking/${SOCKETS_NAME}")
 
 if(WIN32 OR ANDROID)
     # Sources are just globbed in the project, see later
@@ -165,7 +167,7 @@ endif()
 
 
 set(WEBSOCKETS_NAME "uWebSockets")
-set(WEBSOCKETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/uNetworking/${WEBSOCKETS_NAME}")
+set(WEBSOCKETS_DIR "${EXTRA_DIR}/uNetworking/${WEBSOCKETS_NAME}")
 externalproject_add(libwebsockets
     PREFIX ${WEBSOCKETS_DIR}
     GIT_REPOSITORY https://github.com/uNetworking/uWebSockets.git
@@ -192,7 +194,7 @@ find_path(ZLIB_H zlib.h PATHS
 if(NOT ZLIB_H)
     message("Retrieve zlib")
     set(ZLIB_NAME "zlib")
-    set(ZLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extra/${ZLIB_NAME}")
+    set(ZLIB_DIR "${EXTRA_DIR}/${ZLIB_NAME}")
     externalproject_add(zlib
         PREFIX ${ZLIB_DIR}
         GIT_REPOSITORY https://github.com/madler/zlib.git

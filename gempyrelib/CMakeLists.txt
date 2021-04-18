@@ -13,6 +13,18 @@ if(WIN32)
      set (CMAKE_DEBUG_POSTFIX "d")
 endif()
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+
+string(TOLOWER ${CMAKE_BUILD_TYPE} LOWER)
+if (${LOWER} STREQUAL debug)
+    set(IS_RELEASE FALSE)
+else()
+    set(IS_RELEASE TRUE)
+endif()
+
 option(BLEEDING_EDGE OFF)
 
 #googletest-src release-1.10.0-612-g6c5c4554
@@ -41,10 +53,6 @@ set(EXTRA_DIR "${CMAKE_CURRENT_BINARY_DIR}/extra")
 
 set(CMAKE_CXX_FLAGS "-DGEMPYRE_PROJECT_VERSION=${PROJECT_VERSION} ${CMAKE_CXX_FLAGS}")
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
 if(WIN32)
     set(CMAKE_CXX_FLAGS "-DWINDOWS_EXPORT -D_WIN32 ${CMAKE_CXX_FLAGS}")
     add_compile_options(-DWINDOWS_EXPORT)
@@ -54,28 +62,30 @@ if(WIN32)
     endif()
 endif()
 
+
 if (WIN32 OR ANDROID)
         message("Need Libuv...")
-
         set(UV_DIR "${EXTRA_DIR}/libuv")
         set(UV_LIB_DIR "${UV_DIR}/src/libuv-build")
+
+        if(NOT ${IS_RELEASE})
+            set(UVA_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uv_ad${CMAKE_STATIC_LIBRARY_SUFFIX})
+        else() 
+            set(UVA_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX})
+        endif()
 		
         if (MSVC)
-            if(${CMAKE_GENERATOR} STREQUAL "Ninja")
-                set(UV_LIB "${UV_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
-           else()
-                if(CMAKE_BUILD_TYPE STREQUAL "Debug") #these actally pretty same, change if debug is needed.
-                     set(UV_LIB "${UV_LIB_DIR}/Debug/uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
-                else()
-                     set(UV_LIB "${UV_LIB_DIR}/Release/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
-                endif()
-                message("MSVC builds artifacts upon release type")
+            if (NOT ${IS_RELEASE})
+                    set(UV_LIB_FULL "${UV_LIB_DIR}/Debug/${UVA_LIB_NAME}")
+            else()
+                    set(UV_LIB_FULL "${UV_LIB_DIR}/Release/${UVA_LIB_NAME}")
             endif()
+            message("MSVC builds artifacts upon release type")
          else()
              if(NOT ANDROID)
                   find_program(NINJA ninja.exe DOC "Ninja must be in path" REQUIRED)
              endif()
-             set(UV_LIB "${UV_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX}")
+             set(UV_LIB_FULL "${UV_LIB_DIR}/${UVA_LIB_NAME}")
          endif()
 
         externalproject_add(libuv
@@ -83,8 +93,8 @@ if (WIN32 OR ANDROID)
             GIT_REPOSITORY https://github.com/libuv/libuv.git
             GIT_TAG ${LIB_UV_VER}
             GIT_PROGRESS true
-            BUILD_BYPRODUCTS ${UV_LIB}
-            CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
+            BUILD_BYPRODUCTS ${UV_LIB_FULL}
+            CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
             UPDATE_DISCONNECTED false
             INSTALL_COMMAND  ${CMAKE_COMMAND} --build . --target install
             UPDATE_COMMAND ""
@@ -92,10 +102,15 @@ if (WIN32 OR ANDROID)
             TEST_COMMAND ""
             )
 
+        set(INCLUDES "${UV_DIR}/src/libuv/include")
 
-        set(UV_SOURCES "${UV_DIR}/src/libuv")
-        set(INCLUDES "${UV_SOURCES}/include")
-
+#TODO: Same shit with usockets
+        add_library(UV_LIB_TARGET STATIC IMPORTED)
+        set_target_properties(UV_LIB_TARGET PROPERTIES
+            IMPORTED_LOCATION "${UV_LIB_FULL}"
+            INTERFACE_INCLUDE_DIRECTORIES "${UV_DIR}/src/libuv/include"
+            )
+        set(UV_LIB ${UV_LIB_TARGET})
 endif()
 
 
@@ -152,6 +167,7 @@ else()
         )
 
     set(SOCKETS_LIB_NAME uSockets${CMAKE_STATIC_LIBRARY_SUFFIX})
+    set(SOCKETS_LIB_FULL ${SOCKETS_DIR}/${SOCKETS_LIB_NAME})
     set(SOCKETS_LIB ${SOCKETS_DIR}/${SOCKETS_LIB_NAME})
 
     #file(GLOB SOCKETS_OBJ "${SOCKETS_SOURCES}/*.o") # get bored with depencies, maybe fix later
@@ -314,7 +330,6 @@ elseif(WIN32)
 else()
     add_library(${PROJECT_NAME} ${LIB_TYPE}
         ${GEMPYRE_SRC}
-      #  ${SOCKETS_OBJ}
     )
 endif()
 
@@ -340,7 +355,6 @@ endif()
 #add_dependencies(${PROJECT_NAME} gempyrejs)
 
 if(WIN32)
-
     message("uvlib is set as:${UV_LIB}")
     if(MSVC)
         set(WIN_LIB psapi.lib userenv.lib iphlpapi.lib)
@@ -368,13 +382,23 @@ else()
         PRIVATE -lstdc++)
 endif()
 
+#if(WIN32)
+#    if(MSVC)
+#        set(PROJECT_TARGETS_FILE ${PROJECT_NAME}Targets_vc.cmake)
+#    else()
+#        set(PROJECT_TARGETS_FILE ${PROJECT_NAME}Targets_gw.cmake)
+#    endif()
+#else()
+#    set(PROJECT_TARGETS_FILE ${PROJECT_NAME}Targets.cmake)
+#endif()
+
 set(GEMPYRE_CONFIG_INSTALL_DIR        "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 set(GEMPYRE_TARGETS_EXPORT_NAME       "${PROJECT_NAME}")
 set(GEMPYRE_CMAKE_CONFIG_TEMPLATE     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake.in")
 set(GEMPYRE_CMAKE_CONFIG_DIR          "${CMAKE_CURRENT_BINARY_DIR}")
 set(GEMPYRE_CMAKE_VERSION_CONFIG_FILE   "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
 set(GEMPYRE_CMAKE_PROJECT_CONFIG_FILE   "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
-set(GEMPYRE_CMAKE_PROJECT_TARGETS_FILE  "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Targets.cmake")
+#set(GEMPYRE_CMAKE_PROJECT_TARGETS_FILE  "${GEMPYRE_CMAKE_CONFIG_DIR}/${PROJECT_TARGETS_FILE}")
 
 generate_export_header(${PROJECT_NAME})
 
@@ -405,12 +429,18 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
 if(ANDROID)
     # Where to install for crosscompile? Maybe just use a ENV as this far
 else()
+    if(WIN32)
+        set(CONNECTION_FIND Finduva.cmake)
+        set(CONNECTION_LIB_FULL ${UV_LIB_FULL})
+    else()
+        set(CONNECTION_FIND FinduSockets.cmake)
+        set(CONNECTION_LIB_FULL ${SOCKETS_LIB_FULL})
+    endif()
 
-    set(USOCKETS_CMAKE_PROJECT_CONFIG_FILE ${GEMPYRE_CMAKE_CONFIG_DIR}/FinduSockets.cmake)
-
+    set(SOCKET_CMAKE_PROJECT_CONFIG_FILE ${GEMPYRE_CMAKE_CONFIG_DIR}/${CONNECTION_FIND})
     configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FinduSockets.cmake.in
-        ${USOCKETS_CMAKE_PROJECT_CONFIG_FILE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${CONNECTION_FIND}.in
+        ${SOCKET_CMAKE_PROJECT_CONFIG_FILE}
         @ONLY)
 
     install(
@@ -420,38 +450,46 @@ else()
        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
        )
 
+       # internal testing
    export(EXPORT GempyreTargets
-     FILE  "${PROJECT_NAME}Targets.cmake"
+     FILE  "${PROJECT_TARGETS_FILE}"
      NAMESPACE gempyre::
      )
 
-   install(EXPORT GempyreTargets
-       NAMESPACE gempyre::
-       FILE ${PROJECT_NAME}Targets.cmake
-       DESTINATION "${GEMPYRE_CONFIG_INSTALL_DIR}"
-       )
+     #external 
+   #install(EXPORT GempyreTargets
+   #    NAMESPACE gempyre::
+   #    FILE ${PROJECT_TARGETS_FILE}
+   #    DESTINATION "${GEMPYRE_CONFIG_INSTALL_DIR}"
+   #    )
 
-   install(FILES
-       ${SOCKETS_LIB}
-       DESTINATION ${LIBRARY_DIR}
-       )
+       install(FILES ${CONNECTION_LIB_FULL}
+            DESTINATION ${LIBRARY_DIR}
+            )
+
+    install(FILES
+            ${SOCKET_CMAKE_PROJECT_CONFIG_FILE}
+            DESTINATION "${GEMPYRE_CONFIG_INSTALL_DIR}"
+            )
 
    install(FILES
        ${GEMPYRE_CMAKE_PROJECT_CONFIG_FILE}
        ${GEMPYRE_CMAKE_VERSION_CONFIG_FILE}
-       ${USOCKETS_CMAKE_PROJECT_CONFIG_FILE}
        ${CMAKE_SOURCE_DIR}/scripts/genStringResource.py
        ${CMAKE_SOURCE_DIR}/scripts/addResource.cmake
-       DESTINATION "${GEMPYRE_CONFIG_INSTALL_DIR}")
+       DESTINATION "${GEMPYRE_CONFIG_INSTALL_DIR}"
+       )
 
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/scripts/jsmin-2.2.2
-        DESTINATION "${GEMPYRE_CONFIG_INSTALL_DIR}")
+        DESTINATION "${GEMPYRE_CONFIG_INSTALL_DIR}"
+        )
 
     if(MSVC)
         install(FILES #CMAKE does not support (exp gen) static lib's pdb location
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dir/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.pdb"
             DESTINATION ${LIBRARY_DIR}
-            OPTIONAL)
+            OPTIONAL
+            )
     endif()
 
 endif()

@@ -44,9 +44,19 @@ if(WIN32)
       #  IMPORTED_LOCATION_DEBUG ${uva_LIBRARY} # this is wrong
         )
 
-    set_target_properties(gempyre::gempyre_lib PROPERTIES
-        INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:psapi.lib>;\$<LINK_ONLY:userenv.lib>;\$<LINK_ONLY:iphlpapi.lib>"
-    )    
+    if(MSVC)
+        set_target_properties(gempyre::gempyre_lib PROPERTIES
+            INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:psapi.lib>;\$<LINK_ONLY:userenv.lib>;\$<LINK_ONLY:iphlpapi.lib>"
+        )
+    else()
+        set_target_properties(gempyre::gempyre_lib PROPERTIES
+            INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:psapi.lib>;\$<LINK_ONLY:userenv.lib>;\$<LINK_ONLY:iphlpapi.lib>;\$<LINK_ONLY:ws2_32.lib>"
+            )
+        set_target_properties(gempyre::gempyre_uv PROPERTIES
+            INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:psapi.lib>;\$<LINK_ONLY:userenv.lib>;\$<LINK_ONLY:iphlpapi.lib>;\$<LINK_ONLY:ws2_32.lib>"
+            )
+
+    endif()    
 
     set_target_properties(gempyre::gempyre PROPERTIES
         IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"

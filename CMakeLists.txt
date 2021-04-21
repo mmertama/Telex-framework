@@ -2,6 +2,18 @@ cmake_minimum_required (VERSION 3.16)
 set(NAME gempyre)
 project (${NAME})
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+string(TOLOWER ${CMAKE_BUILD_TYPE} LOWER)
+if (${LOWER} STREQUAL debug)
+    set(IS_RELEASE FALSE)
+else()
+    set(IS_RELEASE TRUE)
+endif()
+
+
 if(NOT EXISTS ${GEMPYRE_DIR})
     if(EXISTS $ENV{GEMPYRE_DIR})
         set(GEMPYRE_DIR $ENV{GEMPYRE_DIR})

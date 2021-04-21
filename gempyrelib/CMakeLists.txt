@@ -10,7 +10,7 @@ include(GenerateExportHeader)
 include(../scripts/addResource.cmake)
 
 if(WIN32)
-     set (CMAKE_DEBUG_POSTFIX "d")
+    set (CMAKE_DEBUG_POSTFIX "d")
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -148,6 +148,7 @@ if(WIN32 OR ANDROID)
     set(SOCKETS_SOURCES "${libsockets_SOURCE_DIR}")
 
 else()
+
     set(SOCKETS_SOURCES "${SOCKETS_DIR}/src/libsockets")
     set(SOCKETS_INCLUDE_PATH "${CMAKE_PREFIX_PATH}/${SOCKETS_SOURCES}/src")
     set(SOCKETS_LIBRARY_PATH "${CMAKE_PREFIX_PATH}/${SOCKETS_DIR}/src")

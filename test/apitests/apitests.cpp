@@ -29,7 +29,13 @@ std::string defaultChrome() {
     switch(GempyreUtils::currentOS()) {
     case GempyreUtils::OS::MacOs: return R"(/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome)";
     case GempyreUtils::OS::WinOs: return  R"("C:\Program Files (86)\Google\Chrome\Application\chrome.exe")";
-    case GempyreUtils::OS::LinuxOs: return  R"(chromium-browser)";  //R"(google-chrome)";
+    case GempyreUtils::OS::LinuxOs: {
+        auto browser = GempyreUtils::which(R"(chromium-browser)");
+        if(!browser.empty())
+            return browser;
+        return GempyreUtils::which(R"(google-chrome)");
+        //xdg-open
+    }
     default: return "";
     }
 }
@@ -346,7 +352,15 @@ TEST_F(TestUi, ping) {
     bool ok = false;
     m_ui->onOpen([&ok, this](){
         const auto ping = m_ui->ping();
-        ok = ping.has_value() && ping->first.count() > 0 && ping->second.count() > 0 && ping->first.count() < 10000 && ping->second.count() < 10000;
+        ok = ping.has_value() &&
+         ping->first.count() > 0 &&
+         ping->second.count() > 0 &&
+         ping->first.count() < 10000 &&
+         ping->second.count() < 10000;
+        if(ping)
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Ping:", ping->first.count(), ping->second.count());
+        else
+             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Ping: N/A");
         m_ui->exit();
     });
     m_ui->run();

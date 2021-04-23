@@ -92,18 +92,26 @@ private:
     }
     void write() {
         std::ptrdiff_t n = pptr() - pbase();
-#pragma GCC diagnostic push
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#pragma clang diagnostic ignored "-Wformat-security"
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#ifdef COMPILER_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wformat-nonliteral"
+    #pragma clang diagnostic ignored "-Wformat-security"
+#endif
+#ifdef COMPILER_GCC
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #pragma GCC diagnostic ignored "-Wformat-security"
+#endif
         char ntBuf[SZ];
         std::memcpy(ntBuf, m_buffer, static_cast<size_t>(n));
         ntBuf[n] = '\0';
         ::syslog(m_prio, ntBuf);
-#pragma clang diagnostic pop
-#pragma GCC diagnostic pop
+#ifdef COMPILER_CLANG
+    #pragma clang diagnostic pop
+#endif
+#ifdef COMPILER_GCC
+    #pragma GCC diagnostic pop
+#endif
         pbump(static_cast<int>(-n));
     }
 private:
@@ -382,8 +390,6 @@ std::string GempyreUtils::tempName() {
     std::strcat(name, ext);
 #else
     constexpr char tpl[] = "/tmp/ecutils_XXXXXX";
-    char name[sizeof tpl];
-    std::strcpy(name, tpl);
     char name[sizeof tpl];
     std::strcpy(name, tpl);
 #endif

@@ -65,9 +65,9 @@ private:
     const GetFunction m_onGet;
     const ListenFunction m_onListen;
    // std::function<std::unique_ptr<std::thread> ()> mStartFunction = nullptr;
+    unsigned short m_currentPort = 0;
     std::unique_ptr<std::thread> m_serverThread;
     std::any m_closeData; //arbitrary
-    unsigned short m_currentPort = 0;
     bool m_uiready = false;
     mutable int m_queryId = 0;
     std::unique_ptr<Batch> m_batch;

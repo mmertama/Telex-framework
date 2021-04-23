@@ -9,14 +9,23 @@ include(FetchContent)
 include(GenerateExportHeader)
 include(../scripts/addResource.cmake)
 
-if(WIN32)
-    set (CMAKE_DEBUG_POSTFIX "d")
-endif()
+set(CMAKE_DEBUG_POSTFIX "d")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+message("compiler is ${CMAKE_CXX_COMPILER_ID}")
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_compile_definitions(COMPILER_CLANG)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_definitions(COMPILER_GCC)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  add_compile_definitions(COMPILER_INTEL)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  add_compile_definitions(COMPILER_MSVC)
+endif()
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} LOWER)
 if (${LOWER} STREQUAL debug)
@@ -334,6 +343,8 @@ else()
     )
 endif()
 
+set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+
 if(CMAKE_BUILD_TYPE EQUAL "RELEASE")
     set(JSMIN MINIFY)
 else()
@@ -376,7 +387,7 @@ elseif(ANDROID)
         PRIVATE -lstdc++
         )
 else()
-    set_target_properties(${PROJECT_NAME} PROPERTIES socket_lib ${SOCKETS_LIB})
+    set_target_properties(${PROJECT_NAME} PROPERTIES socket_lib "${SOCKETS_LIB};${CMAKE_THREAD_LIBS_INIT}")
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${SOCKETS_LIB}

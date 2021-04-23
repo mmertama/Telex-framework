@@ -6,21 +6,28 @@
 #include <chrono>
 #include <random>
 #include <numeric>
+#ifdef COMPILER_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wall"
+    #pragma clang diagnostic ignored "-Wextra"
+#endif
+#ifdef COMPILER_GCC
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wall"
+    #pragma GCC diagnostic ignored "-Wextra"
+    #pragma GCC diagnostic ignored "-Wunused-parameter"
+    #pragma GCC diagnostic ignored "-Wsign-compare"
+    #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+    #pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
 #define UWS_NO_ZLIB
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wall"
-#pragma clang diagnostic ignored "-Wextra"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-#pragma GCC diagnostic ignored "-Wunused-variable"
 #include <App.h>
-#pragma gcc diagnostic pop
-#pragma clang diagnostic pop
-#pragma gcc diagnostic pop
+#ifdef COMPILER_GCC
+    #pragma GCC diagnostic pop
+#endif
+#ifdef COMPILER_CLANG
+    #pragma clang diagnostic pop
+#endif
 
 #include <nlohmann/json.hpp>
 
@@ -75,22 +82,22 @@ std::any convert(const nlohmann::json& js) {
             std::cerr << key << "->" << value.type().name() << std::endl;
         }
 #endif
-        return std::move(params);
+        return std::make_any<Server::Object>(params);
     } else if(js.is_array()) {
         Server::Array params;
         for(const auto& value : js) {
             params.push_back(convert(value));
         }
-        return std::move(params);
+        return std::make_any<Server::Array>(params);
     } else if(js.is_boolean()) {
-        return std::move(std::string(js.get<bool>() ? "true" : "false"));
+        return std::make_any<std::string>(std::string(js.get<bool>() ? "true" : "false"));
     } else if(js.is_number()) {
-        return std::move(std::to_string(js.get<double>()));
+        return std::make_any<std::string>(std::to_string(js.get<double>()));
     } else if(js.is_string()) {
-        return std::move(js.get<std::string>());
+        return std::make_any<std::string>(js.get<std::string>());
     } else {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "conversion dicards", js);
-        return std::move(std::string("false"));
+        return std::make_any<std::string>(std::string("false"));
     }
 }
 
@@ -243,6 +250,7 @@ void Server::serverThread(unsigned short port) {
             };
     auto messageHandler =
             [this](auto ws, auto message, auto opCode) {
+                (void) ws;
                 GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS message", message, opCode);
                 const auto jsObj = json::parse(message);
                 const auto f = jsObj.find("type");
@@ -366,6 +374,7 @@ void Server::serverThread(unsigned short port) {
     })
     .listen(port, [this, port](auto * socket) {
         char PADDING[2];
+        (void) PADDING;
         if(socket) {
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "listening on port:", port);
             m_closeData = socket;

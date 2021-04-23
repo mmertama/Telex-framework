@@ -15,6 +15,7 @@ if(WIN32)
     find_dependency(uva)
 else()
     find_dependency(uSockets)
+    find_package(Threads)
 endif()
 
 # Since msvc and mingw libraries are located in the same folder we have to be explicit with naming.
@@ -59,7 +60,6 @@ if(WIN32)
     endif()    
 
     set_target_properties(gempyre::gempyre PROPERTIES
-        IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
         INTERFACE_LINK_LIBRARIES "gempyre::gempyre_lib;gempyre::gempyre_uv"
         )
 else()
@@ -67,11 +67,14 @@ else()
 
     set_target_properties(gempyre::gempyre_usock PROPERTIES
         IMPORTED_LOCATION "${uSockets_LIBRARY}"
-        IMPORTED_LOCATION_DEBUG ${uSockets_LIBRARY} # this is wrong
+        IMPORTED_LOCATION_DEBUG ${uSockets_LIBRARY} 
         )
 
+    set_target_properties(gempyre::gempyre_lib PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}"
+            )    
+
     set_target_properties(gempyre::gempyre PROPERTIES
-        IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
         INTERFACE_INCLUDE_DIRECTORIES ${gempyre_legacy_INCLUDE_DIR}
         INTERFACE_LINK_LIBRARIES  "gempyre::gempyre_lib;gempyre::gempyre_usock"
         )

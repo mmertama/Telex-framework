@@ -134,7 +134,6 @@ Error
 ;
 
 
-
 void GempyreUtils::init() {
 #ifdef WINDOWS_OS
 	if(!LoadLibraryA("ntdll.dll")) {
@@ -160,6 +159,24 @@ std::string GempyreUtils::toStr(LogLevel l) {
         {LogLevel::Debug_Trace, "TRACE"}
     };
     return m.at(l);
+}
+
+std::string GempyreUtils::qq(const std::string& s) {
+   std::stringstream ss;
+   ss << std::quoted(s);
+   return ss.str();
+}
+
+std::string GempyreUtils::chop(const std::string& s) {
+    auto str = s;
+    str.erase(str.find_last_not_of("\t\n\v\f\r ") + 1);
+    return str;
+}
+
+std::string GempyreUtils::chop(const std::string& s, const std::string& chopped) {
+    auto str = s;
+    str.erase(str.find_last_not_of(chopped) + 1);
+    return str;
 }
 
 void GempyreUtils::setLogLevel(GempyreUtils::LogLevel level, bool useSysLog) {

@@ -10,8 +10,6 @@ include_directories(
     include
 )
 
-#find_package (gempyre REQUIRED PATHS ../..)
-
 add_executable(${PROJECT_NAME}
     src/main.cpp
     gui/${NAME}.html

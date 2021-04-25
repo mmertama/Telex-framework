@@ -85,21 +85,11 @@ enum class LogLevel{None, Fatal, Error, Warning, Info, Debug, Debug_Trace};
   * String Utils
   */
 
-inline std::string qq(const std::string& s) {
-    return '"' + s + '"';
-}
+UTILS_EX std::string qq(const std::string& s);
 
-inline std::string chop(const std::string& s) {
-    auto str = s;
-    str.erase(str.find_last_not_of("\t\n\v\f\r ") + 1);
-    return str;
-}
+UTILS_EX std::string chop(const std::string& s);
 
-inline std::string chop(const std::string& s, const std::string& chopped) {
-    auto str = s;
-    str.erase(str.find_last_not_of(chopped) + 1);
-    return str;
-}
+UTILS_EX std::string chop(const std::string& s, const std::string& chopped);
 
 UTILS_EX std::string substitute(const std::string& str, const std::string& substring,  const std::string& substitution);
 

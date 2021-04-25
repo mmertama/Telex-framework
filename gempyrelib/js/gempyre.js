@@ -428,6 +428,9 @@ function canvasDraw(element, commands) {
                           commands[cmdpos++],
                           commands[cmdpos++]);
             break;
+        case 'textBaseline':
+            ctx.textBaseline = commands[cmdpos++];
+            break;    
         default:
             errlog(cmd, "is not supported command:" + cmdpos + ", in commands:" + commands);
             return;

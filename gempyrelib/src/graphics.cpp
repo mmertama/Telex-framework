@@ -123,7 +123,7 @@ void CanvasElement::draw(const CanvasElement::CommandList &canvasCommands) {
                return std::to_string(*doubleval);
             if(const auto intval = std::get_if<int>(&arg))
                return std::to_string(*intval);
-            return std::string(std::get<std::string_view>(arg));
+            return std::string(std::get<std::string>(arg));
        };
     for(auto&& cmd : canvasCommands)  {
         auto s = str(cmd);

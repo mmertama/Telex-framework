@@ -95,11 +95,11 @@ public:
     CanvasDataPtr makeCanvas(int width, int height);
     std::string addImage(const std::string& url, const std::function<void (const std::string& id)>& loaded = nullptr);
     std::vector<std::string> addImages(const std::vector<std::string>& urls, const std::function<void(const std::vector<std::string>)>&loaded = nullptr);
-    void paintImage(const std::string& imageId, int x, int y, const Element::Rect& clippingRect  = {0, 0, 0, 0});
-    void paintImage(const std::string& imageId, const Element::Rect& targetRect, const Element::Rect& clippingRect = {0, 0, 0, 0});
-    void draw(const CommandList& canvasCommands);
-    void draw(const FrameComposer& frameComposer);
-    void erase(bool resized = false);
+    void paintImage(const std::string& imageId, int x, int y, const Element::Rect& clippingRect  = {0, 0, 0, 0}) const;
+    void paintImage(const std::string& imageId, const Element::Rect& targetRect, const Element::Rect& clippingRect = {0, 0, 0, 0}) const;
+    void draw(const CommandList& canvasCommands) const;
+    void draw(const FrameComposer& frameComposer) const;
+    void erase(bool resized = false) const;
     bool hasCanvas() const {
         return !!m_tile;
     }
@@ -108,8 +108,8 @@ private:
     void paint(const CanvasDataPtr& canvas);
 private:
     CanvasDataPtr m_tile;
-    int m_width = 0;
-    int m_height = 0;
+    mutable int m_width = 0;
+    mutable int m_height = 0;
 };
 
 namespace  Color {

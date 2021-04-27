@@ -306,9 +306,9 @@ set(GEMPYRE_SRC
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
     # bool type is also used as reference, even the compiler warns, therefore we suppress
-    set_source_files_properties(src/json.cpp PROPERTIES COMPILE_FLAGS "-Wrange-loop-analysis")
+    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/json.cpp PROPERTIES COMPILE_FLAGS "-Wrange-loop-analysis")
     # with syslog stuff
-    set_source_files_properties(src/utils.cpp PROPERTIES COMPILE_FLAGS "-Wformat-security")
+    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp PROPERTIES COMPILE_FLAGS "-Wformat-security")
     set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")

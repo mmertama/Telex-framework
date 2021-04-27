@@ -25,7 +25,6 @@ message("Found debug libraries ${gempyre_LIBRARIES}")
 find_library(LIB_NAME NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}gempyre${CMAKE_STATIC_LIBRARY_SUFFIX} PATHS "@LIBRARY_FULL_DIR@" NO_DEFAULT_PATH REQUIRED)
 message("Found release libraries ${gempyre_LIBRARIES}")
 
-get_filename_component(THIS_LIB ${LIB_NAME} NAME)
 set_and_check(gempyre_legacy_INCLUDE_DIR "@INCLUDE_FULL_DIR@")
 set_and_check(gempyre_LIBRARY_DIR "@LIBRARY_FULL_DIR@")
 set(ENV{gempyre_ROOT} "@PROJECT_CMAKE_DIR@")
@@ -34,7 +33,7 @@ add_library(gempyre::gempyre_lib STATIC IMPORTED)
     
 set_target_properties(gempyre::gempyre_lib PROPERTIES
     IMPORTED_LOCATION "${LIB_NAME}"
-    #IMPORTED_LOCATION_DEBUG ${LIB_NAME_DEBUG}
+    IMPORTED_LOCATION_DEBUG ${LIB_NAME_DEBUG}
     )
 
 if(WIN32)

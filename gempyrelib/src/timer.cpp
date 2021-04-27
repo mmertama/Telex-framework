@@ -32,6 +32,9 @@ void TimerMgr::start() {
                 continue; // we have slept
             }
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "timer pop id:", data.id, m_queue.size());
+            //data is shared pointer, so it may be alive, but it may not be timer
+            if(!m_queue.blessed(data.id))
+                continue;
             m_queue.pop();
             GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer thread function");
             data.func(data.id);
@@ -76,8 +79,6 @@ bool TimerMgr::bless(int id) {
 }
 
 bool TimerMgr::blessed(int id) const {
-    if(m_queue.empty())
-        return false;
     return m_queue.blessed(id);
 }
 

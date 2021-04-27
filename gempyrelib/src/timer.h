@@ -21,11 +21,11 @@ public:
     using TimeType = std::chrono::milliseconds;
     struct DataEntry {
         DataEntry(const TimeType& t, const Function& f, const TimeType& i, int d) : currentTime(t), func(f), initialTime(i), id(d) {}
-        TimeType currentTime = std::chrono::milliseconds(0);
-        Function func = nullptr;
-        TimeType initialTime = std::chrono::milliseconds(0);
-        int id = 0;
-        char _PADDING[4] =  "\0\0\0";
+        TimeType currentTime = std::chrono::milliseconds(0); //when this is 0 the timer elapses
+        Function func = nullptr;                             //function to run
+        TimeType initialTime = std::chrono::milliseconds(0); //requested time, for recurring timer
+        int id = 0;                                          //id of this timer
+        char _PADDING[4] =  "\0\0\0";                        //compiler warnings
     };
     using Data = std::shared_ptr<DataEntry>;
     public:
@@ -39,47 +39,47 @@ public:
 
     int append(const TimeType& ms, const Function& func) {
         std::lock_guard<std::mutex> guard(m_mutex);
-        ++m_id;
-        m_queue.emplace(std::make_shared<DataEntry>(ms, func, ms, m_id));
-        m_blessed.emplace(m_id);
+        ++m_id;                                                            //just a running number
+        m_queue.emplace(std::make_shared<DataEntry>(ms, func, ms, m_id));  //priorize
+        m_blessed.emplace(m_id);                                           //set this timer to timer set
         return m_id;
     }
 
     void reAppend(const TimeType& ms, const Function& func, int id) {
         std::lock_guard<std::mutex> guard(m_mutex);
-        m_queue.emplace(std::make_shared<DataEntry>(ms, func, ms, id));
+        m_queue.emplace(std::make_shared<DataEntry>(ms, func, ms, id));    //priorize
     }
 
     void reduce(const TimeType& sleep) {
         std::lock_guard<std::mutex> guard(m_mutex);
-        std::vector<Data> store;
-        store.reserve(m_queue.size());
-        while(!m_queue.empty()) {
+        std::vector<Data> store;                                    //can only pop so we pop and put back
+        store.reserve(m_queue.size());                              //could be more static?
+        while(!m_queue.empty()) {                                   //everyhing off
             store.emplace_back(std::move(m_queue.top()));
             m_queue.pop();
         }
         for(auto& c : store) {
-            c->currentTime -= sleep;
-            m_queue.emplace(c);
+            c->currentTime -= sleep;                               //reduce time
+            m_queue.emplace(c);                                    //priorize again
         }
     }
 
     void pop() {
         std::lock_guard<std::mutex> guard(m_mutex);
-        m_queue.pop();
+        m_queue.pop();                                            //Take off
     }
 
     void bless(int id) {
         std::lock_guard<std::mutex> guard(m_mutex);
-        m_blessed.emplace(id);
+        m_blessed.emplace(id);                                  //set timer to set
     }
 
     bool blessed(int id) const {
         std::lock_guard<std::mutex> guard(m_mutex);
-        return m_blessed.find(id) != m_blessed.end();
+        return m_blessed.find(id) != m_blessed.end();           //see if this timer is in set
     }
 
-    bool takeBless(int id) {
+    bool takeBless(int id) {                                    //remove from set, if found
         std::lock_guard<std::mutex> guard(m_mutex);
         const auto it = m_blessed.find(id);
         if(it != m_blessed.end()) {
@@ -89,7 +89,7 @@ public:
         return false;
     }
 
-    void remove(int id) {
+    void remove(int id) {                                      //Remove a timer
         std::lock_guard<std::mutex> guard(m_mutex);
               std::vector<Data> store;
               store.reserve(m_queue.size());
@@ -104,6 +104,8 @@ public:
               }
     }
 
+    /// Change everything executed now
+    /// keepBless = false, not executed set, has to be blessed
     void setNow(bool keepBless = true) {
         std::lock_guard<std::mutex> guard(m_mutex);
         std::vector<Data> store;
@@ -125,6 +127,7 @@ public:
     }
 
 
+    //peek the next item
     std::optional<DataEntry> peek() const {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer queue peek");
         std::unique_lock<std::mutex> guard(m_mutex);

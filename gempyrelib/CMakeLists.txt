@@ -16,15 +16,16 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 message("compiler is ${CMAKE_CXX_COMPILER_ID}")
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
   add_compile_definitions(COMPILER_CLANG)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   add_compile_definitions(COMPILER_GCC)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
   add_compile_definitions(COMPILER_INTEL)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   add_compile_definitions(COMPILER_MSVC)
+else()
+    message(WARNING, "Cannot identify compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} LOWER)
@@ -302,6 +303,22 @@ set(GEMPYRE_SRC
     src/element.cpp
     src/internal.h
     )
+
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+    # bool type is also used as reference, even the compiler warns, therefore we suppress
+    set_source_files_properties(src/json.cpp PROPERTIES COMPILE_FLAGS "-Wrange-loop-analysis")
+    # with syslog stuff
+    set_source_files_properties(src/utils.cpp PROPERTIES COMPILE_FLAGS "-Wformat-security")
+    set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+  set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+  set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+  set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
+else()
+    message(WARNING, "Cannot identify compiler: ${CMAKE_CXX_COMPILER_ID}")
+endif()
 
 if(ANDROID)
     set(GEMPYRE_SRC ${GEMPYRE_SRC} src/android.cpp)

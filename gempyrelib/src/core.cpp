@@ -420,31 +420,14 @@ Ui::TimerId Ui::startTimer(const std::chrono::milliseconds& ms, bool singleShot,
     });
 }
 
-
-Ui::TimerId Ui::startTimer(const std::chrono::milliseconds& ms, bool singleShot, const std::function<void (TimerId)>& timerFunc) {
-    const int id = m_timers->append(ms, [this, timerFunc, singleShot](int id) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Timer added to run", id, toStr(m_status));
-        m_timerqueue.emplace_back([timerFunc, id, singleShot, this]() {
-            if(!m_timers->blessed(id)) {
-                return;
-            }
-            m_timers->takeBless(id);
-            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Timer running", id);
-            timerFunc(id);
-            if(singleShot)   {
-                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Timer", id, "decided to finish");
-                stopTimer(id);
-            } else {
-                GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Timer bless", id);
-                m_timers->bless(id);
-            }
-        });
+Ui::TimerId Ui::startTimer(const std::chrono::milliseconds& ms, bool singleShot, const std::function<void (int)>& timerFunc) {
+    const int id = m_timers->append(ms, singleShot, timerFunc, [this](const std::function<void()>& f) {
+        m_timerqueue.emplace_back(f);
         m_sema->signal();
     });
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Start Timer", ms.count(), id);
     return id;
 }
-
 
 bool Ui::stopTimer(TimerId id) {
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Stop Timer", id);

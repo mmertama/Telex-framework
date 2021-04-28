@@ -1,6 +1,5 @@
 #include "timer.h"
 
-
 using namespace Gempyre;
 
 class Gempyre::TimeQueue {
@@ -17,7 +16,6 @@ public:
         Function func = nullptr;                             //function to run
         TimeType initialTime = std::chrono::milliseconds(0); //requested time, for recurring timer
         int id = 0;                                          //id of this timer
-    //    bool blessed = true;
         char _PADDING[4] =  "\0\0\0";                        //compiler warnings
     };
     using DataPtr = std::shared_ptr<Data>;
@@ -38,19 +36,19 @@ public:
         return m_id;
     }
 
+    /// restore timer if not removed already
     bool restoreIf(int id) {
         std::lock_guard<std::mutex> guard(m_mutex);
         auto it = std::find_if(m_priorityQueue.begin(), m_priorityQueue.end(), [&id](const auto& d){return d->id == id;});
         if(it == m_priorityQueue.end())
             return false;
- //       assert(!(*it)->blessed);
         auto data = m_priorityQueue.extract(it);
-//        data.value()->blessed = true;
         data.value()->currentTime = data.value()->initialTime;
         m_priorityQueue.insert(std::move(data));  //priorize
         return true;
     }
 
+    ///move all timers
     void reduce(const TimeType& sleep) {
         std::lock_guard<std::mutex> guard(m_mutex);
         for(auto& d : m_priorityQueue) {
@@ -58,32 +56,8 @@ public:
         }
     }
 
-
-/*    void bless(int id) {
-        std::lock_guard<std::mutex> guard(m_mutex);
-        auto it = std::find_if(m_priorityQueue.begin(), m_priorityQueue.end(), [&id](const auto& d){return d->id == id;});
-        assert(it != m_priorityQueue.end());
-        assert(!(*it)->blessed);
-        (*it)->blessed = true;
-    }
-
-    [[nodiscard]]
-    bool blessed(int id) const {
-        std::lock_guard<std::mutex> guard(m_mutex);
-        auto it = std::find_if(m_priorityQueue.begin(), m_priorityQueue.end(), [&id](const auto& d){return d->id == id;});
-        assert(it != m_priorityQueue.end());
-        return it != m_priorityQueue.end() && (*it)->blessed;
-    }
-
-    void takeBless(int id) {                                    //remove from set, if found
-        std::lock_guard<std::mutex> guard(m_mutex);
-        auto it = std::find_if(m_priorityQueue.begin(), m_priorityQueue.end(), [&id](const auto& d){return d->id == id;});
-        assert(it != m_priorityQueue.end());
-        assert((*it)->blessed);
-        (*it)->blessed = false;
-    }
-*/
-    void remove(int id) {                                      //Remove a timer
+    ///Remove a timer
+    void remove(int id) {
         std::lock_guard<std::mutex> guard(m_mutex);
         auto it = std::find_if(m_priorityQueue.begin(), m_priorityQueue.end(), [&id](const auto& d){return d->id == id;});
         assert(it != m_priorityQueue.end());
@@ -100,7 +74,6 @@ public:
     /// keepBless = false, not executed set, has to be blessed
     void setNow(/*bool keepBless = true*/) {
         std::lock_guard<std::mutex> guard(m_mutex);
-    //    std::vector<Data> store;
         for(auto& c : m_priorityQueue) {
     /*        if(!keepBless) {
                c->blessed = false;
@@ -112,7 +85,7 @@ public:
 
     //peek the next item
     [[nodiscard]]
-    std::optional<Data> copyFirstBlessed() const {
+    std::optional<Data> copyTop() const {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer queue peek", m_priorityQueue.size());
         std::unique_lock<std::mutex> guard(m_mutex);
         const auto it = m_priorityQueue.begin();
@@ -121,13 +94,6 @@ public:
             guard.unlock(); // I have no idea why RAII wont work, unlock does
             GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer queue return");
             return value;
-        /* for(const auto& d : m_priorityQueue) {
-            if(d->blessed) {
-                const auto value = std::make_optional(*d);
-                guard.unlock(); // I have no idea why RAII wont work, unlock does
-                GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer queue return");
-                return value;
-            }*/
         }
         GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer queue is empty");
         return std::nullopt;
@@ -154,9 +120,7 @@ public:
 private:
     static Comp m_comp;
     mutable std::mutex m_mutex;
-    //std::priority_queue<Data, std::vector<Data>, Comp> m_queue;
     int m_id = 0;
-    //std::set<int> m_blessed;
     std::multiset<DataPtr, Comp> m_priorityQueue;
 };
 
@@ -167,7 +131,7 @@ void TimerMgr::start() {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "timer thread start");
         for(;;) {
             GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer thread loop");
-            const auto itemOr = m_queue->copyFirstBlessed();
+            const auto itemOr = m_queue->copyTop();
             GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer queue peeked");
             if(!itemOr.has_value()) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer thread loop exit");
@@ -190,8 +154,6 @@ void TimerMgr::start() {
                 continue; // we have slept
             }
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "timer pop id:", data.id, m_queue->size());
-      //      m_queue->pop();
-            GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer thread function");
             data.func(data.id);
             if(!m_exit) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer thread reappend");
@@ -209,15 +171,11 @@ int TimerMgr::append(const TimeQueue::TimeType& ms, bool singleShot, const TimeQ
     const auto id = m_queue->append(ms, [singleShot, timerFunc, this, cb] (int id) {
         const auto f = [singleShot, timerFunc, id, this]() {
             {
-          //      m_queue->takeBless(id);
                 GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Timer running", id);
                 timerFunc(id);
                 if(singleShot)   {
                     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Timer", id, "decided to finish");
                     remove(id);
-                } else {
-                    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Timer bless", id);
-                //    m_queue->bless(id);
                 }
             }
         };

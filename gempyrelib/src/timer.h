@@ -33,7 +33,7 @@ public:
                const TimerMgr::Function& func,
                const TimerMgr::Callback& cb);
     bool remove(int id);
-    void flush(bool doRun);
+    void flush(bool doRun); //do run not used - fix if issue - test everything!
     ~TimerMgr();
     TimerMgr();
 private:

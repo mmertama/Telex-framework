@@ -28,10 +28,10 @@ public:
     using Function = std::function<void (int)>;
     using Callback = std::function<void (const std::function<void()>& f)>;
     using TimeType = std::chrono::milliseconds;
-    int append(const TimerMgr::TimeType& ms, //at this time
-               bool singleShot,
-               const TimerMgr::Function& func,
-               const TimerMgr::Callback& cb);
+    int append(const TimerMgr::TimeType& ms,    //at this time
+               bool singleShot,                 //do re do?
+               const TimerMgr::Function& func,  //this is a parameter
+               const TimerMgr::Callback& cb);   //this is a cb run in timer thread, that returns a function that call a func executed in event thread
     bool remove(int id);
     void flush(bool doRun); //do run not used - fix if issue - test everything!
     ~TimerMgr();

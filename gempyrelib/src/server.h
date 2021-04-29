@@ -42,7 +42,7 @@ public:
     bool send(const std::unordered_map<std::string, std::string>& object, const std::any& values = std::any());
     bool send(const char* data, size_t len);
     int queryId() const {return ++m_queryId;}
-    unsigned short port() const {return m_currentPort;}
+    unsigned short port() const {return m_port;}
     std::function<std::string (const std::string&)> onFile(const std::function<std::string (const std::string&)>&f );
     ~Server();
     bool beginBatch();
@@ -54,8 +54,9 @@ private:
     enum class DataType{Json, Bin};
     int addPulled(DataType, const std::string_view& data);
     void serverThread(unsigned short port);
+    bool checkPort();
 private:
-    const unsigned short m_requestedPort;
+    unsigned short m_port;
     std::string m_rootFolder;
     std::unique_ptr<Broadcaster> m_broadcaster;
     std::unique_ptr<Broadcaster> m_extensions;
@@ -64,8 +65,6 @@ private:
     const CloseFunction m_onClose;
     const GetFunction m_onGet;
     const ListenFunction m_onListen;
-   // std::function<std::unique_ptr<std::thread> ()> mStartFunction = nullptr;
-    unsigned short m_currentPort = 0;
     std::unique_ptr<std::thread> m_serverThread;
     std::any m_closeData; //arbitrary
     bool m_uiready = false;

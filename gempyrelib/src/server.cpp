@@ -192,7 +192,15 @@ private:
     std::timed_mutex m_backPressureMutex;
 };
 
-
+int wishAport(int port, int max) {
+    int end = port + max;
+    while(!GempyreUtils::isAvailable(port)) {
+        ++port;
+        if(port == end)
+            return 0;
+    }
+    return port;
+}
 
 Server::Server(
     unsigned short port,
@@ -202,7 +210,7 @@ Server::Server(
     const CloseFunction& onClose,
     const GetFunction& onGet,
     const ListenFunction& onListen) :
-    m_requestedPort(port == 0 ? DEFAULT_PORT : port),
+    m_port(port == 0 ? wishAport(DEFAULT_PORT, PORT_ATTEMPTS) : port),
     m_rootFolder(root),
     m_broadcaster(std::make_unique<Broadcaster>()),
     m_onOpen(onOpen),
@@ -210,11 +218,12 @@ Server::Server(
     m_onClose(onClose),
     m_onGet(onGet),
     m_onListen(onListen),
-    m_currentPort(m_requestedPort),
     //mStartFunction([this]()->std::unique_ptr<std::thread> {
 //   return makeServer();
 //}),
-    m_serverThread(std::make_unique<std::thread>([this]() {serverThread(m_currentPort);})) {
+    m_serverThread(std::make_unique<std::thread>([this]() {
+    serverThread(m_port);
+})) {
 #ifdef RANDOM_PORT
     const auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
@@ -265,6 +274,19 @@ void Server::serverThread(unsigned short port) {
                         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "WS", "exteansionready");
                         return;
                     }
+                    if(*f == "log") {
+                        const auto log = jsObj.find("level");
+                        const auto msg = jsObj.find("msg");
+                        if(*log == "log")
+                            GempyreUtils::log(GempyreUtils::LogLevel::Info, "JS", *msg);
+                        if(*log == "info")
+                            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "JS", *msg);
+                        if(*log == "warn")
+                            GempyreUtils::log(GempyreUtils::LogLevel::Warning, "JS", *msg);
+                        if(*log == "")
+                            GempyreUtils::log(GempyreUtils::LogLevel::Error, "JS", *msg);
+                        return;
+                    }
                 }
                 const auto js = convert(jsObj);
                 auto object = std::any_cast<Object>(js);
@@ -285,6 +307,7 @@ void Server::serverThread(unsigned short port) {
         m_broadcaster->remove(ws);
         m_onClose(Close::CLOSE, code);
         ws->close();
+        doClose();
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Socket is closed");
     };
 
@@ -413,10 +436,13 @@ void Server::closeSocket() {
     }
 }
 
+
+
 bool Server::retryStart() {
-    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Retry", m_currentPort);
-    if(++m_currentPort > m_requestedPort + PORT_ATTEMPTS) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Error, "Listen ports:", m_requestedPort, "-", m_currentPort, "failed", GempyreUtils::lastError());
+    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Retry", m_port);
+    const int port = wishAport(m_port, PORT_ATTEMPTS);
+    if(port <= 0) {
+        GempyreUtils::log(GempyreUtils::LogLevel::Error, "Listen ports:", m_port, "failed", GempyreUtils::lastError());
         return false;
     }
 
@@ -432,7 +458,7 @@ bool Server::retryStart() {
 
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "retry end", m_doExit);
     if(!m_doExit) {
-        m_serverThread = std::make_unique<std::thread>([this]() {serverThread(m_currentPort);});
+        m_serverThread = std::make_unique<std::thread>([this]() {serverThread(m_port);});
         return true;
     } else {
         return false;

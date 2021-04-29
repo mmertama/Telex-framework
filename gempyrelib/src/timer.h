@@ -15,6 +15,7 @@
 
 namespace Gempyre {
 
+
 /**
  * Timers for Gempyre event queue.
  * Start time wraps a function into data and push into queue in next-priority order.

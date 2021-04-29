@@ -23,7 +23,7 @@ public:
 private:
     struct Comp {
     bool operator()(const DataPtr& a, const DataPtr& b) const {
-            return a->currentTime > b->currentTime;
+            return a->currentTime < b->currentTime;
         };
     };
 public:
@@ -66,27 +66,30 @@ public:
         m_priorityQueue.erase(it);
     }
 
-    /*
-    void setPending(int id) {
+
+    bool setPending(int id) {
         std::lock_guard<std::mutex> guard(m_mutex);
         auto it = std::find_if(m_priorityQueue.begin(), m_priorityQueue.end(), [&id](const auto& d){return d->id == id;});
-        assert(it != m_priorityQueue.end());
+        if(it == m_priorityQueue.end())
+            return false;
         (*it)->pending = true;
+        return true;
     }
+
    bool contains(int id) const {
         std::lock_guard<std::mutex> guard(m_mutex);
         const auto it = std::find_if(m_priorityQueue.begin(), m_priorityQueue.end(), [&id](const auto& d){return d->id == id;});
         return it != m_priorityQueue.end();
-    }*/
+    }
 
     /// Change everything executed now
     /// keepBless = false, not executed set, has to be blessed
-    void setNow(/*bool keepBless = true*/) {
+    void setNow(bool executeQueued) {
         std::lock_guard<std::mutex> guard(m_mutex);
         for(auto& c : m_priorityQueue) {
-    /*        if(!keepBless) {
-               c->blessed = false;
-            }*/
+            if(!executeQueued) {
+               c->pending = true;
+            }
             c->currentTime = std::chrono::milliseconds{0};
         }
     }
@@ -100,7 +103,6 @@ public:
         for(const auto& d : m_priorityQueue) {
             if(d->pending)
                 continue;
-            d->pending = true;
             const auto value = std::make_optional(*d);
             guard.unlock(); // I have no idea why RAII wont work, unlock does
             GempyreUtils::log(GempyreUtils::LogLevel::Debug_Trace, "timer queue return");
@@ -138,6 +140,7 @@ private:
 
 void TimerMgr::start() {
     m_exit = false;
+    GempyreUtils::log(GempyreUtils::LogLevel::Debug, "timers start");
     m_timerThread = std::async([this]() {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "timer thread start");
         while(!m_exit) {
@@ -169,10 +172,10 @@ void TimerMgr::start() {
                 const auto actualWait = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
                 GempyreUtils::log(GempyreUtils::LogLevel::Debug, "timer awake id:", data.id , currentSleep.count(), actualWait.count(), m_queue->size());
                 m_queue->reduce(actualWait);  //so we see if we are still there, and restart
-                if(m_exit)
-                    continue;
-                 // we have slept
+                continue; //find a new
             }
+            if(!m_queue->setPending(data.id))
+                continue;
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "timer pop id:", data.id, m_queue->size());
             data.func(data.id);
             /*if(!m_exit) {
@@ -182,13 +185,13 @@ void TimerMgr::start() {
 
             }*/
         }
-        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "timer thread ended", m_queue->size());
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "timer thread ended", m_queue->size(), m_exit.load());
     });
 }
 
 int TimerMgr::append(const TimeQueue::TimeType& ms, bool singleShot, const TimeQueue::Function& timerFunc, const Callback& cb) {
+    m_exit = false;
     const auto doStart = m_queue->empty();
-
     const auto id = m_queue->append(ms, [singleShot, timerFunc, this, cb] (int id) {
 
         cb([singleShot, timerFunc, id, this]() {
@@ -216,18 +219,20 @@ int TimerMgr::append(const TimeQueue::TimeType& ms, bool singleShot, const TimeQ
 
 
 bool TimerMgr::remove(int id) {
-    m_queue->remove(id);
+    if(!m_exit) //on exit queue is cleaned
+        m_queue->remove(id);
     m_cv.notify_all();  //if currently waiting has been waiting thing may have changed
     return true;
 }
 
-void TimerMgr::flush(bool /*doRun*/) {
+void TimerMgr::flush(bool doRun) {
     if(!m_queue->empty()) {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "flush");
-        m_queue->setNow(); //There was a feature that on flush (on exit) all timers are run.
+        m_queue->setNow(doRun);
         m_exit = true;
         m_cv.notify_all();
         m_timerThread.wait();
+        m_queue->clear();
     }
 }
 

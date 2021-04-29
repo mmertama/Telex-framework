@@ -9,10 +9,40 @@ socket.binaryType = 'arraybuffer';
 
 var logging = true;
 
+var sys_log = console.log;
+var sys_warn = console.warn;
+var sys_info = console.info;
+var sys_error = console.error;
+
+function g_log(msg) {
+    const logged = Array.prototype.slice.call(arguments).join(', ');
+    socket.send(JSON.stringify({'type': 'log', 'level': 'log', 'msg': logged}));
+    sys_log(msg);
+}
+
+function g_warn(msg) {
+    const logged = Array.prototype.slice.call(arguments).join(', ');
+    socket.send(JSON.stringify({'type': 'log', 'level': 'warn', 'msg': logged}));
+    sys_warn(msg);
+}
+
+function g_info(msg) {
+    const logged = Array.prototype.slice.call(arguments).join(', ');
+    socket.send(JSON.stringify({'type': 'log', 'level': 'info', 'msg': logged}));
+    sys_info(msg);
+}
+
+function g_error(msg) {
+    const logged = Array.prototype.slice.call(arguments).join(', ');
+    socket.send(JSON.stringify({'type': 'log', 'level': 'error', 'msg': logged}));
+    sys_error(msg);
+}
+
+
 function log(...logStr) {
-    if(logging) {
+   // if(logging) {
         console.log(...logStr);
-    }
+ //   }
 } 
 
 function errlog(source, text) {
@@ -472,7 +502,18 @@ function handleJson(msg) {
             socket.close();
             return;
         case 'logging':
-            logging = msg.logging == "true" ? true : false;
+            logging = msg.logging === "true" ? true : false;
+            if(logging) {
+                console.log = g_log;
+                console.info = g_info;
+                console.warn = g_warn;
+                console.error = g_error;
+            } else {
+                console.log = sys_log;
+                console.info = sys_info;
+                console.warn = sys_warn;
+                console.error = sys_error;
+            }
             return;
         case 'debug':
             console.log(msg.debug);

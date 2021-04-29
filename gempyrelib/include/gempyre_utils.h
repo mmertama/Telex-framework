@@ -405,6 +405,7 @@ UTILS_EX std::string slurp(const std::string& file, const size_t max = std::nume
 UTILS_EX std::optional<std::string> toJsonString(const std::any& any);
 UTILS_EX std::optional<std::any> jsonToAny(const std::string& str);
 
+UTILS_EX bool isAvailable(int port);
 
 }
 

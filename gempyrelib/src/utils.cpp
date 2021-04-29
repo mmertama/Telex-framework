@@ -811,6 +811,25 @@ std::pair<int, int> GempyreUtils::getPriorityLevels() {
 #endif
 
 
+bool GempyreUtils::isAvailable(int port) {
+    const int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sockfd < 0 ) {
+        return false;
+    }
+    struct sockaddr_in serv_addr = {};
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(port);
+    if (bind(sockfd, reinterpret_cast<struct sockaddr *>(&serv_addr), sizeof(serv_addr)) < 0) {
+        if( errno == EADDRINUSE )
+           return false;
+        }
+    if (close (sockfd) < 0 ) {
+        return false;
+    }
+    return true;
+}
+
 std::vector<std::string> GempyreUtils::ipAddresses(int addressType) {
     std::vector<std::string> addresses;
 #ifndef WINDOWS_OS

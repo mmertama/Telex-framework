@@ -306,11 +306,29 @@ void Ui::close() {
 
 void Ui::exit() {
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "exit - start", toStr(m_status));
-    if(m_status == State::RUNNING) {
+    switch(m_status) {
+    case State::RUNNING: {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "exit - request", toStr(m_status));
+        if(!(m_server && m_server->isRunning())) {
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "exit - no run", toStr(m_status));
+            m_status = State::EXIT;
+            return;
+        }
+        if(!m_server->isConnected()) {
+            GempyreUtils::log(GempyreUtils::LogLevel::Debug, "exit - no connect", toStr(m_status));
+            m_server->close(true);
+            m_status = State::EXIT;
+            return;
+        }
+
         addRequest([this]() {
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "exit - send", toStr(m_status));
-            return m_server->send({{"type", "exit_request"}});
+            if(!m_server->send({{"type", "exit_request"}})) {
+                //on fail we force
+                m_server->close(true); //at this point we can close server (it may already be close)
+                return false;
+            }
+            return true;
         });
         //Utils::log(Utils::LogLevel::Debug, "Status change -> CLOSE");
         //m_status = State::CLOSE;
@@ -318,15 +336,16 @@ void Ui::exit() {
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "exit - wait in eventloop", toStr(m_status));
         eventLoop();
         GempyreUtils::log(GempyreUtils::LogLevel::Debug, "exit - wait in eventloop done, back in mainloop", toStr(m_status));
-        m_sema->signal();
-    } else if(m_status == State::CLOSE) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Status change -> EXIT");
-        m_status = State::EXIT;  //there will be no one
-        m_sema->signal();
     }
-    // } else
-    //     m_status = State::EXIT;
-    //   m_sema->signal();
+        break;
+    case State::CLOSE:
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Status change -> EXIT");
+        m_status = State::EXIT;  //there will be no one      
+        break;
+    default:
+        GempyreUtils::log(GempyreUtils::LogLevel::Debug, "on exit switch", toStr(m_status));
+    }
+    m_sema->signal();
 }
 
 #ifndef ENSURE_SEND
@@ -461,13 +480,7 @@ void Ui::run() {
     GempyreUtils::log(GempyreUtils::LogLevel::Debug, "run, Status change --> RUNNING");
     m_status = State::RUNNING;
     eventLoop();
-    assert(m_status == State::EXIT);
-    //GempyreUtils::log(GempyreUtils::LogLevel::Debug, "run, Status change --> EXIT");
-    //m_status = State::EXIT;
-    //if(m_server) {
-    //    m_server->close();
-    // }
-    //GempyreUtils::log(GempyreUtils::LogLevel::Debug, "run has exit, server is gone");
+    //assert(m_status == State::EXIT);
 }
 
 void Ui::eventLoop() {

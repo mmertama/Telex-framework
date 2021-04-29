@@ -16,13 +16,9 @@ using namespace std::chrono_literals;
 
 std::string headlessParams(bool log = false) {
     const auto temp = std::filesystem::temp_directory_path().string();
-//    switch(GempyreUtils::currentOS()) {
-//    case GempyreUtils::OS::WinOs:
-//    case GempyreUtils::OS::MacOs:
-        return R"(--headless --disable-gpu --remote-debugging-port=9222 --user-data-dir=)" + temp
-                + (log ? R"( --enable-logging --v=0)" : "");
-//  default:return R"(--headless --disable-gpu)";
-//    }
+    return R"(--headless --disable-gpu --remote-debugging-port=9222 --user-data-dir=)" + temp
+            + (log ? R"( --enable-logging --v=0)" : " --disable-logging ");
+
 }
 
 std::string defaultChrome() {
@@ -45,7 +41,8 @@ void killHeadless() {
      GempyreUtils::currentOS() == GempyreUtils::OS::WinOs
         ? R"(powershell.exe -command "Get-CimInstance Win32_Process -Filter \"CommandLine LIKE%--headless%'\" | %{Stop-Process $_.ProcessId}")"
         : "pkill -f \"(chrome)?(--headless)\"";
-    std::system(cmd);
+    const auto killStatus = std::system(cmd);
+    (void) killStatus;
 }
 
 class TestUi : public testing::Test {
@@ -56,6 +53,11 @@ class TestUi : public testing::Test {
                     "apitests.html",
                      defaultChrome(),
                      headlessParams());
+        m_ui->onError([this](const auto& element, const auto& info) {
+            std::cerr << element << " err:" << info;
+            EXPECT_TRUE(false);
+            m_ui->exit();
+        });
     }
     void TearDown() override {
         m_ui.reset();
@@ -76,7 +78,6 @@ class Waiter {
 #define TEST_FAIL (assert(false))
 
 TEST(UiTests, openPage_with_page_browser) {
-    Gempyre::setDebug();
     const auto htmlPage = TEST_HTML;
     ASSERT_TRUE(std::filesystem::exists(htmlPage));
     const auto browser = defaultChrome();
@@ -163,19 +164,6 @@ TEST_F(TestUi, exit_on_time) {
     EXPECT_TRUE(ok);
 }
 
-TEST_F(TestUi, close) {
-    bool ok = false;
-    m_ui->onOpen([&ok, this](){
-       ok = true;
-       m_ui->close();
-    });
-    m_ui->startTimer(2s, true, [this]()  {
-      m_ui->exit();
-    });
-    m_ui->run();
-    EXPECT_TRUE(ok);
-}
-
 
 TEST_F(TestUi, onExit) {
     m_ui->startTimer(2s, true, [this]() {
@@ -190,12 +178,27 @@ TEST_F(TestUi, onExit) {
     EXPECT_TRUE(ok);
 }
 
-TEST_F(TestUi, onReload) {
-    Gempyre::setDebug();
-    m_ui->startTimer(1s, true, [this]()  {
-       m_ui->eval("window.location.reload(false);");
+TEST_F(TestUi, close) {
+    bool ok = false;
+    m_ui->onOpen([&ok, this](){
+       ok = true;
+       m_ui->close();
     });
-    m_ui->startTimer(10s, true, [this]()  {
+    m_ui->startTimer(2s, true, [this]()  {
+      m_ui->exit();
+    });
+    m_ui->run();
+    EXPECT_TRUE(ok);
+}
+
+TEST_F(TestUi, onReload) {
+    /** window.location.reload is deprecated **/
+    /*
+    m_ui->startTimer(1s, true, [this]()  {
+       m_ui->eval(R"(window.location.reload( true )); //deprecated
+    )");
+    });
+    m_ui->startTimer(20s, true, [this]()  {
        m_ui->exit();
     });
     bool ok = false;
@@ -205,6 +208,7 @@ TEST_F(TestUi, onReload) {
     });
     m_ui->run();
     EXPECT_TRUE(ok);
+    */
 }
 
 TEST_F(TestUi, onOpen){
@@ -232,6 +236,7 @@ TEST_F(TestUi, run) {
 
 TEST_F(TestUi, setLogging) {
     m_ui->startTimer(3s, true, [this]()  {
+       m_ui->setLogging(false);
        m_ui->exit();
     });
     m_ui->onError([](const auto& element, const auto& info){std::cerr << element << " err:" << info; TEST_FAIL;});
@@ -314,6 +319,62 @@ TEST_F(TestUi, stopTimer) {
     EXPECT_TRUE(ok);
 }
 
+
+TEST_F(TestUi, startManyTimers) {
+    std::string test = "";
+    m_ui->onOpen([&test](){
+        test += 'm';
+    });
+    m_ui->startTimer(0ms, true, [&test](Gempyre::Ui::TimerId id)  {
+       (void)id;
+       test += 'o';
+    });
+    m_ui->startTimer(1ms, true, [&test](Gempyre::Ui::TimerId id)  {
+       (void)id;
+       test += 'n';
+    });
+    m_ui->startTimer(100ms, true, [&test](Gempyre::Ui::TimerId id)  {
+       (void)id;
+       test += 's';
+    });
+    m_ui->startTimer(1000ms, true, [&test](Gempyre::Ui::TimerId id)  {
+       (void)id;
+       test += 't';
+    });
+    m_ui->startTimer(1001ms, true, [&test](Gempyre::Ui::TimerId id)  {
+       (void)id;
+       test += 'e';
+    });
+    m_ui->startTimer(10002ms, true, [&test, this](Gempyre::Ui::TimerId id)  {
+       (void)id;
+       test += 'r';
+       m_ui->exit();
+    });
+    m_ui->run();
+    EXPECT_EQ("monster", test);
+}
+
+TEST_F(TestUi, timing) {
+    const auto start = std::chrono::system_clock::now();
+    m_ui->startTimer(1000ms, true, [&start]()  {
+        const auto end = std::chrono::system_clock::now();
+        const auto diff = end - start;
+        EXPECT_TRUE(diff >= 1000ms);
+    });
+    m_ui->startTimer(2000ms, true, [&start]()  {
+        const auto end = std::chrono::system_clock::now();
+        const auto diff = end - start;
+        EXPECT_TRUE(diff >= 2000ms);
+    });
+    m_ui->startTimer(4000ms, true, [&start, this]()  {
+        const auto end = std::chrono::system_clock::now();
+        const auto diff = end - start;
+        EXPECT_TRUE(diff >= 4000ms);
+        m_ui->exit();
+    });
+   m_ui->run();
+}
+
 TEST_F(TestUi, root) {
     EXPECT_EQ(m_ui->root().id(), ""); //root has no id
 }
@@ -355,8 +416,8 @@ TEST_F(TestUi, ping) {
         ok = ping.has_value() &&
          ping->first.count() > 0 &&
          ping->second.count() > 0 &&
-         ping->first.count() < 10000 &&
-         ping->second.count() < 10000;
+         ping->first.count() < 20000 &&
+         ping->second.count() < 20000;
         if(ping)
             GempyreUtils::log(GempyreUtils::LogLevel::Debug, "Ping:", ping->first.count(), ping->second.count());
         else
@@ -447,7 +508,7 @@ TEST_F(TestUi, subscribe) {
     m_ui->startTimer(2s, true, [&]()  {
           el.setAttribute("style", "color:green");
        });
-    m_ui->startTimer(3s, true, [&]()  {
+    m_ui->startTimer(10s, true, [&]()  {
           m_ui->exit();
           ASSERT_TRUE(is_open);
        });
@@ -641,7 +702,10 @@ TEST_F(TestUi, rect) {
 }
 
 int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
+   ::testing::InitGoogleTest(&argc, argv);
+   for(int i = 1 ; i < argc; ++i)
+       if(argv[i] == std::string_view("--verbose"))
+            Gempyre::setDebug();
   return RUN_ALL_TESTS();
 }
 

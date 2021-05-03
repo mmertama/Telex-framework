@@ -135,7 +135,8 @@ public:
             const auto success = s->send(text, uWS::OpCode::TEXT);
             if(!success) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Warning, "socket t2 buffer", s->getBufferedAmount());
-                m_backPressureMutex.try_lock_for(DELAY);
+                if(!m_backPressureMutex.try_lock_for(DELAY))
+                    GempyreUtils::log(GempyreUtils::LogLevel::Warning, "Cannot lock backpressure mutex");
                 return false;
             }
         }
@@ -148,7 +149,8 @@ public:
             const auto success = s->send(std::string_view(data, len), uWS::OpCode::BINARY);
             if(!success) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Warning, "socket b2 buffer", s->getBufferedAmount());
-                m_backPressureMutex.try_lock_for(DELAY);
+                if(!m_backPressureMutex.try_lock_for(DELAY))
+                       GempyreUtils::log(GempyreUtils::LogLevel::Warning, "Cannot lock backpressure mutex");
                 return false;
             }
         }

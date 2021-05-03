@@ -824,9 +824,15 @@ bool GempyreUtils::isAvailable(int port) {
         if( errno == EADDRINUSE )
            return false;
         }
+#ifndef WINDOWS_OS    
     if (close (sockfd) < 0 ) {
         return false;
     }
+#else
+ if (closesocket (sockfd) < 0 ) {
+        return false;
+    }
+#endif
     return true;
 }
 

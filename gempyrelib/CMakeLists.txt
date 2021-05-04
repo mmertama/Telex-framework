@@ -16,16 +16,16 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 message("compiler is ${CMAKE_CXX_COMPILER_ID}")
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   add_compile_definitions(COMPILER_CLANG)
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   add_compile_definitions(COMPILER_GCC)
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   add_compile_definitions(COMPILER_INTEL)
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   add_compile_definitions(COMPILER_MSVC)
 else()
-    message(WARNING, "Cannot identify compiler: ${CMAKE_CXX_COMPILER_ID}")
+    message(FATAL_ERROR "Cannot identify compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} LOWER)
@@ -90,7 +90,7 @@ if (WIN32 OR ANDROID)
             else()
                     set(UV_LIB_FULL "${UV_LIB_DIR}/Release/${UVA_LIB_NAME}")
             endif()
-            message("MSVC builds artifacts upon release type")
+            message("MSVC builds artifacts upon release type at ${UV_LIB_FULL}")
          else()
              if(NOT ANDROID)
                   find_program(NINJA ninja.exe DOC "Ninja must be in path" REQUIRED)
@@ -104,7 +104,12 @@ if (WIN32 OR ANDROID)
             GIT_TAG ${LIB_UV_VER}
             GIT_PROGRESS true
             BUILD_BYPRODUCTS ${UV_LIB_FULL}
-            CMAKE_ARGS -DLIBUV_BUILD_TESTS=OFF -DLIBUV_BUILD_BENCH=OFF -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
+            CMAKE_ARGS
+                -DLIBUV_BUILD_TESTS=OFF
+                -DLIBUV_BUILD_BENCH=OFF
+                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+                -DCMAKE_INSTALL_PREFIX=${UV_LIB_DIR}
+                -DCMAKE_DEBUG_POSTFIX=${CMAKE_DEBUG_POSTFIX}
             UPDATE_DISCONNECTED false
             INSTALL_COMMAND  ${CMAKE_COMMAND} --build . --target install
             UPDATE_COMMAND ""
@@ -115,12 +120,12 @@ if (WIN32 OR ANDROID)
         set(INCLUDES "${UV_DIR}/src/libuv/include")
 
 #TODO: Same shit with usockets
-        add_library(UV_LIB_TARGET STATIC IMPORTED)
-        set_target_properties(UV_LIB_TARGET PROPERTIES
-            IMPORTED_LOCATION "${UV_LIB_FULL}"
+        add_library(uv_lib_interface STATIC IMPORTED)
+        set_target_properties(uv_lib_interface PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${UV_LIB_FULL}"
             INTERFACE_INCLUDE_DIRECTORIES "${UV_DIR}/src/libuv/include"
             )
-        set(UV_LIB ${UV_LIB_TARGET})
+        set(UV_LIB uv_lib_interface)
 endif()
 
 
@@ -315,7 +320,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
   set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-  set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
+  set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "/w")
 else()
     message(WARNING, "Cannot identify compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
@@ -384,13 +389,14 @@ endif()
 #add_dependencies(${PROJECT_NAME} gempyrejs)
 
 if(WIN32)
-    message("uvlib is set as:${UV_LIB}")
+    message("uvlib is set as:'${UV_LIB_FULL}'")
     if(MSVC)
         set(WIN_LIB psapi.lib userenv.lib iphlpapi.lib)
     else()
         set(WIN_LIB psapi.lib userenv.lib iphlpapi.lib ws2_32.lib)
     endif()
-    set_property(TARGET ${PROJECT_NAME} PROPERTY socket_lib ${UV_LIB} ${WIN_LIB})
+    set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs "${UVA_LIB_NAME};${WIN_LIB}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs_path "${UV_LIB_DIR}")
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${UV_LIB}
@@ -398,13 +404,13 @@ if(WIN32)
         )
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
-    set_target_properties(${PROJECT_NAME} PROPERTIES socket_lib ${UV_LIB})
+    set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs ${UV_LIB})
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${UV_LIB}
         PRIVATE -lstdc++
         )
 else()
-    set_target_properties(${PROJECT_NAME} PROPERTIES socket_lib "${SOCKETS_LIB};${CMAKE_THREAD_LIBS_INIT}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs "${SOCKETS_LIB};${CMAKE_THREAD_LIBS_INIT}")
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${SOCKETS_LIB}

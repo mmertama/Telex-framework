@@ -8,11 +8,13 @@ include_directories(
      ../../gempyrelib/include
 )
 
-#find_package (gempyre REQUIRED PATHS ../..)
+# This is not a an example! This is just enabler to link without install, internal to Gempyre
+link_directories("$<TARGET_PROPERTY:gempyre,gempyre_libs_path>")
 
 add_executable(helloworld main.cpp)
 
-target_link_libraries (helloworld  PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,socket_lib>")
+# This is not a an example! This is just enabler to link without install, internal to Gempyre
+target_link_libraries (helloworld  PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,gempyre_libs>")
 
 
 

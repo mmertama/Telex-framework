@@ -10,7 +10,8 @@ include_directories(
     ${TEST_INCLUDE_DIR}
 )
 
-#find_package (gempyre REQUIRED PATHS ../..)
+# This is not a an example! This is just enabler to link without install, internal to Gempyre
+link_directories("$<TARGET_PROPERTY:gempyre,gempyre_libs_path>")
 
 add_executable(${PROJECT_NAME}
     apitests.cpp
@@ -31,5 +32,5 @@ configure_file(gui/${PROJECT_NAME}.html ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NA
 
 find_library(gtest PATHS ${TEST_LIBRARY_DIR})
 
-target_link_libraries (${PROJECT_NAME}  PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,socket_lib>" gtest)
+target_link_libraries (${PROJECT_NAME}  PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,gempyre_libs>" gtest)
 

@@ -1,7 +1,7 @@
 include(FindPackageHandleStandardArgs)
 
 find_library(uva_LIBRARY
-  NAMES @UVA_LIB_NAME@
+  NAMES @UVA_LIB_NAME_CORE@
   PATHS "@LIBRARY_FULL_DIR@"
 )
 

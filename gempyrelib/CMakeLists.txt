@@ -74,16 +74,19 @@ endif()
 
 
 if (WIN32 OR ANDROID)
-        message("Need Libuv...")
         set(UV_DIR "${EXTRA_DIR}/libuv")
         set(UV_LIB_DIR "${UV_DIR}/src/libuv-build")
 
+        message("Need Libuv at ${UV_DIR} ")
+
         if(NOT ${IS_RELEASE})
-            set(UVA_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uv_ad${CMAKE_STATIC_LIBRARY_SUFFIX})
-        else() 
-            set(UVA_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}uv_a${CMAKE_STATIC_LIBRARY_SUFFIX})
+            set(UVA_LIB_NAME_CORE uv_ad)
+        else()
+            set(UVA_LIB_NAME_CORE uv_a)
         endif()
-		
+
+        set(UVA_LIB_NAME ${CMAKE_STATIC_LIBRARY_PREFIX}${UVA_LIB_NAME_CORE}${CMAKE_STATIC_LIBRARY_SUFFIX})
+
         if (MSVC)
             if (NOT ${IS_RELEASE})
                     set(UV_LIB_FULL "${UV_LIB_DIR}/Debug/${UVA_LIB_NAME}")
@@ -309,20 +312,20 @@ set(GEMPYRE_SRC
     src/internal.h
     )
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     # bool type is also used as reference, even the compiler warns, therefore we suppress
     set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/json.cpp PROPERTIES COMPILE_FLAGS "-Wrange-loop-analysis")
     # with syslog stuff
     set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp PROPERTIES COMPILE_FLAGS "-Wformat-security")
     set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   set_target_properties(libwebsockets PROPERTIES COMPILE_FLAGS "/w")
 else()
-    message(WARNING, "Cannot identify compiler: ${CMAKE_CXX_COMPILER_ID}")
+    message(FATAL_ERROR "Cannot identify compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 if(ANDROID)

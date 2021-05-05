@@ -198,8 +198,10 @@ int wishAport(int port, int max) {
     int end = port + max;
     while(!GempyreUtils::isAvailable(port)) {
         ++port;
-        if(port == end)
+        if(port == end) {
+            GempyreUtils::log(GempyreUtils::LogLevel::Error, "wish a port", GempyreUtils::lastError());
             return 0;
+        }
     }
     return port;
 }

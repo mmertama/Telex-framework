@@ -13,7 +13,7 @@
 
 #else
 #ifndef _WINSOCKAPI_                              
-    #include <winsock2.h>                           
+    #include <winsock2.h>
 #endif   
 #include <Windows.h>                                
 #include <iphlpapi.h>
@@ -137,14 +137,19 @@ Error
 void GempyreUtils::init() {
 #ifdef WINDOWS_OS
 	if(!LoadLibraryA("ntdll.dll")) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Warning, "Cannot preload", "ntdll.dll");
+        GempyreUtils::log(GempyreUtils::LogLevel::Error, "Cannot preload", "ntdll.dll");
 	}
 	if(!LoadLibraryA("kernel32.dll")) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Warning, "Cannot preload", "kernel32.dll");
+        GempyreUtils::log(GempyreUtils::LogLevel::Error, "Cannot preload", "kernel32.dll");
 	}
 	if(!LoadLibraryA("advapi32.dll")) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Warning, "Cannot preload", "advapi32.dll");
+        GempyreUtils::log(GempyreUtils::LogLevel::Error, "Cannot preload", "advapi32.dll");
 	}
+    WSADATA wsa;
+    const auto version = MAKEWORD(2, 2);
+    if(!WSAStartup(version, &wsa)) {
+        GempyreUtils::log(GempyreUtils::LogLevel::Error, "Cannot initialize soockets", WSAGetLastError(), lastError());
+    }
 #endif
 }
 

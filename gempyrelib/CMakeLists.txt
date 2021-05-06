@@ -123,12 +123,12 @@ if (WIN32 OR ANDROID)
         set(INCLUDES "${UV_DIR}/src/libuv/include")
 
 #TODO: Same shit with usockets
-        add_library(uv_lib_interface STATIC IMPORTED)
-        set_target_properties(uv_lib_interface PROPERTIES
-            INTERFACE_LINK_LIBRARIES "${UV_LIB_FULL}"
-            INTERFACE_INCLUDE_DIRECTORIES "${UV_DIR}/src/libuv/include"
-            )
-        set(UV_LIB uv_lib_interface)
+#        add_library(uv_lib_interface STATIC IMPORTED)
+#        set_target_properties(uv_lib_interface PROPERTIES
+#            INTERFACE_LINK_LIBRARIES "${UV_LIB_FULL}"
+#            INTERFACE_INCLUDE_DIRECTORIES "${UV_DIR}/src/libuv/include>"
+#            )
+#        set(UV_LIB uv_lib_interface)
 endif()
 
 
@@ -402,7 +402,7 @@ if(WIN32)
     set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs_path "${UV_LIB_DIR}")
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
-        PRIVATE ${UV_LIB}
+        #PRIVATE ${UV_LIB}
         PRIVATE ${WIN_LIB}
         )
 elseif(ANDROID)

@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     gui/${NAME}.html
     )
+add_dependencies (${PROJECT_NAME} gempyre)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/gui/minihello.html
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}

@@ -19,7 +19,7 @@ add_executable(${PROJECT_NAME}
     gui/gempyre.ogg
     include/audio_resource.h
     )
-
+add_dependencies (${PROJECT_NAME} gempyre)
 addResource(PROJECT ${PROJECT_NAME} TARGET include/${NAME}_resource.h SOURCES gui/${NAME}.html gui/gempyre.ogg)
 
 # This is not a an example! This is just enabler to link without install, internal to Gempyre

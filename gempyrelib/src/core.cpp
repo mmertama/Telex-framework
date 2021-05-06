@@ -252,10 +252,13 @@ m_filemap(normalizeNames(filemap)) {
             + (appPage.empty() ? "index.html" : appPage)
             + " " + extraParams;
             const auto result =
-#ifndef ANDROID_OS
-            std::system((cmdLine + "&").c_str());
-#else
+#if defined(WINDOWS_OS)
+            std::system(cmdLine.c_str());
+#elif defined (ANDROID_OS)
             androidLoadUi(cmdLine);
+
+#else
+            std::system((cmdLine + "&").c_str());
 #endif
             if(result != 0) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Fatal, "Cannot open:", cmdLine);

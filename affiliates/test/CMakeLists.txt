@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME}
     gui/${NAME}.html
     )
 
+add_dependencies (${PROJECT_NAME} gempyre)
 addResource(PROJECT ${PROJECT_NAME} TARGET include/${NAME}_resource.h SOURCES gui/${NAME}.html)
 
 target_link_libraries (${PROJECT_NAME} PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,gempyre_libs>")

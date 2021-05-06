@@ -25,6 +25,8 @@ add_executable(${PROJECT_NAME}
     gui/${NAME}.html
     )
 
+add_dependencies (${PROJECT_NAME} gempyre)
+
 addResource(PROJECT ${PROJECT_NAME} TARGET include/${NAME}_resource.h SOURCES gui/${NAME}.html)
 
 # This is not a an example! This is just enabler to link without install, internal to Gempyre

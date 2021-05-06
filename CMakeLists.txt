@@ -1,6 +1,4 @@
 cmake_minimum_required (VERSION 3.16)
-set(NAME gempyre)
-project (${NAME})
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)

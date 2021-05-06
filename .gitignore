@@ -90,3 +90,4 @@ examples/minihello/minihello
 build
 mingw_build
 msvc_build
+*build_all

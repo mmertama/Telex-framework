@@ -30,6 +30,7 @@ addResource(PROJECT ${PROJECT_NAME}
 add_compile_definitions(TEST_HTML="${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.html")
 configure_file(gui/${PROJECT_NAME}.html ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.html COPYONLY)
 
+add_dependencies (${PROJECT_NAME} gempyre)
 find_library(gtest PATHS ${TEST_LIBRARY_DIR})
 
 target_link_libraries (${PROJECT_NAME}  PRIVATE "$<TARGET_FILE:gempyre>" "$<TARGET_PROPERTY:gempyre,gempyre_libs>" gtest)

@@ -16,7 +16,12 @@ using namespace std::chrono_literals;
 
 std::string headlessParams(bool log = false) {
     const auto temp = std::filesystem::temp_directory_path().string();
-    return R"(--headless --disable-gpu --remote-debugging-port=9222 --user-data-dir=)" + temp
+    return R"( --headless --disable-gpu --remote-debugging-port=9222 --user-data-dir=)" +
+#ifdef WINDOWS_OS
+            GempyreUtils::substitute(temp, "/", "\\") + " --no-sandbox "
+#else
+            temp
+#endif
             + (log ? R"( --enable-logging --v=0)" : " --disable-logging ");
 
 }
@@ -24,7 +29,7 @@ std::string headlessParams(bool log = false) {
 std::string defaultChrome() {
     switch(GempyreUtils::currentOS()) {
     case GempyreUtils::OS::MacOs: return R"(/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome)";
-    case GempyreUtils::OS::WinOs: return  R"("C:\Program Files (86)\Google\Chrome\Application\chrome.exe")";
+    case GempyreUtils::OS::WinOs: return R"(start "_" "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")";
     case GempyreUtils::OS::LinuxOs: {
         auto browser = GempyreUtils::which(R"(chromium-browser)");
         if(!browser.empty())
@@ -39,7 +44,7 @@ std::string defaultChrome() {
 void killHeadless() {
      const auto cmd =
      GempyreUtils::currentOS() == GempyreUtils::OS::WinOs
-        ? R"(powershell.exe -command "Get-CimInstance Win32_Process -Filter \"CommandLine LIKE%--headless%'\" | %{Stop-Process $_.ProcessId}")"
+        ? R"(powershell.exe -command "Get-CimInstance -ClassName Win32_Process -Filter \"CommandLine LIKE '%--headless%'\" | %{Stop-Process -Id $_.ProcessId}")"
         : "pkill -f \"(chrome)?(--headless)\"";
     const auto killStatus = std::system(cmd);
     (void) killStatus;
@@ -706,6 +711,7 @@ int main(int argc, char **argv) {
    for(int i = 1 ; i < argc; ++i)
        if(argv[i] == std::string_view("--verbose"))
             Gempyre::setDebug();
+  killHeadless(); // there may be unwanted processes
   return RUN_ALL_TESTS();
 }
 

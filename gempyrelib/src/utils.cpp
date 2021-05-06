@@ -147,8 +147,9 @@ void GempyreUtils::init() {
 	}
     WSADATA wsa;
     const auto version = MAKEWORD(2, 2);
-    if(!WSAStartup(version, &wsa)) {
-        GempyreUtils::log(GempyreUtils::LogLevel::Error, "Cannot initialize soockets", WSAGetLastError(), lastError());
+    const int code = WSAStartup(version, &wsa);
+    if(code) {
+        GempyreUtils::log(GempyreUtils::LogLevel::Fatal, "Cannot initialize socket, Windows WSAStartup failed: code", code, "Last error:",  lastError());
     }
 #endif
 }

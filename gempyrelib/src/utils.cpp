@@ -36,6 +36,7 @@
 #include <sys/stat.h>
 
 #include <stdio.h>
+#include <variant>
 
 
 
@@ -148,7 +149,7 @@ void GempyreUtils::init() {
     WSADATA wsa;
     const auto version = MAKEWORD(2, 2);
     const int code = WSAStartup(version, &wsa);
-    if(code) {
+    if(0 != code) {
         GempyreUtils::log(GempyreUtils::LogLevel::Fatal, "Cannot initialize socket, Windows WSAStartup failed: code", code, "Last error:",  lastError());
     }
 #endif
@@ -294,13 +295,13 @@ std::variant<std::tuple<std::multimap<std::string, std::string>, std::vector<std
         const auto arg = plist[i];
         if(arg[0] == '-') {
             if(arg.length() < 2)
-                return ParsedParameters(i);
-            auto it = args.end();
+                return ParsedParameters{static_cast<int>(i)};
+            decltype(args.end()) it;
             bool longOpt = false;
             auto assing = arg.end();
             if(arg[1] == '-') {
                 if(arg.length() < 3)
-                    return ParsedParameters(i);
+                    return ParsedParameters{static_cast<int>(i)};
                 longOpt = true;
                 const auto key = arg.substr(2);
                 assing = std::find(arg.begin(), arg.end(), '=');
@@ -323,7 +324,7 @@ std::variant<std::tuple<std::multimap<std::string, std::string>, std::vector<std
                     } else if(i + 1 < plist.size()) {
                         val = plist[i + 1];
                         ++i;
-                    } else return ParsedParameters(i);
+                    } else return ParsedParameters{static_cast<int>(i)};
                     options.emplace(std::get<std::string>(*it), val);
                     } break;
                 case ArgType::OPT_ARG: {

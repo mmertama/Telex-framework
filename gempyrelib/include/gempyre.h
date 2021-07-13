@@ -14,6 +14,7 @@
 #include <vector>
 #include <variant>
 #include <mutex>
+#include <tuple>
 
 /**
   * ![wqe](https://avatars1.githubusercontent.com/u/7837709?s=400&v=4)
@@ -41,6 +42,7 @@ namespace Gempyre {
     class Server;
     class Semaphore;
     class TimerMgr;
+    class UiApp;
     template <class T> class EventQueue;
     template <class T> class IdList;
     template <class K, class T> class EventMap;
@@ -240,6 +242,7 @@ namespace Gempyre {
         std::mutex m_mutex;
         bool m_hold{false};
         unsigned m_msgId{1};
+        std::unique_ptr<UiApp> m_appUi;
         friend class Element;
         friend class Server;
     };

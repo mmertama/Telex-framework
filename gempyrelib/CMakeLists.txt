@@ -331,6 +331,40 @@ endif()
 
 if(ANDROID)
     set(GEMPYRE_SRC ${GEMPYRE_SRC} src/android.cpp)
+else()
+    if(WIN32)
+        set (PY_CONFIG "python3-config")
+    else()
+        set (PY_CONFIG "/usr/local/bin/python3-config")
+    endif()
+
+    execute_process(
+        COMMAND ${PY_CONFIG} --includes
+        RESULT_VARIABLE PY_CONFIG1_FALSE
+        OUTPUT_VARIABLE PY_INCLUDES
+        ERROR_VARIABLE PY_ERR1
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    execute_process(
+        COMMAND ${PY_CONFIG} --ldflags --embed
+        RESULT_VARIABLE PY_CONFIG2_FALSE
+        OUTPUT_VARIABLE PY_LIBS
+        ERROR_VARIABLE PY_ERR2
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    if(NOT ${PY_CONFIG1_FALSE} OR NOT ${PY_CONFIG2_FALSE})
+        add_compile_definitions(HAS_PYTHON)
+       # add_compile_options(${PY_INCLUDES})
+       message("set cpp ${PY_INCLUDES}")
+       message("set link ${PY_LIBS}")
+       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PY_INCLUDES}")
+    else()
+        message(WARNING "Cannot resolve Python config: ${PY_CONFIG1_FALSE} - ${PY_CONFIG2_FALSE}")
+    endif()
+
+    set(GEMPYRE_SRC ${GEMPYRE_SRC}
+        src/uiapp.cpp
+        src/uiapp.h)
 endif()
 
 include_directories(
@@ -390,6 +424,12 @@ else()
     add_dependencies(${PROJECT_NAME} makecmd)
 endif()
 
+if(NOT ANDROID)
+    add_custom_target(uiapp ALL)
+    addResource(PROJECT uiapp TARGET src/generated/uiapp_python.h SOURCES ${CMAKE_SOURCE_DIR}/affiliates/py_client/pyclient.py)
+    add_dependencies(${PROJECT_NAME} uiapp)
+endif()
+
 #add_dependencies(${PROJECT_NAME} gempyrejs)
 
 if(WIN32)
@@ -399,12 +439,13 @@ if(WIN32)
     else()
         set(WIN_LIB psapi.lib userenv.lib iphlpapi.lib ws2_32.lib)
     endif()
-    set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs "${UVA_LIB_NAME};${WIN_LIB}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs "${UVA_LIB_NAME};${WIN_LIB};${PY_LIBS}")
     set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs_path "${UV_LIB_DIR}")
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         #PRIVATE ${UV_LIB}
         PRIVATE ${WIN_LIB}
+        PRIVATE ${PY_LIBS}
         )
 elseif(ANDROID)
     message("uvdir ${UV_LIB}")
@@ -414,10 +455,11 @@ elseif(ANDROID)
         PRIVATE -lstdc++
         )
 else()
-    set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs "${SOCKETS_LIB};${CMAKE_THREAD_LIBS_INIT}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES gempyre_libs "${SOCKETS_LIB};${CMAKE_THREAD_LIBS_INIT};${PY_LIBS}")
     target_link_libraries (${PROJECT_NAME}
         PRIVATE ${CMAKE_THREAD_LIBS_INIT}
         PRIVATE ${SOCKETS_LIB}
+        PRIVATE ${PY_LIBS}
         PRIVATE -lstdc++)
 endif()
 

@@ -27,9 +27,10 @@ using namespace Gempyre;
 const std::string SERVER_ADDRESS = "http://localhost";
 
 
-
 #ifdef ANDROID_OS
 extern int androidLoadUi(const std::string&);
+#else
+#include "uiapp.h"
 #endif
 
 #define CHECK_FATAL(x) if(ec) {error(ec, merge(x, " at ", __LINE__)); return;}  std::cout << x << " - ok" << std::endl;
@@ -128,7 +129,7 @@ Ui::Ui(const std::string& indexHtml, unsigned short port, const std::string& roo
             , "", port, root) {}
 
 Ui::Ui(const Filemap& filemap, const std::string& indexHtml, unsigned short port, const std::string& root)
-    : Ui(filemap, indexHtml, GempyreUtils::osBrowser(), "", port, root) {}
+    : Ui(filemap, indexHtml, "", "", port, root) {}
 
 Ui::Ui(const std::string& indexHtml, const std::string& browser, const std::string& extraParams, unsigned short port, const std::string& root) :
     Ui(toFileMap(indexHtml), '/' + GempyreUtils::baseName(indexHtml), browser, extraParams, port, root) {}
@@ -251,14 +252,24 @@ m_filemap(normalizeNames(filemap)) {
             + std::to_string(port) + "/"
             + (appPage.empty() ? "index.html" : appPage)
             + " " + extraParams;
-            const auto result =
-#if defined(WINDOWS_OS)
-            std::system(cmdLine.c_str());
-#elif defined (ANDROID_OS)
-            androidLoadUi(cmdLine);
+            auto result = 0;
+#ifndef ANDROID_OS
+            if(browser.empty()) {
+                m_appUi = std::make_unique<UiApp>();
+                if(!m_appUi->isStarted()) {
+                    result = -1;
+                }
+            }
+            if(result != 0)
+                result =
+    #if defined(WINDOWS_OS)
+                std::system(cmdLine.c_str());
+    #else
 
-#else
             std::system((cmdLine + "&").c_str());
+    #endif
+#else
+                     androidLoadUi(cmdLine);
 #endif
             if(result != 0) {
                 GempyreUtils::log(GempyreUtils::LogLevel::Fatal, "Cannot open:", cmdLine);

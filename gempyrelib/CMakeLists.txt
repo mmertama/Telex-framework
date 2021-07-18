@@ -331,7 +331,7 @@ endif()
 
 if(ANDROID)
     set(GEMPYRE_SRC ${GEMPYRE_SRC} src/android.cpp)
-else()
+elseif(USE_PYTHON_UI)
     if(WIN32)
         set (PY_CONFIG "python3-config")
     else()
@@ -353,19 +353,16 @@ else()
         OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     if(NOT ${PY_CONFIG1_FALSE} OR NOT ${PY_CONFIG2_FALSE})
-        add_compile_definitions(HAS_PYTHON)
-       # add_compile_options(${PY_INCLUDES})
-       message("set cpp ${PY_INCLUDES}")
-       message("set link ${PY_LIBS}")
+       add_compile_definitions(HAS_PYTHON)
        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PY_INCLUDES}")
     else()
         message(WARNING "Cannot resolve Python config: ${PY_CONFIG1_FALSE} - ${PY_CONFIG2_FALSE}")
     endif()
-
-    set(GEMPYRE_SRC ${GEMPYRE_SRC}
-        src/uiapp.cpp
-        src/uiapp.h)
 endif()
+
+set(GEMPYRE_SRC ${GEMPYRE_SRC}
+    src/uiapp.cpp
+    src/uiapp.h)
 
 include_directories(
         ${INCLUDES}

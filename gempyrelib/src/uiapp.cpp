@@ -33,7 +33,10 @@ UiApp::UiApp() : m_thread([this]() {
     m_sema.signal();
     const auto data = const_cast<char*>(reinterpret_cast<const char*>(app_py.data()));
 
-    PyRun_SimpleString(data);
+   // GempyreUtils::log(GempyreUtils::LogLevel::Info, data);
+
+    if(PyRun_SimpleString(data) < 0)
+        m_error = 3;
     if (Py_FinalizeEx() < 0) {
         m_error = 2;
     }
